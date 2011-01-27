@@ -150,7 +150,7 @@ sixtasklist =  [ (psetup_six_ttbar, rsetup p NoMatch num) | p <- sixparamset
             ++ [ (psetup_six_ttbar01j, rsetup p MLM num) | p <- sixparamset 
                                                              , num <- sets     ]
 
-totaltasklist = wptasklist ++ zptasklist ++ triptasklist ++ sixtasklist
+totaltasklist = {- wptasklist ++ zptasklist ++ -} triptasklist ++ sixtasklist
 
 main = do putStrLn "benchmark models 20110126 sets" 
           putStrLn "models : Wp, ZpH, Trip, Six "

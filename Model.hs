@@ -104,7 +104,7 @@ paramCardSetup tpath Six (SixParam set) = do
                templates
                [ ("massSix"      , (printf "%.4e" (massExotic set) :: String))
                , ("gRSix"        , (printf "%.4e" (coupExotic set) :: String))
-               , ("widthzp"      , (printf "%.4e" (decayWidthExotic set) :: String)) ]
+               , ("widthSix"      , (printf "%.4e" (decayWidthExotic set) :: String)) ]
                (paramCard4Model Six) ) ++ "\n\n\n"
 paramCardSetup tpath Trip (TripParam set) = do 
   templates <- directoryGroup tpath 
@@ -113,5 +113,5 @@ paramCardSetup tpath Trip (TripParam set) = do
                [ ("massTrip"      , (printf "%.4e" (massExotic set) :: String))
                , ("gRtrip"        , (printf "%.4e" (coupExotic set) :: String))
                , ("widthTrip"      , (printf "%.4e" (decayWidthExotic set) :: String)) ]
-               (paramCard4Model Six) ) ++ "\n\n\n"
+               (paramCard4Model Trip) ) ++ "\n\n\n"
 
