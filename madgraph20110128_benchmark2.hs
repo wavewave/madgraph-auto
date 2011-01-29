@@ -103,6 +103,7 @@ rsetup p matchtype num = RS {
   , setnum  = num
 }
 
+{-
 wpparamset = [ WpParam 200.0 1.3
              , WpParam 200.0 1.4
              , WpParam 200.0 1.5
@@ -127,7 +128,7 @@ zpparamset = [ ZpHParam 200.0 0.90
              , ZpHParam 400.0 1.75 
              , ZpHParam 400.0 1.65 
              , ZpHParam 600.0 2.3 
-             , ZpHParam 600.0 2.2 ] 
+             , ZpHParam 600.0 2.2 ] -}
 
 
 {-
@@ -152,6 +153,18 @@ sixparamset = [ SixParam  M600C3_5
               , SixParam  M600C3_35 
               , SixParam  M600C3_2  ]  -}
 
+tripparamset = [ TripParam 400 3.0
+               , TripParam 400 2.75
+               , TripParam 400 2.5
+               , TripParam 600 3.75
+               , TripParam 600 3.5 
+               , TripParam 600 3.25 ] 
+             
+sixparamset = [ SixParam 600 3.0  
+              , SixParam 600 2.75 
+              , SixParam 600 2.5 ]  
+
+
 psetuplist = [ psetup_wp_ttbar
              , psetup_zp_ttbar
              , psetup_trip_ttbar
@@ -163,7 +176,7 @@ psetuplist = [ psetup_wp_ttbar
 
 sets = [1,2] -- [ 3..10 ] 
 
-
+{-
 wptasklist =  [ (psetup_wp_ttbar, rsetup p NoMatch num) | p <- wpparamset 
                                                         , num <- sets     ]
            ++ [ (psetup_wp_ttbar01j, rsetup p MLM num) | p <- wpparamset 
@@ -172,8 +185,8 @@ wptasklist =  [ (psetup_wp_ttbar, rsetup p NoMatch num) | p <- wpparamset
 zptasklist =  [ (psetup_zp_ttbar, rsetup p NoMatch num) | p <- zpparamset 
                                                         , num <- sets     ]
            ++ [ (psetup_zp_ttbar01j, rsetup p MLM num) | p <- zpparamset 
-                                                           , num <- sets     ]
-{-                  
+                                                           , num <- sets     ] -}
+                  
 triptasklist =  [ (psetup_trip_ttbar, rsetup p NoMatch num) | p <- tripparamset 
                                                             , num <- sets     ]
              ++ [ (psetup_trip_ttbar01j, rsetup p MLM num) | p <- tripparamset 
@@ -182,9 +195,9 @@ triptasklist =  [ (psetup_trip_ttbar, rsetup p NoMatch num) | p <- tripparamset
 sixtasklist =  [ (psetup_six_ttbar, rsetup p NoMatch num) | p <- sixparamset 
                                                           , num <- sets     ]
             ++ [ (psetup_six_ttbar01j, rsetup p MLM num) | p <- sixparamset 
-                                                             , num <- sets     ] -}
+                                                             , num <- sets     ] 
 
-totaltasklist = wptasklist ++ zptasklist {- ++ triptasklist ++ sixtasklist -}
+totaltasklist = {- wptasklist ++ zptasklist ++ -} triptasklist ++ sixtasklist 
 
 main = do putStrLn "benchmark models 20110128 sets" 
           putStrLn "models : Wp, ZpH, Trip, Six "

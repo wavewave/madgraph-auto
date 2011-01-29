@@ -70,8 +70,8 @@ makeRunName psetup rsetup =
       masscoup =  case (param rsetup) of 
         WpParam  m g -> "M"++show m++"G"++show g
         ZpHParam m g -> "M"++show m++"G"++show g 
-        SixParam set -> "M"++show (massExotic set)++"G"++show (coupExotic set)
-        TripParam set -> "M"++show (massExotic set)++"G"++show (coupExotic set)  
+        SixParam m g -> "M"++show m++"G"++show g
+        TripParam m g -> "M"++show m++"G"++show g  
       machineName = case (machine rsetup) of 
         TeVatron -> "TeVa" 
         LHC7 -> "LHC7"
