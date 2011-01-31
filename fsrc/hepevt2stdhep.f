@@ -68,7 +68,7 @@ C      OPEN(istr, FILE='slha.stdhep',STATUS='unknown')
       call stdxwrt(100,istr,lok)
 
 C...Initialize.
-      CALL PYINIT('NONE',' ',' ',0D0)
+C      CALL PYINIT('NONE',' ',' ',0D0)
 
 C...Event loop. List first few events.
       DO 200 IEV=1,nmax
@@ -102,7 +102,7 @@ C            write(*,*) 'd1 =  , d8 = , d13 = ' , d1 , d8,  d13
             VHEP(4,i) = d16
  10      enddo
 
-         CALL PYHEPC(2)
+C         CALL PYHEPC(2)
 
 C         CALL PYLIST(2)
 
@@ -120,8 +120,8 @@ C        endif
       call stdxend(istr)
 
 C...Final statistics.
-      CALL PYSTAT(1)
-      CALL PYSTAT(2)
+C      CALL PYSTAT(1)
+C      CALL PYSTAT(2)
       stop
       END
 
