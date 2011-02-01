@@ -166,7 +166,8 @@ c      WRITE(*,*),'Reading pythia input card'
 c      CALL RPYCARD(pythia_card)
 
 c     IWKIM TEMPORARY
-      NITER = 100
+c      NITER = 100
+
       NPASEV = 0
 
 
@@ -491,7 +492,7 @@ C
 
 c       Missing Energy Cut
         IF(Etmiss.LT.20d0) THEN
-           WRITE(*,*) 'Not enough missing energy'
+           WRITE(*,*) 'Event ',IEV,' has not enough missing energy'
            GOTO 130
         ENDIF
 
@@ -503,21 +504,32 @@ C       Semileptonic Cut and four jet pass cut
 C     Electron or Muon passed eta cut and et cut  
               IF( (IDUP(I).EQ.11) .OR. (IDUP(I).EQ.-11) .OR.
      $            (IDUP(I).EQ.13) .OR. (IDUP(I).EQ.-13) ) THEN
-                 WRITE(*,*) IEV,": ",ETA_GEN(I)
                  IF( (ETA_GEN(I).GT. -1d0) .AND. (ETA_GEN(I).LT.1d0) 
      $               .AND. (ET_GEN(I).GT.2.0d1) ) THEN 
                     NCELEP=NCELEP+1
 
                  ENDIF
+              ENDIF
+C     Four Jet pass eta cut and et cut  
+              IF( (IDUP(I).EQ.5) .OR. (IDUP(I).EQ.21) ) THEN
+                 IF( (ETA_GEN(I).GT. -2d0) .AND. (ETA_GEN(I).LT.2d0) 
+     $               .AND. (ET_GEN(I).GT.2.0d1) ) THEN 
+                    NCEJET=NCEJET+1
+
+                 ENDIF
 
 
               ENDIF
+
            ENDIF
+
+
         ENDDO
 
-        IF( NCELEP /= 1 ) THEN
+        IF( (NCELEP /= 1) .OR. (NCEJET.LT.4) ) THEN
            WRITE(*,*) 'Event ',IEV,
-     $                ' is not Semileptonic, not passed a cut',NCELEP
+     $                ' is not Semileptonic, not passed a cut',
+     $                NCELEP,' ',NCEJET
            GOTO 130
         ENDIF
 
