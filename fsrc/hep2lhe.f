@@ -110,8 +110,12 @@ C   Local variables
 c      LOGICAL banner_open
       integer lok,istream,itype
 
+C     IWKIM variables
+      INTEGER NLEP
+
+
 C...Set pythia input card and STDHEP output file
-      pythia_card='../Cards/pythia_card.dat'
+c      pythia_card='../Cards/pythia_card.dat'
 c      banner_file='banner.txt'
       input_file='pythia_events.hep'
       output_file='pythia_events.lhe'
@@ -154,9 +158,12 @@ C...Open STDHEP input file
       endif
 
 C...Read pythia input card
-      WRITE(*,*)
-      WRITE(*,*),'Reading pythia input card'
-      CALL RPYCARD(pythia_card)
+c      WRITE(*,*)
+c      WRITE(*,*),'Reading pythia input card'
+c      CALL RPYCARD(pythia_card)
+
+      NITER = 10
+
 
       IF(NITER.LE.0)THEN
         WRITE(*,*),'Generating all events'
@@ -471,6 +478,46 @@ c          WRITE(20,'(a)') '</event>'
 c          ievold=ievold+1
 c        ENDDO
         ievold=IEV
+
+
+C       IWKIM 
+C       User defined cut
+C
+
+C       Missing Energy Cut
+c        IF(Etmiss.LT.20d0) THEN
+c           WRITE(*,*) 'Not enough missing energy'
+c           GOTO 130
+c        ENDIF
+
+C       Semileptonic Cut
+        NLEP=0
+        DO I=1,NUP
+           IF(ISTUP(I).EQ.1) THEN 
+C     Electron
+              IF( (IDUP(I).EQ.11) .OR. (IDUP(I).EQ.-11) ) THEN  
+                 NLEP=NLEP+1
+              ENDIF
+C     Muon
+              IF( (IDUP(I).EQ.13) .OR. (IDUP(I).EQ.-13) ) THEN
+                 NLEP=NLEP+1
+              ENDIF
+           ENDIF
+        ENDDO
+
+        IF( NLEP /= 1 ) THEN
+           WRITE(*,*) 'Not Semileptonic',NLEP
+           GOTO 130
+        ENDIF
+
+C          Tau : I do not count tau
+c           IF( (IDUP(I).EQ.15) .OR. (IDUP(I).EQ.-15) ) THEN
+c              NLEP=NLEP+1
+c           ENDIF
+c        ENDDO
+
+
+
 C...Write event into lhe file
         WRITE(20,'(a)') '<event>'
         WRITE(20,'(I3,I4,4E16.8)')
@@ -482,9 +529,9 @@ C...Write event into lhe file
         ENDDO
         WRITE(20,'(a)') '</event>'
 
-C...Print first 10 events
+C...Print first 0 events   IWKIM
 
- 125    IF(IEV.LE.10) THEN
+ 125    IF(IEV.LE.0) THEN
           WRITE(*,*)
           WRITE(*,*),'Event number: ',IEV
           CALL PYLIST(2)
