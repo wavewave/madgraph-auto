@@ -12,6 +12,9 @@ C   E-mail: alwall@fyma.ucl.ac.be
 
       IMPLICIT NONE
 
+      real*8 et_gen,pt_gen,p_gen,eta_gen,phi_gen
+
+
 C...EXTERNAL statement links PYDATA on most machines.
       EXTERNAL PYDATA
 
@@ -111,7 +114,7 @@ c      LOGICAL banner_open
       integer lok,istream,itype
 
 C     IWKIM variables
-      INTEGER NLEP
+      INTEGER NCELEP, NCEJET, NPASEV
 
 
 C...Set pythia input card and STDHEP output file
@@ -162,7 +165,9 @@ c      WRITE(*,*)
 c      WRITE(*,*),'Reading pythia input card'
 c      CALL RPYCARD(pythia_card)
 
-      NITER = 10
+c     IWKIM TEMPORARY
+      NITER = 100
+      NPASEV = 0
 
 
       IF(NITER.LE.0)THEN
@@ -484,31 +489,39 @@ C       IWKIM
 C       User defined cut
 C
 
-C       Missing Energy Cut
-c        IF(Etmiss.LT.20d0) THEN
-c           WRITE(*,*) 'Not enough missing energy'
-c           GOTO 130
-c        ENDIF
+c       Missing Energy Cut
+        IF(Etmiss.LT.20d0) THEN
+           WRITE(*,*) 'Not enough missing energy'
+           GOTO 130
+        ENDIF
 
-C       Semileptonic Cut
-        NLEP=0
+C       Semileptonic Cut and four jet pass cut 
+        NCELEP=0
+        NCEJET=0
         DO I=1,NUP
            IF(ISTUP(I).EQ.1) THEN 
-C     Electron
-              IF( (IDUP(I).EQ.11) .OR. (IDUP(I).EQ.-11) ) THEN  
-                 NLEP=NLEP+1
-              ENDIF
-C     Muon
-              IF( (IDUP(I).EQ.13) .OR. (IDUP(I).EQ.-13) ) THEN
-                 NLEP=NLEP+1
+C     Electron or Muon passed eta cut and et cut  
+              IF( (IDUP(I).EQ.11) .OR. (IDUP(I).EQ.-11) .OR.
+     $            (IDUP(I).EQ.13) .OR. (IDUP(I).EQ.-13) ) THEN
+                 WRITE(*,*) IEV,": ",ETA_GEN(I)
+                 IF( (ETA_GEN(I).GT. -1d0) .AND. (ETA_GEN(I).LT.1d0) 
+     $               .AND. (ET_GEN(I).GT.2.0d1) ) THEN 
+                    NCELEP=NCELEP+1
+
+                 ENDIF
+
+
               ENDIF
            ENDIF
         ENDDO
 
-        IF( NLEP /= 1 ) THEN
-           WRITE(*,*) 'Not Semileptonic',NLEP
+        IF( NCELEP /= 1 ) THEN
+           WRITE(*,*) 'Event ',IEV,
+     $                ' is not Semileptonic, not passed a cut',NCELEP
            GOTO 130
         ENDIF
+
+        NPASEV = NPASEV + 1
 
 C          Tau : I do not count tau
 c           IF( (IDUP(I).EQ.15) .OR. (IDUP(I).EQ.-15) ) THEN
@@ -556,9 +569,13 @@ c          call heplst(1)
 C...Close lhe file
  135  WRITE(20,'(a)') '</LesHouchesEvents>'
       
-      WRITE(*,*),'Done. Wrote ',IEV,' lhe events.'
+c     IWKIM
+      WRITE(*,*),'Done. Try ',IEV,' events.'
 
+      WRITE(*,*),'Write ',NPASEV,' lhe events.'
       RETURN
+
+
  4000 FORMAT(i3,i14,i7)
  4001 FORMAT(i3,i5,f9.3,f7.3,f8.2,f8.2,2f6.1,f9.2,2f6.1)
  999  WRITE(*,*) 'Error in one of the KTCLUS routines'
@@ -685,3 +702,139 @@ C************************************************
       return
 
       end
+
+
+
+c generated particles --------------------------------------------------
+      
+      function et_gen(ihep)
+
+c this function returns the ET of a generated (HEPEVT) object
+
+      implicit none
+      include 'pgs.inc'
+
+c      INTEGER NMXHEP,NEVHEP,NHEP,ISTHEP,IDHEP,JMOHEP,JDAHEP
+c      DOUBLE PRECISION PHEP,VHEP
+c      PARAMETER (NMXHEP=4000)
+c      COMMON/HEPEVT/NEVHEP,NHEP,ISTHEP(NMXHEP),IDHEP(NMXHEP),
+c     &JMOHEP(2,NMXHEP),JDAHEP(2,NMXHEP),PHEP(5,NMXHEP),VHEP(4,NMXHEP)
+c      SAVE /HEPEVT/
+
+      integer ihep
+
+c check object number
+      if (ihep.gt.nhep.or.ihep.lt.0) then
+        write(pgs_log_unit,'('' ET_GEN: called for nonexistent'',
+     .          '' generated (HEPEVT) object'',i5)') ihep
+        et_gen = 0.
+        return
+      endif
+
+      if (p_gen(ihep).gt.0.) then
+        et_gen = phep(4,ihep) * pt_gen(ihep) / p_gen(ihep)
+      else
+        et_gen = 0.
+      endif
+
+      return
+      end
+
+
+      function pt_gen(ihep)
+
+c this function returns the PT of a generated (HEPEVT) object
+
+      implicit none
+
+      include 'pgs.inc'
+c      INTEGER NMXHEP,NEVHEP,NHEP,ISTHEP,IDHEP,JMOHEP,JDAHEP
+c      DOUBLE PRECISION PHEP,VHEP
+c      PARAMETER (NMXHEP=4000)
+c      COMMON/HEPEVT/NEVHEP,NHEP,ISTHEP(NMXHEP),IDHEP(NMXHEP),
+c     &JMOHEP(2,NMXHEP),JDAHEP(2,NMXHEP),PHEP(5,NMXHEP),VHEP(4,NMXHEP)
+c      SAVE /HEPEVT/
+
+      integer ihep
+
+      pt_gen = phep(1,ihep)**2 + phep(2,ihep)**2
+
+      if (pt_gen.gt.0.) pt_gen=sqrt(pt_gen)
+
+      return
+      end
+
+
+      function p_gen(ihep)
+
+c this function returns the P of a generated (HEPEVT) object
+
+      implicit none
+      include 'pgs.inc'
+
+c      INTEGER NMXHEP,NEVHEP,NHEP,ISTHEP,IDHEP,JMOHEP,JDAHEP
+c      DOUBLE PRECISION PHEP,VHEP
+c      PARAMETER (NMXHEP=4000)
+c      COMMON/HEPEVT/NEVHEP,NHEP,ISTHEP(NMXHEP),IDHEP(NMXHEP),
+c     &JMOHEP(2,NMXHEP),JDAHEP(2,NMXHEP),PHEP(5,NMXHEP),VHEP(4,NMXHEP)
+c      SAVE /HEPEVT/
+
+      integer ihep
+
+      p_gen = phep(1,ihep)**2 + phep(2,ihep)**2 + phep(3,ihep)**2
+
+      if (p_gen.gt.0.) p_gen=sqrt(p_gen)
+
+      return
+      end
+
+
+      function eta_gen(ihep)
+
+c this function returns the eta (pseudorapidity) 
+c of a generated (HEPEVT) particle
+
+      implicit none
+
+      include 'pgs.inc'
+c     INTEGER NMXHEP,NEVHEP,NHEP,ISTHEP,IDHEP,JMOHEP,JDAHEP
+c      DOUBLE PRECISION PHEP,VHEP
+c      PARAMETER (NMXHEP=4000)
+c      COMMON/HEPEVT/NEVHEP,NHEP,ISTHEP(NMXHEP),IDHEP(NMXHEP),
+c     &JMOHEP(2,NMXHEP),JDAHEP(2,NMXHEP),PHEP(5,NMXHEP),VHEP(4,NMXHEP)
+c      SAVE /HEPEVT/
+
+      integer ihep
+
+      if ((p_gen(ihep)-phep(3,ihep)).ne.0.0) then
+        eta_gen = dlog(pt_gen(ihep)/(p_gen(ihep)-phep(3,ihep)))
+      endif
+ 
+      return
+      end
+
+
+      function phi_gen(ihep)
+
+c this function returns the phi (azimuthal angle)
+c of a generated (HEPEVT) object
+
+      implicit none
+      include 'pgs.inc'
+c      INTEGER NMXHEP,NEVHEP,NHEP,ISTHEP,IDHEP,JMOHEP,JDAHEP
+c      DOUBLE PRECISION PHEP,VHEP
+c      PARAMETER (NMXHEP=4000)
+c      COMMON/HEPEVT/NEVHEP,NHEP,ISTHEP(NMXHEP),IDHEP(NMXHEP),
+c     &JMOHEP(2,NMXHEP),JDAHEP(2,NMXHEP),PHEP(5,NMXHEP),VHEP(4,NMXHEP)
+c      SAVE /HEPEVT/
+
+      integer ihep
+
+      if ((p_gen(ihep)-phep(3,ihep)).ne.0.0) then
+        phi_gen = atan2(phep(2,ihep),phep(1,ihep))
+        if (phi_gen.lt.0.) phi_gen = phi_gen + 2.0d0*pi
+      endif
+ 
+      return
+      end
+
