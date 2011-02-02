@@ -12,9 +12,6 @@ C   E-mail: alwall@fyma.ucl.ac.be
 
       IMPLICIT NONE
 
-      real*8 et_gen,pt_gen,p_gen,eta_gen,phi_gen
-
-
 C...EXTERNAL statement links PYDATA on most machines.
       EXTERNAL PYDATA
 
@@ -117,6 +114,8 @@ C     IWKIM variables
       INTEGER LOK2,ISTR2
       CHARACTER*80 OUTPUTHEP
       INTEGER NCELEP, NCEJET, NPASEV
+      DOUBLE PRECISION ETATEMP,ETTEMP
+      DOUBLE PRECISION PT_MOM, ETA_MOM
 
 
 C...Set pythia input card and STDHEP output file
@@ -524,21 +523,24 @@ C       Semileptonic Cut and four jet pass cut
 C     Electron or Muon passed eta cut and et cut  
               IF( (IDUP(I).EQ.11) .OR. (IDUP(I).EQ.-11) .OR.
      $            (IDUP(I).EQ.13) .OR. (IDUP(I).EQ.-13) ) THEN
-                 IF( (ETA_GEN(I).GT. -1d0) .AND. (ETA_GEN(I).LT.1d0) 
-     $               .AND. (ET_GEN(I).GT.2.0d1) ) THEN 
+                 ETATEMP = ETA_MOM(PUP(1,I),PUP(2,I),PUP(3,I),PUP(4,I))
+                 ETTEMP  = PT_MOM(PUP(1,I),PUP(2,I),PUP(3,I),PUP(4,I))
+                 IF( (ETATEMP.GT. -1d0) .AND. (ETATEMP.LT.1d0) 
+     $               .AND. (ETTEMP.GT.20.0) ) THEN 
                     NCELEP=NCELEP+1
 
                  ENDIF
               ENDIF
 C     Four Jet pass eta cut and et cut  
               IF( (IDUP(I).EQ.5) .OR. (IDUP(I).EQ.21) ) THEN
-                 IF( (ETA_GEN(I).GT. -2d0) .AND. (ETA_GEN(I).LT.2d0) 
-     $               .AND. (ET_GEN(I).GT.2.0d1) ) THEN 
+                 ETATEMP = ETA_MOM(PUP(1,I),PUP(2,I),PUP(3,I),PUP(4,I))
+                 ETTEMP  = PT_MOM(PUP(1,I),PUP(2,I),PUP(3,I),PUP(4,I))
+
+                 IF( (ETATEMP.GT. -2d0) .AND. (ETATEMP.LT.2d0) 
+     $               .AND. (ETTEMP.GT.20.0) ) THEN 
+
                     NCEJET=NCEJET+1
-
                  ENDIF
-
-
               ENDIF
 
            ENDIF
@@ -566,72 +568,22 @@ c        ENDDO
         WRITE(22,500) IEV, N
 c        WRITE (*,*) K(2,1)
         DO J=1,N
-           WRITE (22,501) K(J,2), K(J,1), K(J,3), K(J,3), K(J,4)
+           WRITE (22,501) J,K(J,1), K(J,2), K(J,3), K(J,3), K(J,4)
      $           , K(J,5),P(J,1), P(J,2), P(J,3), P(J,4), P(J,5)  
      $           , V(J,1), V(J,2), V(J,3), V(J,4)
         ENDDO
 
         CALL FLUSH()
 
-c 127    NEVHEP = IEV
-c        NHEP=N
-c        WRITE(*,*) "N = ", N
-c        DO J=1,N
-c           ISTHEP(J)   = K(2,J) 
-c           IDHEP(J)    = K(1,J) 
-c           JMOHEP(1,J) = K(3,J)
-c           JMOHEP(2,J) = K(3,J)
-c           JDAHEP(1,J) = K(4,J)
-c           JDAHEP(2,J) = K(5,J)
-c           PHEP(1,J)   = P(J,1) 
-c           PHEP(2,J)   = P(J,2)
-c           PHEP(3,J)   = P(J,3) 
-c           PHEP(4,J)   = P(J,4)
-c           PHEP(5,J)   = P(J,5) 
-c           VHEP(1,J)   = V(J,1)
-c           VHEP(2,J)   = V(J,2)
-c           VHEP(3,J)   = V(J,3)
-c           VHEP(4,J)   = V(J,4)
-c        ENDDO 
-
-c        CALL HEPLST(1)
-c        CALL LUNHEP(1)
-c        CALL STDXWRT(1,ISTR2,LOK2)
-
  127    WRITE(20,'(a)') '<event>'
         WRITE(20,'(I3,I4,4E16.8)')
      $     NUP,100,1d0,0d0,0d0,0d0
-        DO I=1,N
+        DO I=1,NUP
           WRITE(20,'(I8,I3,2I3,2I2,5E16.8,2F3.0)')
-     $       K(I,2),K(I,1),K(I,3),K(I,3),0,0,
-     $       (P(I,J),J=1,5),0d0,0d0
+     $       IDUP(I),ISTUP(I),MOTHUP(1,I),MOTHUP(2,I),0,0,
+     $       (PUP(J,I),J=1,5),0d0,0d0
         ENDDO
         WRITE(20,'(a)') '</event>'
-
-
-
-c...IWKIM
-C...Write event into file
-c 127    WRITE(20,'(a)') '<event>'
-c        WRITE(20,'(I3,I4,4E16.8)')
-c     $     NUP,100,1d0,0d0,0d0,0d0
-c        DO I=1,N
-c          WRITE(20,'(I8,I3,2I3,2I2,5E16.8,2F3.0)')
-c     $       K(I,2),K(I,1),K(I,3),K(I,3),0,0,
-c     $       (P(I,J),J=1,5),0d0,0d0
-c        ENDDO
-c        WRITE(20,'(a)') '</event>'
-
-C...Write event into lhe file
-c 127    WRITE(20,'(a)') '<event>'
-c        WRITE(20,'(I3,I4,4E16.8)')
-c     $     NUP,100,1d0,0d0,0d0,0d0
-c        DO I=1,NUP
-c          WRITE(20,'(I8,I3,2I3,2I2,5E16.8,2F3.0)')
-c     $       IDUP(I),ISTUP(I),MOTHUP(1,I),MOTHUP(2,I),0,0,
-c     $       (PUP(J,I),J=1,5),0d0,0d0
-c        ENDDO
-c        WRITE(20,'(a)') '</event>'
 
 C...Print first 0 events   IWKIM
 
@@ -681,7 +633,7 @@ c      call stdxend(ISTR2)
  4001 FORMAT(i3,i5,f9.3,f7.3,f8.2,f8.2,2f6.1,f9.2,2f6.1)
 c...IWKIM HEPEVT FORMAT
  500  FORMAT(i7,i4)
- 501  FORMAT(i7,i4,i4,i4,i4,i4,5E13.5,4f7.3)
+ 501  FORMAT(i5,i4,i7,i4,i4,i4,i4,9E16.8)
 
 
  999  WRITE(*,*) 'Error in one of the KTCLUS routines'
@@ -813,132 +765,60 @@ C************************************************
 
 c generated particles --------------------------------------------------
       
-      function et_gen(ihep)
+      DOUBLE PRECISION FUNCTION PT_MOM(P1,P2,P3,P4)
 
 c this function returns the ET of a generated (HEPEVT) object
 
       implicit none
-      include 'pgs.inc'
+      DOUBLE PRECISION P1,P2,P3,P4
+      DOUBLE PRECISION PT_MOM
 
-c      INTEGER NMXHEP,NEVHEP,NHEP,ISTHEP,IDHEP,JMOHEP,JDAHEP
-c      DOUBLE PRECISION PHEP,VHEP
-c      PARAMETER (NMXHEP=4000)
-c      COMMON/HEPEVT/NEVHEP,NHEP,ISTHEP(NMXHEP),IDHEP(NMXHEP),
-c     &JMOHEP(2,NMXHEP),JDAHEP(2,NMXHEP),PHEP(5,NMXHEP),VHEP(4,NMXHEP)
-c      SAVE /HEPEVT/
-
-      integer ihep
-
-c check object number
-      if (ihep.gt.nhep.or.ihep.lt.0) then
-        write(pgs_log_unit,'('' ET_GEN: called for nonexistent'',
-     .          '' generated (HEPEVT) object'',i5)') ihep
-        et_gen = 0.
-        return
-      endif
-
-      if (p_gen(ihep).gt.0.) then
-        et_gen = phep(4,ihep) * pt_gen(ihep) / p_gen(ihep)
-      else
-        et_gen = 0.
-      endif
-
-      return
-      end
+      PT_MOM = SQRT(P1*P1 + P2*P2)
+      RETURN 
+      END
 
 
-      function pt_gen(ihep)
-
-c this function returns the PT of a generated (HEPEVT) object
-
-      implicit none
-
-      include 'pgs.inc'
-c      INTEGER NMXHEP,NEVHEP,NHEP,ISTHEP,IDHEP,JMOHEP,JDAHEP
-c      DOUBLE PRECISION PHEP,VHEP
-c      PARAMETER (NMXHEP=4000)
-c      COMMON/HEPEVT/NEVHEP,NHEP,ISTHEP(NMXHEP),IDHEP(NMXHEP),
-c     &JMOHEP(2,NMXHEP),JDAHEP(2,NMXHEP),PHEP(5,NMXHEP),VHEP(4,NMXHEP)
-c      SAVE /HEPEVT/
-
-      integer ihep
-
-      pt_gen = phep(1,ihep)**2 + phep(2,ihep)**2
-
-      if (pt_gen.gt.0.) pt_gen=sqrt(pt_gen)
-
-      return
-      end
-
-
-      function p_gen(ihep)
-
-c this function returns the P of a generated (HEPEVT) object
-
-      implicit none
-      include 'pgs.inc'
-
-c      INTEGER NMXHEP,NEVHEP,NHEP,ISTHEP,IDHEP,JMOHEP,JDAHEP
-c      DOUBLE PRECISION PHEP,VHEP
-c      PARAMETER (NMXHEP=4000)
-c      COMMON/HEPEVT/NEVHEP,NHEP,ISTHEP(NMXHEP),IDHEP(NMXHEP),
-c     &JMOHEP(2,NMXHEP),JDAHEP(2,NMXHEP),PHEP(5,NMXHEP),VHEP(4,NMXHEP)
-c      SAVE /HEPEVT/
-
-      integer ihep
-
-      p_gen = phep(1,ihep)**2 + phep(2,ihep)**2 + phep(3,ihep)**2
-
-      if (p_gen.gt.0.) p_gen=sqrt(p_gen)
-
-      return
-      end
-
-
-      function eta_gen(ihep)
+      DOUBLE PRECISION FUNCTION ETA_MOM(P1,P2,P3,P4)
 
 c this function returns the eta (pseudorapidity) 
 c of a generated (HEPEVT) particle
 
       implicit none
+      DOUBLE PRECISION P1,P2,P3,P4
+      DOUBLE PRECISION ETA_MOM,PT_MOM
+      DOUBLE PRECISION P,PT
 
-      include 'pgs.inc'
-c     INTEGER NMXHEP,NEVHEP,NHEP,ISTHEP,IDHEP,JMOHEP,JDAHEP
-c      DOUBLE PRECISION PHEP,VHEP
-c      PARAMETER (NMXHEP=4000)
-c      COMMON/HEPEVT/NEVHEP,NHEP,ISTHEP(NMXHEP),IDHEP(NMXHEP),
-c     &JMOHEP(2,NMXHEP),JDAHEP(2,NMXHEP),PHEP(5,NMXHEP),VHEP(4,NMXHEP)
-c      SAVE /HEPEVT/
+      P = SQRT (P1*P1+P2*P2+P3*P3)
+      PT = PT_MOM(P1,P2,P3,P4)
 
-      integer ihep
-
-      if ((p_gen(ihep)-phep(3,ihep)).ne.0.0) then
-        eta_gen = dlog(pt_gen(ihep)/(p_gen(ihep)-phep(3,ihep)))
+      if ((P-P3).ne.0.0) then
+        ETA_MOM = DLOG(PT/(P-P3))
       endif
  
       return
       end
 
 
-      function phi_gen(ihep)
+      DOUBLE PRECISION FUNCTION PHI_MOM(P1,P2,P3,P4)
 
 c this function returns the phi (azimuthal angle)
 c of a generated (HEPEVT) object
 
       implicit none
-      include 'pgs.inc'
-c      INTEGER NMXHEP,NEVHEP,NHEP,ISTHEP,IDHEP,JMOHEP,JDAHEP
-c      DOUBLE PRECISION PHEP,VHEP
-c      PARAMETER (NMXHEP=4000)
-c      COMMON/HEPEVT/NEVHEP,NHEP,ISTHEP(NMXHEP),IDHEP(NMXHEP),
-c     &JMOHEP(2,NMXHEP),JDAHEP(2,NMXHEP),PHEP(5,NMXHEP),VHEP(4,NMXHEP)
-c      SAVE /HEPEVT/
+      DOUBLE PRECISION P1,P2,P3,P4
+      DOUBLE PRECISION PHI_MOM
+      DOUBLE PRECISION P,PT,PT_MOM
+      DOUBLE PRECISION PI,TWOPI
+      PARAMETER (PI=3.141592653,TWOPI=2*PI)
 
-      integer ihep
 
-      if ((p_gen(ihep)-phep(3,ihep)).ne.0.0) then
-        phi_gen = atan2(phep(2,ihep),phep(1,ihep))
-        if (phi_gen.lt.0.) phi_gen = phi_gen + 2.0d0*pi
+      P = SQRT (P1*P1+P2*P2+P3*P3)
+      PT = PT_MOM(P1,P2,P3,P4)
+
+
+      if ((P-P3).ne.0.0) then
+        PHI_MOM = ATAN2(P2,P1)
+        if (PHI_MOM.lt.0.) PHI_MOM = PHI_MOM + TWOPI
       endif
  
       return

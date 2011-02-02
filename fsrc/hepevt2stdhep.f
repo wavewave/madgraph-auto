@@ -68,20 +68,27 @@ C      OPEN(istr, FILE='slha.stdhep',STATUS='unknown')
       call stdxwrt(100,istr,lok)
 
 C...Initialize.
-C      CALL PYINIT('NONE',' ',' ',0D0)
+c      CALL PYINIT('NONE',' ',' ',0D0)
 
 C...Event loop. List first few events.
       DO 200 IEV=1,nmax
-C        CALL PYEVNW
+c        CALL PYEVNW
          read(u,*) evtnum , numptl 
-         write(*,*) 'evtnum = ', evtnum 
+         write(*,*) 'evtnum = ', evtnum, 'numptl =', numptl
 
          
          do 10 i = 1 , numptl 
-            read(u,*) d1, d2, d3, d4, d5, d6, d7 
-            read(u,*) d8, d9 , d10, d11,d12
-            read(u,*) d13, d14, d15, d16
-C            write(*,*) 'd1 =  , d8 = , d13 = ' , d1 , d8,  d13 
+            read(u,1000)  d1 , d2 , d3 , d4 , d5 , d6, d7, 
+     $                    d8 , d9 , d10, d11, d12
+     $                    d13, d14, d15, d16
+c            write(*,*) 'd1 =',d1,', d2 = ' , d2
+c            write(*,*) 'd3 =',d3,', d4 = ' , d4
+c            write(*,*) 'd5 =',d5,', d6 = ' , d6
+c            write(*,*) 'd7 =',d7,', d8 = ' , d8
+c            write(*,*) 'd9 =',d9,', d10= ' , d10
+c            write(*,*) 'd11=',d11,', d12= ' , d12
+c            write(*,*) 'd13=',d13,', d14= ' , d14
+c            write(*,*) 'd15=',d15,', d16= ' , d16
 
             NEVHEP = evtnum 
             NHEP = numptl
@@ -102,13 +109,19 @@ C            write(*,*) 'd1 =  , d8 = , d13 = ' , d1 , d8,  d13
             VHEP(4,i) = d16
  10      enddo
 
-C         CALL PYHEPC(2)
 
-C         CALL PYLIST(2)
+c        CALL PYHEPC(1)
 
-	CALL LUNHEP(1)
-        call stdxwrt(1,istr,lok)
-	WRITE(*,*) i
+	CALL LUNHEP(2)
+c        WRITE(*,*) 'test=',K(1,2) 
+
+
+        CALL HEPLST(1)
+
+        CALL PYLIST(1)
+
+       call stdxwrt(1,istr,lok)
+c	WRITE(*,*) i
 C        if(i.le.nprnt)then
 C          call pylist(2)
 C          call heplst(1)
@@ -123,8 +136,9 @@ C...Final statistics.
 C      CALL PYSTAT(1)
 C      CALL PYSTAT(2)
       stop
-      END
+ 1000 FORMAT (i5,i4,i7,i4,i4,i4,i4,9E16.8)
 
+      END
       subroutine pgs_user_pythia
       return
       end
