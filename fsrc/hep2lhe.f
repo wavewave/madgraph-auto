@@ -114,6 +114,8 @@ c      LOGICAL banner_open
       integer lok,istream,itype
 
 C     IWKIM variables
+      INTEGER LOK2,ISTR2
+      CHARACTER*80 OUTPUTHEP
       INTEGER NCELEP, NCEJET, NPASEV
 
 
@@ -123,6 +125,10 @@ c      banner_file='banner.txt'
       input_file='pythia_events.hep'
       output_file='pythia_events.lhe'
       init_file='pythia_events.init'
+      OUTPUTHEP='aftercut.hepevt'
+
+      ISTREAM=1
+      ISTR2=2
 
       IF(ijetalg.eq.0) THEN
          write(*,*)'Using KTCLUS for jet finding (ijetalg=0)'
@@ -140,6 +146,8 @@ c 10   WRITE(*,*)'Warning: No file ',banner_file(1:len_trim(banner_file))
 c     $   ,'. No banner will be written.'
  15   OPEN (20, FILE=output_file, ERR=90 )
       OPEN (21, FILE=init_file, ERR=90 )
+      OPEN (22, FILE=outputhep, ERR=90)
+
       
 cC...Write banner to .lhe file
 c      WRITE(20,'(a)') '<LesHouchesEvents version="1.0">'
@@ -159,6 +167,8 @@ C...Open STDHEP input file
      $     lok
         stop
       endif
+      WRITE(*,*) 'ISTR=',ISTREAM
+
 
 C...Read pythia input card
 c      WRITE(*,*)
@@ -166,9 +176,14 @@ c      WRITE(*,*),'Reading pythia input card'
 c      CALL RPYCARD(pythia_card)
 
 c     IWKIM TEMPORARY
-c      NITER = 100
-
+      NITER = 100
       NPASEV = 0
+
+c      call stdflpyxsec(NITER)
+c      call stdxwrt(100,ISTR2,LOK2)
+
+      
+
 
 
       IF(NITER.LE.0)THEN
@@ -207,10 +222,15 @@ C...Write init info to the .lhe init file
         IF(IEV.GE.NITER) CYCLE
 
         IEV=IEV+1
-
+        WRITE(*,*) IEV
 C...Convert event from STDHEP format to Pythia format
         call lunhep(2)
-
+C...IWKIM TEST
+c        call lunhep(1)
+c        call pylist(1)
+c       call FLUSH()
+c        NUP=N
+c        goto 127
 C...Prepare for jet clustering
         NN=0
         NCJET=0
@@ -540,19 +560,78 @@ c           IF( (IDUP(I).EQ.15) .OR. (IDUP(I).EQ.-15) ) THEN
 c              NLEP=NLEP+1
 c           ENDIF
 c        ENDDO
+        
 
+        CALL LUNHEP(1)
+        WRITE(22,500) IEV, N
+c        WRITE (*,*) K(2,1)
+        DO J=1,N
+           WRITE (22,501) K(J,2), K(J,1), K(J,3), K(J,3), K(J,4)
+     $           , K(J,5),P(J,1), P(J,2), P(J,3), P(J,4), P(J,5)  
+     $           , V(J,1), V(J,2), V(J,3), V(J,4)
+        ENDDO
 
+        CALL FLUSH()
 
-C...Write event into lhe file
-        WRITE(20,'(a)') '<event>'
+c 127    NEVHEP = IEV
+c        NHEP=N
+c        WRITE(*,*) "N = ", N
+c        DO J=1,N
+c           ISTHEP(J)   = K(2,J) 
+c           IDHEP(J)    = K(1,J) 
+c           JMOHEP(1,J) = K(3,J)
+c           JMOHEP(2,J) = K(3,J)
+c           JDAHEP(1,J) = K(4,J)
+c           JDAHEP(2,J) = K(5,J)
+c           PHEP(1,J)   = P(J,1) 
+c           PHEP(2,J)   = P(J,2)
+c           PHEP(3,J)   = P(J,3) 
+c           PHEP(4,J)   = P(J,4)
+c           PHEP(5,J)   = P(J,5) 
+c           VHEP(1,J)   = V(J,1)
+c           VHEP(2,J)   = V(J,2)
+c           VHEP(3,J)   = V(J,3)
+c           VHEP(4,J)   = V(J,4)
+c        ENDDO 
+
+c        CALL HEPLST(1)
+c        CALL LUNHEP(1)
+c        CALL STDXWRT(1,ISTR2,LOK2)
+
+ 127    WRITE(20,'(a)') '<event>'
         WRITE(20,'(I3,I4,4E16.8)')
      $     NUP,100,1d0,0d0,0d0,0d0
-        DO I=1,NUP
+        DO I=1,N
           WRITE(20,'(I8,I3,2I3,2I2,5E16.8,2F3.0)')
-     $       IDUP(I),ISTUP(I),MOTHUP(1,I),MOTHUP(2,I),0,0,
-     $       (PUP(J,I),J=1,5),0d0,0d0
+     $       K(I,2),K(I,1),K(I,3),K(I,3),0,0,
+     $       (P(I,J),J=1,5),0d0,0d0
         ENDDO
         WRITE(20,'(a)') '</event>'
+
+
+
+c...IWKIM
+C...Write event into file
+c 127    WRITE(20,'(a)') '<event>'
+c        WRITE(20,'(I3,I4,4E16.8)')
+c     $     NUP,100,1d0,0d0,0d0,0d0
+c        DO I=1,N
+c          WRITE(20,'(I8,I3,2I3,2I2,5E16.8,2F3.0)')
+c     $       K(I,2),K(I,1),K(I,3),K(I,3),0,0,
+c     $       (P(I,J),J=1,5),0d0,0d0
+c        ENDDO
+c        WRITE(20,'(a)') '</event>'
+
+C...Write event into lhe file
+c 127    WRITE(20,'(a)') '<event>'
+c        WRITE(20,'(I3,I4,4E16.8)')
+c     $     NUP,100,1d0,0d0,0d0,0d0
+c        DO I=1,NUP
+c          WRITE(20,'(I8,I3,2I3,2I2,5E16.8,2F3.0)')
+c     $       IDUP(I),ISTUP(I),MOTHUP(1,I),MOTHUP(2,I),0,0,
+c     $       (PUP(J,I),J=1,5),0d0,0d0
+c        ENDDO
+c        WRITE(20,'(a)') '</event>'
 
 C...Print first 0 events   IWKIM
 
@@ -585,11 +664,26 @@ c     IWKIM
       WRITE(*,*),'Done. Try ',IEV,' events.'
 
       WRITE(*,*),'Write ',NPASEV,' lhe events.'
+
+c      call stdflpyxsec(NPASEV)
+c      call stdxwrt(200,ISTR2,LOK2)
+c      call stdxend(ISTR2)
+
+
+
+
+
+
       RETURN
 
 
  4000 FORMAT(i3,i14,i7)
  4001 FORMAT(i3,i5,f9.3,f7.3,f8.2,f8.2,2f6.1,f9.2,2f6.1)
+c...IWKIM HEPEVT FORMAT
+ 500  FORMAT(i7,i4)
+ 501  FORMAT(i7,i4,i4,i4,i4,i4,5E13.5,4f7.3)
+
+
  999  WRITE(*,*) 'Error in one of the KTCLUS routines'
       STOP
  90   WRITE(*,*) 'Error: Could not open MadEvent event file'
