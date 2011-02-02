@@ -14,7 +14,12 @@ gfortran -c ME2pythia.f
 gfortran -c getjet.f
 gfortran -c ktclusdble.f
 gfortran -c pgs_ranmar.f
+gfortran -c stdhep_print.f
 gfortran -o hep2lhe.iw hep2lhe.o ME2pythia.o getjet.o ktclusdble.o pgs_ranmar.o $LIBDIR/libtauola.a $PYTHIALIB/libpythiaext.a $LIBDIR/libstdhep.a $LIBDIR/libFmcfio.a $PDFLIB/libLHAPDF.a
+
+gfortran -o stdhep_print.iw stdhep_print.o ME2pythia.o getjet.o ktclusdble.o pgs_ranmar.o $LIBDIR/libtauola.a $PYTHIALIB/libpythiaext.a $LIBDIR/libstdhep.a $LIBDIR/libFmcfio.a $PDFLIB/libLHAPDF.a
+
+
 
 #gfortran -o pythia.iw pythia.f ME2pythia.o getjet.o ktclusdble.o pgs_ranmar.o $LIBDIR/libtauola.a $PYTHIALIB/libpythiaext.a $LIBDIR/libstdhep.a $LIBDIR/libFmcfio.a $PDFLIB/libLHAPDF.a
 

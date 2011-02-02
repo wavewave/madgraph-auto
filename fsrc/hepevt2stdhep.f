@@ -79,40 +79,59 @@ c        CALL PYEVNW
          
          do 10 i = 1 , numptl 
             read(u,1000)  d1 , d2 , d3 , d4 , d5 , d6, d7, 
-     $                    d8 , d9 , d10, d11, d12
+     $                    d8 , d9 , d10, d11, d12,
      $                    d13, d14, d15, d16
-c            write(*,*) 'd1 =',d1,', d2 = ' , d2
-c            write(*,*) 'd3 =',d3,', d4 = ' , d4
-c            write(*,*) 'd5 =',d5,', d6 = ' , d6
-c            write(*,*) 'd7 =',d7,', d8 = ' , d8
-c            write(*,*) 'd9 =',d9,', d10= ' , d10
-c            write(*,*) 'd11=',d11,', d12= ' , d12
-c            write(*,*) 'd13=',d13,', d14= ' , d14
-c            write(*,*) 'd15=',d15,', d16= ' , d16
+            write(*,*) 'd1 =',d1,', d2 = ' , d2
+            write(*,*) 'd3 =',d3,', d4 = ' , d4
+            write(*,*) 'd5 =',d5,', d6 = ' , d6
+            write(*,*) 'd7 =',d7,', d8 = ' , d8
+            write(*,*) 'd9 =',d9,', d10= ' , d10
+            write(*,*) 'd11=',d11,', d12= ' , d12
+            write(*,*) 'd13=',d13,', d14= ' , d14
+            write(*,*) 'd15=',d15,', d16= ' , d16
 
-            NEVHEP = evtnum 
-            NHEP = numptl
-            ISTHEP(i) =  d2
-            IDHEP(i) = d3
-            JMOHEP(1,i) = d4  
-            JMOHEP(2,i) = d5 
-            JDAHEP(1,i) = d6 
-            JDAHEP(2,i) = d7 
-            PHEP(1,i) = d8
-            PHEP(2,i) = d9
-            PHEP(3,i) = d10
-            PHEP(4,i) = d11
-            PHEP(5,i) = d12 
-            VHEP(1,i) = d13
-            VHEP(2,i) = d14
-            VHEP(3,i) = d15
-            VHEP(4,i) = d16
+c            NEVHEP = evtnum 
+c            NHEP = numptl
+c            ISTHEP(i) =  d2
+c            IDHEP(i) = d3
+c            JMOHEP(1,i) = d4  
+c            JMOHEP(2,i) = d5 
+c            JDAHEP(1,i) = d6 
+c            JDAHEP(2,i) = d7 
+c            PHEP(1,i) = d8
+c            PHEP(2,i) = d9
+c            PHEP(3,i) = d10
+c            PHEP(4,i) = d11
+c            PHEP(5,i) = d12 
+c            VHEP(1,i) = d13
+c            VHEP(2,i) = d14
+c            VHEP(3,i) = d15
+c            VHEP(4,i) = d16
+c            P(i,5) = PHEP(5,i)
+            N=numptl
+            K(I,1)=d2
+            K(I,2)=d3
+            K(I,3)=d4
+            K(I,4)=d6
+            K(I,5)=d7
+            P(I,1)=d8
+            P(I,2)=d9
+            P(I,3)=d10
+            P(I,4)=d11
+            P(I,5)=d12
+            V(I,1)=d13
+            V(I,2)=d14
+            V(I,3)=d15
+            V(I,4)=d16
+
  10      enddo
 
 
-c        CALL PYHEPC(1)
+c       CALL PYHEPC(1)
 
-	CALL LUNHEP(2)
+        CALL LUNHEP(1)
+
+c	CALL LUNHEP(2)
 c        WRITE(*,*) 'test=',K(1,2) 
 
 
