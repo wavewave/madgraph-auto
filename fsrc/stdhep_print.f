@@ -162,21 +162,21 @@ C...Open STDHEP input file
       DO 130 WHILE(.TRUE.)
 C...Get event
         call stdxrd(itype,istream,lok)
-        if (lok.ne.0) then
-          write(*,
-     .       '('' READ_EVENT: error reading file: '',i5)') lok
-          GOTO 135
-        endif
+c        if (lok.ne.0) then
+c          write(*,
+c     .       '('' READ_EVENT: error reading file: '',i5)') lok
+c          GOTO 135
+c        endif
         if(itype.eq.100) then
-c start run record
-           cycle
+cc start run record
+           GOTO 130 
         endif
-        if (itype.eq.200) then
-c end run record        
-C...Write init info to the .lhe init file
-          call stdxend(istream)
-          GOTO 135
-        endif
+c        if (itype.eq.200) then
+cc end run record        
+cC...Write init info to the .lhe init file
+c          call stdxend(istream)
+c          GOTO 135
+c        endif
 
         IF(IEV.GE.NITER) CYCLE
 
@@ -185,8 +185,10 @@ C...Write init info to the .lhe init file
 C...Convert event from STDHEP format to Pythia format
         call lunhep(2)
 C...IWKIM TEST
-c        call lunhep(1)
-        call pylist(1)
+        call lunhep(1)
+c        WRITE(*,*) 'NPAD = ',NPAD
+        WRITE(*,*) 'NEVHEP',NEVHEP
+        call PYLIST(3)
         call FLUSH()
 c        NUP=N
         goto 130
