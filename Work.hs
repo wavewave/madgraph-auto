@@ -31,16 +31,20 @@ data ProcessSetup = PS {
   , workname :: String 
   }
 
+data ClusterRunType = NoParallel | Parallel Int | Cluster String
+
 data RunSetup = RS { 
     param   :: Param
+  , numevent :: Int
   , machine :: MachineType
   , rgrun   :: RGRunType
   , rgscale :: Double
   , match   :: MatchType
   , cut     :: CutType
   , pythia  :: PYTHIAType
-  , pgs     :: PGSType
-  , setnum  :: Int
+  , pgs     :: PGSType 
+  , cluster :: ClusterRunType 
+  , setnum  :: Int 
 }
 
 
@@ -55,7 +59,10 @@ createWorkDir ssetup psetup = do
   readProcess ("bin/mg5") [tempdir ++ "proc_card_mg5.dat"] ""
   putStrLn "Wait Two Seconds"  
   sleep 2
-  putStrLn "moving directory"
+  putStrLn $ "moving directory" 
+ 	++ (mg5base ssetup ++ workname psetup) 
+ 	++ " to " 
+	++ (workbase ssetup ++ workname psetup) 
   renameDirectory (mg5base ssetup ++ workname psetup) (workbase ssetup ++ workname psetup) 
   return ()
 
@@ -120,6 +127,7 @@ generateEvents ssetup psetup rsetup = do
                   (match   rsetup) 
                   (rgrun   rsetup) 
                   (rgscale rsetup) 
+		  (numevent rsetup) 
                   
   pythiacard <- pythiaCardSetup 
                   tpath
@@ -143,9 +151,11 @@ generateEvents ssetup psetup rsetup = do
     Just str -> writeFile (carddir ++ "pgs_card.dat") str
   
   
-  setCurrentDirectory (workbase ssetup ++ workname psetup) 
-  readProcess ("bin/generate_events") ["2", "6", taskname] ""
-
+  setCurrentDirectory (workbase ssetup ++ workname psetup)
+  case cluster rsetup of
+    NoParallel -> readProcess ("bin/generate_events") ["0", taskname] ""
+    Parallel ncore -> readProcess ("bin/generate_events") ["2", show ncore, taskname] ""
+    Cluster cname -> readProcess ("bin/generate_events") ["1", cname, taskname] "" 
   return ()
 
 

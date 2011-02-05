@@ -28,7 +28,7 @@
 #*********************************************************************
 # Number of events and rnd seed                                      *
 #*********************************************************************
-  10000       = nevents ! Number of unweighted events requested 
+  $numevt$    = nevents ! Number of unweighted events requested 
       0       = iseed   ! rnd seed (0=assigned automatically=default))
 #*********************************************************************
 # Collider type and energy                                           *

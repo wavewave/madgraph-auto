@@ -54,6 +54,7 @@ psetup_six_ttbar01j = PS {
 
 rsetup p matchtype num = RS { 
     param   = p
+  , numevent = 100000
   , machine = TeVatron 
   , rgrun   = Fixed
   , rgscale = 200.0 
@@ -65,6 +66,7 @@ rsetup p matchtype num = RS {
     NoMatch -> NoPYTHIA
     MLM     -> RunPYTHIA
   , pgs     = NoPGS
+  , cluster = Cluster "test"
   , setnum  = num
 }
 

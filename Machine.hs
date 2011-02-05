@@ -32,8 +32,8 @@ pgsCardMachine TeVatron = "pgs_card_TEV.dat"
 pgsCardMachine LHC7     = "pgs_card_LHC.dat"
 pgsCardMachine LHC14    = "pgs_card_LHC.dat"
 
-runCardSetup :: FilePath -> MachineType -> CutType -> MatchType -> RGRunType -> Double -> IO String 
-runCardSetup tpath machine ctype mtype rgtype scale = do 
+runCardSetup :: FilePath -> MachineType -> CutType -> MatchType -> RGRunType -> Double -> Int -> IO String 
+runCardSetup tpath machine ctype mtype rgtype scale numevt = do 
   let (beamtyp1,beamtyp2,beamenergy) = case machine of 
         TeVatron -> ("1","-1","980")
         LHC7     -> ("1","1","3500")
@@ -41,11 +41,13 @@ runCardSetup tpath machine ctype mtype rgtype scale = do
       isFixedRG = case rgtype of 
         Fixed -> "T"
         Auto  -> "F"
+      numevtfinal = if numevt > 100000 then 100000 else numevt 
       
   templates <- directoryGroup tpath 
   return $ (renderTemplateGroup
               templates
-              [ ("beamTypeOne"  , beamtyp1   )
+              [ ("numevt"       , show numevtfinal ) 
+	      , ("beamTypeOne"  , beamtyp1   )
               , ("beamTypeTwo"  , beamtyp2   )
               , ("beamEnergy" , beamenergy )
               , ("isFixedRG"  , isFixedRG  )
@@ -53,7 +55,6 @@ runCardSetup tpath machine ctype mtype rgtype scale = do
               , ("facScale"   , show scale ) ]
               (runCard4CutMatch ctype mtype)  ) ++ "\n\n\n"
 
---templatedir = "./template/"
 
 pythiaCardSetup :: FilePath -> MatchType -> PYTHIAType -> IO (Maybe String)
 pythiaCardSetup tpath mtype ptype = do  
