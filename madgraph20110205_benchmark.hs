@@ -69,10 +69,10 @@ rsetup p matchtype num = RS {
 }
 
 
-wpparamset = [ WpParam 200.0 (0.85*sqrt 2)
-             , WpParam 300.0 (1.20*sqrt 2) 
+wpparamset = [ WpParam 200.0 (0.85*sqrt 2) ] 
+{-             , WpParam 300.0 (1.20*sqrt 2) 
              , WpParam 400.0 (1.50*sqrt 2)
-             , WpParam 600.0 (2.00*sqrt 2) ] 
+             , WpParam 600.0 (2.00*sqrt 2) ] -}
 
 zpparamset = [ ZpHParam 200.0 (0.70*sqrt 2) 
              , ZpHParam 300.0 (1.00*sqrt 2) 
@@ -91,10 +91,10 @@ sixparamset = [ SixParam  600.0 3.5
               , SixParam  600.0 3.2  ]  
 
 
-psetuplist = [ psetup_wp_ttbar01j
-             , psetup_zp_ttbar01j
-             , psetup_trip_ttbar01j
-             , psetup_six_ttbar01j ] 
+psetuplist = [ psetup_wp_ttbar01j ]
+--             , psetup_zp_ttbar01j
+--             , psetup_trip_ttbar01j
+--             , psetup_six_ttbar01j ] 
 
 sets = [1,2] -- [ 3..10 ] 
 
@@ -111,7 +111,7 @@ triptasklist =  [ (psetup_trip_ttbar01j, rsetup p MLM num) | p <- tripparamset
 sixtasklist =  [ (psetup_six_ttbar01j, rsetup p MLM num) | p <- sixparamset 
                                                          , num <- sets     ] 
 
-totaltasklist = {- wptasklist ++ zptasklist ++ -} triptasklist ++ sixtasklist 
+totaltasklist = wptasklist {- ++ zptasklist ++ triptasklist ++ sixtasklist -}
 
 main = do putStrLn "benchmark models 20110205 sets" 
           putStrLn "models : Wp, ZpH, Trip, Six "
