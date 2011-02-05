@@ -5,6 +5,8 @@ module Main where
 import Model
 import Machine
 import Work
+import Fortran 
+
 -- import SimpleQQ
 
 import System.Posix.Unistd (sleep)
@@ -14,6 +16,14 @@ ssetup = SS {
   , mg5base    = "/nobackup/iankim/montecarlo/MG_ME_V4.4.44/MadGraph5_v0_6_1/"
   , workbase   = "/nobackup/iankim/wk/"
   }
+
+ucut = UserCut { 
+    uc_metcut    = 20.0 
+  , uc_etacutlep = 1.0 
+  , uc_etcutlep  = 20.0
+  , uc_etacutjet = 2.5
+  , uc_etcutjet  = 20.0 
+}
 
 
 processTTBar0or1jet =  
@@ -118,8 +128,10 @@ totaltasklist = wptasklist {- ++ zptasklist ++ triptasklist ++ sixtasklist -}
 main = do putStrLn "benchmark models 20110205 sets" 
           putStrLn "models : Wp, ZpH, Trip, Six "
           
+          compileFortran ssetup ucut
+{-
           mapM_ (createWorkDir ssetup) psetuplist
           sleep 2
           mapM_ (\(psetup,rsetup) -> generateEvents ssetup psetup rsetup) $
-            totaltasklist
+            totaltasklist -}
      

@@ -27,7 +27,7 @@ C...Inputs for jet clustering and Pythia run
       INTEGER NITER,NFILES,IJETALG,KTSCHE
       DOUBLE PRECISION ETCLUS,ETMIN,RMAX,ETAMAX,ETAJETMAX
       COMMON/JETPAR/ETCLUS,ETMIN,RMAX,ETAMAX,ETAJETMAX,
-     $     NITER,NFILES,IJETALG,KTSCHE
+     .     NITER,NFILES,IJETALG,KTSCHE
       DATA ETCLUS,ETMIN,RMAX,ETAMAX,ETAJETMAX/10d0,10d0,0.7d0,5d0,4.5d0/
       DATA KTSCHE/4313/
       DATA NITER,NFILES,IJETALG/-1,0,1/
@@ -46,8 +46,8 @@ C...User process event common block.
       INTEGER NUP,IDPRUP,IDUP,ISTUP,MOTHUP,ICOLUP
       DOUBLE PRECISION XWGTUP,SCALUP,AQEDUP,AQCDUP,PUP,VTIMUP,SPINUP
       COMMON/HEPEUP/NUP,IDPRUP,XWGTUP,SCALUP,AQEDUP,AQCDUP,IDUP(MAXNUP),
-     &   ISTUP(MAXNUP),MOTHUP(2,MAXNUP),ICOLUP(2,MAXNUP),PUP(5,MAXNUP),
-     &   VTIMUP(MAXNUP),SPINUP(MAXNUP)
+     .   ISTUP(MAXNUP),MOTHUP(2,MAXNUP),ICOLUP(2,MAXNUP),PUP(5,MAXNUP),
+     .   VTIMUP(MAXNUP),SPINUP(MAXNUP)
 C...HEPEVT commonblock.
       INTEGER NMXHEP,NEVHEP,NHEP,ISTHEP,IDHEP,JMOHEP,JDAHEP
       DOUBLE PRECISION PHEP,VHEP
@@ -62,13 +62,13 @@ C...GETJET commonblocks
       PARAMETER (MNCY=200)
       PARAMETER (MNCPHI=200)
       COMMON/CALOR/DELY,DELPHI,ET(MNCY,MNCPHI),
-     $CTHCAL(MNCY),STHCAL(MNCY),CPHCAL(MNCPHI),SPHCAL(MNCPHI),
-     $YCMIN,YCMAX,NCY,NCPHI
+     .CTHCAL(MNCY),STHCAL(MNCY),CPHCAL(MNCPHI),SPHCAL(MNCPHI),
+     .YCMIN,YCMAX,NCY,NCPHI
       DATA YCMIN,YCMAX/-5d0,5d0/
       DATA NCY,NCPHI/100,60/
       PARAMETER (NJMAX=500)
       COMMON/GETCOM/PJJET(4,NJMAX),ETJETJ(NJMAX),JETNO(MNCY,MNCPHI),
-     $NJJET
+     .NJJET
 c
 c   STDHEP global variables
 c   stdecom  - center-of-mass energy
@@ -142,7 +142,7 @@ c      banner_open=.true.
 c      WRITE(*,*)'Opened file ',banner_file
 c      GOTO 15
 c 10   WRITE(*,*)'Warning: No file ',banner_file(1:len_trim(banner_file))
-c     $   ,'. No banner will be written.'
+c     .   ,'. No banner will be written.'
  15   OPEN (20, FILE=output_file, ERR=90 )
       OPEN (21, FILE=init_file, ERR=90 )
       OPEN (22, FILE=outputhep, ERR=90)
@@ -163,7 +163,7 @@ C...Open STDHEP input file
  5    call stdxropen('pythia_events.hep',NITER,istream,lok)
       if (lok.ne.0) then
         write(*,'('' STDX: open failure on pythia_events.hep: '',i5)')
-     $     lok
+     .     lok
         stop
       endif
       WRITE(*,*) 'ISTR=',ISTREAM
@@ -209,10 +209,10 @@ c end run record
 C...Write init info to the .lhe init file
           WRITE(21,'(a)') '<init>'
           WRITE(21,'(2i6,2E12.5,2i2,2i6,2i2)')
-     $       K(1,2),K(2,2),P(1,4),P(2,4),0,0,
-     $       0,0,3,1
+     .       K(1,2),K(2,2),P(1,4),P(2,4),0,0,
+     .       0,0,3,1
           WRITE(21,'(3E12.5,i4)')
-     $       stdxsec,0d0,1d0,100
+     .       stdxsec,0d0,1d0,100
           WRITE(21,'(a)') '</init>'
           call stdxend(istream)
           GOTO 135
@@ -238,8 +238,8 @@ C...Prepare for jet clustering
         DO I=7,N
 C...Make only interesting jet particles active
           IF(K(I,1).LT.10.AND.
-     $          (ABS(K(I,2)).LT.6 .OR. K(I,2).EQ.21 .OR. K(I,2).EQ.22
-     $          .OR.(ABS(K(I,2)).GT.100.AND.ABS(K(I,2)).LT.10000)))THEN
+     .          (ABS(K(I,2)).LT.6 .OR. K(I,2).EQ.21 .OR. K(I,2).EQ.22
+     .          .OR.(ABS(K(I,2)).GT.100.AND.ABS(K(I,2)).LT.10000)))THEN
              ISTHEP(I)=1
           ELSE
              ISTHEP(I)=2
@@ -249,13 +249,13 @@ C...Prepare for kT clustering
           IF(IJETALG.EQ.0.AND.ISTHEP(I).EQ.1)THEN
             APT=sqrt(P(I,1)**2+P(I,2)**2)
             AETA=ABS(LOG(MIN((SQRT(APT**2+P(I,3)**2)+
-     $         ABS(P(I,3)))/APT,1d5)))
+     .         ABS(P(I,3)))/APT,1d5)))
             IF(AETA.GT.ETAMAX) CYCLE
             IF(APT.EQ.0) CYCLE
             NN=NN+1
             IF (NN.GT.NMAX) then
               WRITE(*,*), 'Too many particles for kt clustering, ',NN,
-     $              ', skipping extra particles.'
+     .              ', skipping extra particles.'
               NN=NN-1
               EXIT
             endif
@@ -271,7 +271,7 @@ C...Perform jet clustering with ktclus
             YCUT=ETCLUS**2
             CALL KTCLUS(KTSCHE,PP,NN,ECUT,Y,*999)
             CALL KTRECO(MOD(KTSCHE,10),PP,NN,ECUT,YCUT,YCUT,
-     $           PCJET,JET,NCJET,NSUB,*999)            
+     .           PCJET,JET,NCJET,NSUB,*999)            
             DO I=1,NCJET
                ETJETC(I)=PT(PCJET(1,I))
             ENDDO
@@ -288,7 +288,7 @@ C...Perform jet clustering with ktclus
           DO I=1,NCJET
              ETACJET(I)=PSERAP(PCJET(1,KSORTC(NCJET+1-I)))
              PHICJET(I)= PYANGL(PCJET(1,KSORTC(NCJET+1-I)),
-     $            PCJET(2,KSORTC(NCJET+1-I)))
+     .            PCJET(2,KSORTC(NCJET+1-I)))
              IBTAG(I)=0
           ENDDO
         ELSE
@@ -302,7 +302,7 @@ C...Perform jet reconstruction with getjet
           DO I=1,NJJET
              ETAJJET(I)=PSERAP(PJJET(1,KSORTJ(NJJET+1-I)))
              PHIJJET(I)=PYANGL(PJJET(1,KSORTJ(NJJET+1-I)),
-     $            PJJET(2,KSORTJ(NJJET+1-I)))
+     .            PJJET(2,KSORTJ(NJJET+1-I)))
              IBTAG(I)=0
           ENDDO
         ENDIF
@@ -332,9 +332,9 @@ C...Perform event analysis to generate .lhe and .lhco files
             ENDDO
           ENDIF
           IF(K(I,1).LT.10.AND.(IABS(K(I,2)).EQ.11.OR.
-     $       IABS(K(I,2)).EQ.13.OR.IABS(K(I,2)).EQ.15.OR.
-     $       IABS(K(I,2)).EQ.22)
-     $       .AND.K(K(I,3),2).EQ.K(I,2))THEN
+     .       IABS(K(I,2)).EQ.13.OR.IABS(K(I,2)).EQ.15.OR.
+     .       IABS(K(I,2)).EQ.22)
+     .       .AND.K(K(I,3),2).EQ.K(I,2))THEN
 c            NE=NE+1
 c            PTE(NE)=PYP(I,10)
 c            ETAE(NE)=PYP(I,19)
@@ -348,8 +348,8 @@ c            PHIE(NE)=PYP(I,15)
               PUP(J,NUP)=P(I,J)
             ENDDO
           ELSE IF(K(I,1).LT.10.AND.(IABS(K(I,2)).EQ.12.OR.
-     $         IABS(K(I,2)).EQ.14.OR.IABS(K(I,2)).EQ.16.OR.
-     $         K(I,2).EQ.1000022))THEN
+     .         IABS(K(I,2)).EQ.14.OR.IABS(K(I,2)).EQ.16.OR.
+     .         K(I,2).EQ.1000022))THEN
             Pxmiss=Pxmiss+P(I,1)
             Pymiss=Pymiss+P(I,2)
           ELSE IF(K(I,1).LT.10.AND.IABS(K(I,2)).GT.1000000)THEN
@@ -362,12 +362,12 @@ c            PHIE(NE)=PYP(I,15)
               PUP(J,NUP)=P(I,J)
             ENDDO
           ELSE IF(K(I,1).LT.20.AND.(IABS(K(I,2)).EQ.5.OR.
-     $     (IABS(K(I,2)).GT.500.AND.IABS(K(I,2)).LT.600).OR.
-     $     (IABS(K(I,2)).GT.5000.AND.IABS(K(I,2)).LT.6000)).AND.
-     $     (K(I,4).EQ.0.OR.K(K(I,4),2).NE.92.AND.
-     $      (IABS(K(K(I,4),2)).LT.500.OR.IABS(K(K(I,4),2)).GT.600).AND.
-     $      (IABS(K(K(I,4),2)).LT.5000.OR.IABS(K(K(I,4),2)).GT.6000)))
-     $      THEN
+     .     (IABS(K(I,2)).GT.500.AND.IABS(K(I,2)).LT.600).OR.
+     .     (IABS(K(I,2)).GT.5000.AND.IABS(K(I,2)).LT.6000)).AND.
+     .     (K(I,4).EQ.0.OR.K(K(I,4),2).NE.92.AND.
+     .      (IABS(K(K(I,4),2)).LT.500.OR.IABS(K(K(I,4),2)).GT.600).AND.
+     .      (IABS(K(K(I,4),2)).LT.5000.OR.IABS(K(K(I,4),2)).GT.6000)))
+     .      THEN
 c     Check if there is a b quark/hadron going in the direction of one of the jets
             IF(IJETALG.GT.0)THEN
               RFOUND=1.5*RMAX
@@ -375,19 +375,19 @@ c     Check if there is a b quark/hadron going in the direction of one of the je
 c              PRINT *,'Found b particle at ',I
               DO J=1,NJJET
 c                PRINT *,'DeltaR, Pt ratio: ',
-c     $             SQRT((PSERAP(PJJET(1,J))-PYP(I,19))**2+
-c     $           (PYANGL(PJJET(1,J),PJJET(2,J))-PYP(I,15))**2),
-c     $             PYP(I,10)/PT(PJJET(1,J))
+c     .             SQRT((PSERAP(PJJET(1,J))-PYP(I,19))**2+
+c     .           (PYANGL(PJJET(1,J),PJJET(2,J))-PYP(I,15))**2),
+c     .             PYP(I,10)/PT(PJJET(1,J))
                 IF(SQRT((PSERAP(PJJET(1,J))-PYP(I,19))**2+
-     $             MIN(ABS(PYANGL(PJJET(1,J),PJJET(2,J))-PYP(I,15)),
-     $             TWOPI-ABS(PYANGL(PJJET(1,J),PJJET(2,J))-PYP(I,15))
-     $             )**2).LT.RFOUND
-     $             .AND. PT(PJJET(1,J))/PYP(I,10).GT.0.3d0 
-     $          ) THEN
+     .             MIN(ABS(PYANGL(PJJET(1,J),PJJET(2,J))-PYP(I,15)),
+     .             TWOPI-ABS(PYANGL(PJJET(1,J),PJJET(2,J))-PYP(I,15))
+     .             )**2).LT.RFOUND
+     .             .AND. PT(PJJET(1,J))/PYP(I,10).GT.0.3d0 
+     .          ) THEN
                   RFOUND=SQRT((PSERAP(PJJET(1,J))-PYP(I,19))**2+
-     $             MIN(ABS(PYANGL(PJJET(1,J),PJJET(2,J))-PYP(I,15)),
-     $             TWOPI-ABS(PYANGL(PJJET(1,J),PJJET(2,J))-PYP(I,15))
-     $             )**2)
+     .             MIN(ABS(PYANGL(PJJET(1,J),PJJET(2,J))-PYP(I,15)),
+     .             TWOPI-ABS(PYANGL(PJJET(1,J),PJJET(2,J))-PYP(I,15))
+     .             )**2)
                   IFOUND=J
                 ENDIF
               ENDDO
@@ -398,12 +398,12 @@ c              ELSE
 c                PRINT *,'Couldnt find match for b in event ',IEV
 c                CALL PYLIST(2)
 c                WRITE(*,'(a,3I5,3F8.3)')'b: ',I,K(I,1),K(I,2),PYP(I,10),
-c     $             PYP(I,19),PYP(I,15)
+c     .             PYP(I,19),PYP(I,15)
 c                PRINT *,'Jets: pt eta phi px py pz'
 c                DO J=1,NJJET
 c                  WRITE(*,'(6F8.3)')PT(PJJET(1,J)),
-c     $               PSERAP(PJJET(1,J)),PYANGL(PJJET(1,J),PJJET(2,J)),
-c     $               (PJJET(II,J),II=1,3)
+c     .               PSERAP(PJJET(1,J)),PYANGL(PJJET(1,J),PJJET(2,J)),
+c     .               (PJJET(II,J),II=1,3)
 c                ENDDO
               ENDIF
             ELSE
@@ -412,15 +412,15 @@ c                ENDDO
               DO J=1,NCJET
 c             For now just use cone also for this case
                 IF(SQRT((PSERAP(PCJET(1,J))-PYP(I,19))**2+
-     $             MIN(ABS(PYANGL(PCJET(1,J),PCJET(2,J))-PYP(I,15)),
-     $             TWOPI-ABS(PYANGL(PCJET(1,J),PCJET(2,J))-PYP(I,15))
-     $             )**2).LT.RFOUND
-     $             .AND. PT(PCJET(1,J))/PYP(I,10).GT.0.3d0 
-     $             ) THEN
+     .             MIN(ABS(PYANGL(PCJET(1,J),PCJET(2,J))-PYP(I,15)),
+     .             TWOPI-ABS(PYANGL(PCJET(1,J),PCJET(2,J))-PYP(I,15))
+     .             )**2).LT.RFOUND
+     .             .AND. PT(PCJET(1,J))/PYP(I,10).GT.0.3d0 
+     .             ) THEN
                   RFOUND=SQRT((PSERAP(PCJET(1,J))-PYP(I,19))**2+
-     $             MIN(ABS(PYANGL(PCJET(1,J),PCJET(2,J))-PYP(I,15)),
-     $             TWOPI-ABS(PYANGL(PCJET(1,J),PCJET(2,J))-PYP(I,15))
-     $             )**2)
+     .             MIN(ABS(PYANGL(PCJET(1,J),PCJET(2,J))-PYP(I,15)),
+     .             TWOPI-ABS(PYANGL(PCJET(1,J),PCJET(2,J))-PYP(I,15))
+     .             )**2)
                   IFOUND=J
                 ENDIF
               ENDDO
@@ -429,12 +429,12 @@ c             For now just use cone also for this case
 c              ELSE
 c                PRINT *,'Couldnt find match for b in event ',IEV
 c                WRITE(*,'(a,3I5,3F8.3)')'b: ',I,K(I,1),K(I,2),PYP(I,10),
-c     $             PYP(I,19),PYP(I,15)
+c     .             PYP(I,19),PYP(I,15)
 c                PRINT *,'Jets: pt eta phi px py pz'
 c                DO J=1,NCJET
 c                  WRITE(*,'(6F8.3)')PT(PCJET(1,J)),
-c     $               PSERAP(PCJET(1,J)),PYANGL(PCJET(1,J),PCJET(2,J)),
-c     $               (PCJET(II,J),II=1,3)
+c     .               PSERAP(PCJET(1,J)),PYANGL(PCJET(1,J),PCJET(2,J)),
+c     .               (PCJET(II,J),II=1,3)
 c                ENDDO
 c                CALL PYLIST(2)
               ENDIF
@@ -458,7 +458,7 @@ c     Jets
               PUP(J,NUP)=PCJET(J,KSORTC(NCJET+1-I))
             ENDDO
             PUP(5,NUP)=SQRT(MAX(0d0,PUP(4,NUP)**2-
-     $         PUP(1,NUP)**2-PUP(2,NUP)**2-PUP(3,NUP)**2))
+     .         PUP(1,NUP)**2-PUP(2,NUP)**2-PUP(3,NUP)**2))
           ENDDO
         ELSE
           DO I=1,NJJET
@@ -475,7 +475,7 @@ c     Jets
               PUP(J,NUP)=PJJET(J,KSORTJ(NJJET+1-I))
             ENDDO
             PUP(5,NUP)=SQRT(MAX(0d0,PUP(4,NUP)**2-
-     $         PUP(1,NUP)**2-PUP(2,NUP)**2-PUP(3,NUP)**2))
+     .         PUP(1,NUP)**2-PUP(2,NUP)**2-PUP(3,NUP)**2))
           ENDDO
         ENDIF
 
@@ -498,7 +498,7 @@ C...First write dummy events into lhe file
 c        DO WHILE(ievold.lt.IEVNT-1)
 c          WRITE(20,'(a)') '<event>'
 c          WRITE(20,'(I3,I4,4E16.8)')
-c     $       0,661,IEVNT*1d9*PARI(2),SCALUP,AQEDUP,AQCDUP
+c     .       0,661,IEVNT*1d9*PARI(2),SCALUP,AQEDUP,AQCDUP
 c          WRITE(20,'(a)') '</event>'
 c          ievold=ievold+1
 c        ENDDO
@@ -522,11 +522,11 @@ C       Semileptonic Cut and four jet pass cut
            IF(ISTUP(I).EQ.1) THEN 
 C     Electron or Muon passed eta cut and et cut  
               IF( (IDUP(I).EQ.11) .OR. (IDUP(I).EQ.-11) .OR.
-     $            (IDUP(I).EQ.13) .OR. (IDUP(I).EQ.-13) ) THEN
+     .            (IDUP(I).EQ.13) .OR. (IDUP(I).EQ.-13) ) THEN
                  ETATEMP = ETA_MOM(PUP(1,I),PUP(2,I),PUP(3,I),PUP(4,I))
                  ETTEMP  = PT_MOM(PUP(1,I),PUP(2,I),PUP(3,I),PUP(4,I))
                  IF( (ETATEMP.GT. -$etacutlep$) .AND. (ETATEMP.LT. $etacutlep$) 
-     $               .AND. (ETTEMP.GT.$etcutlep$) ) THEN 
+     .               .AND. (ETTEMP.GT.$etcutlep$) ) THEN 
                     NCELEP=NCELEP+1
 
                  ENDIF
@@ -537,7 +537,7 @@ C     Four Jet pass eta cut and et cut
                  ETTEMP  = PT_MOM(PUP(1,I),PUP(2,I),PUP(3,I),PUP(4,I))
 
                  IF( (ETATEMP.GT. -$etacutjet$) .AND. (ETATEMP.LT.$etcutjet$) 
-     $               .AND. (ETTEMP.GT.$etcutjet$) ) THEN 
+     .               .AND. (ETTEMP.GT.$etcutjet$) ) THEN 
 
                     NCEJET=NCEJET+1
                  ENDIF
@@ -550,8 +550,8 @@ C     Four Jet pass eta cut and et cut
 
         IF( (NCELEP /= 1) .OR. (NCEJET.LT.4) ) THEN
            WRITE(*,*) 'Event ',IEV,
-     $                ' is not Semileptonic, not passed a cut',
-     $                NCELEP,' ',NCEJET
+     .                ' is not Semileptonic, not passed a cut',
+     .                NCELEP,' ',NCEJET
            GOTO 130
         ENDIF
 
@@ -569,19 +569,19 @@ c        ENDDO
 c        WRITE (*,*) K(2,1)
         DO J=1,N
            WRITE (22,501) J,K(J,1), K(J,2), K(J,3), K(J,3), K(J,4)
-     $           , K(J,5),P(J,1), P(J,2), P(J,3), P(J,4), P(J,5)  
-     $           , V(J,1), V(J,2), V(J,3), V(J,4)
+     .           , K(J,5),P(J,1), P(J,2), P(J,3), P(J,4), P(J,5)  
+     .           , V(J,1), V(J,2), V(J,3), V(J,4)
         ENDDO
 
         CALL FLUSH()
 
  127    WRITE(20,'(a)') '<event>'
         WRITE(20,'(I3,I4,4E16.8)')
-     $     NUP,100,1d0,0d0,0d0,0d0
+     .     NUP,100,1d0,0d0,0d0,0d0
         DO I=1,NUP
           WRITE(20,'(I8,I3,2I3,2I2,5E16.8,2F3.0)')
-     $       IDUP(I),ISTUP(I),MOTHUP(1,I),MOTHUP(2,I),0,0,
-     $       (PUP(J,I),J=1,5),0d0,0d0
+     .       IDUP(I),ISTUP(I),MOTHUP(1,I),MOTHUP(2,I),0,0,
+     .       (PUP(J,I),J=1,5),0d0,0d0
         ENDDO
         WRITE(20,'(a)') '</event>'
 
@@ -652,7 +652,7 @@ C...Inputs for jet clustering and Pythia run
       INTEGER NITER,NFILES,IJETALG,KTSCHE
       DOUBLE PRECISION ETCLUS,ETMIN,RMAX,ETAMAX,ETAJETMAX
       COMMON/JETPAR/ETCLUS,ETMIN,RMAX,ETAMAX,ETAJETMAX,
-     $     NITER,NFILES,IJETALG,KTSCHE
+     .     NITER,NFILES,IJETALG,KTSCHE
 
 C...GETJET commonblocks
       INTEGER MNCY,MNCPHI,NCY,NCPHI,NJMAX,JETNO,NJJET
@@ -661,8 +661,8 @@ C...GETJET commonblocks
       PARAMETER (MNCY=200)
       PARAMETER (MNCPHI=200)
       COMMON/CALOR/DELY,DELPHI,ET(MNCY,MNCPHI),
-     $CTHCAL(MNCY),STHCAL(MNCY),CPHCAL(MNCPHI),SPHCAL(MNCPHI),
-     $YCMIN,YCMAX,NCY,NCPHI
+     .CTHCAL(MNCY),STHCAL(MNCY),CPHCAL(MNCPHI),SPHCAL(MNCPHI),
+     .YCMIN,YCMAX,NCY,NCPHI
 
       INTEGER ios,i
       CHARACTER*80 pythia_card
@@ -678,7 +678,7 @@ C...GETJET commonblocks
           if (ios.eq.0) then
              call remove_comments(line,132)
              if(index(line,'IJETALG').ne.0.or.
-     $               index(line,'ijetalg').ne.0) then
+     .               index(line,'ijetalg').ne.0) then
                 READ(line(index(line,'=')+1:),*) ijetalg
                 if(ijetalg.eq.0)then
                    write(*,*) 'Using kt jets'
@@ -686,39 +686,39 @@ C...GETJET commonblocks
                    write(*,*) 'Using cone jets'
                 endif
              else if(index(line,'ETCLUS').ne.0.or.
-     $               index(line,'etclus').ne.0) then
+     .               index(line,'etclus').ne.0) then
                 READ(line(index(line,'=')+1:),*) etclus
                 write(*,*) 'Read Etclus = ',etclus
              else if(index(line,'ETMIN').ne.0.or.
-     $               index(line,'etmin').ne.0) then
+     .               index(line,'etmin').ne.0) then
                 READ(line(index(line,'=')+1:),*) etmin
                 write(*,*) 'Read Etmin = ',etmin
              else if(index(line,'RMAX').ne.0.or.
-     $               index(line,'rmax').ne.0) then
+     .               index(line,'rmax').ne.0) then
                 READ(line(index(line,'=')+1:),*) rmax
                 write(*,*) 'Read Rmax  = ',rmax
              else if(index(line,'ETAMAX').ne.0.or.
-     $               index(line,'etamax').ne.0) then
+     .               index(line,'etamax').ne.0) then
                 READ(line(index(line,'=')+1:),*) etamax
                 write(*,*) 'Read Etamax = ',etamax
              else if(index(line,'ETAJETMAX').ne.0.or.
-     $               index(line,'etajetmax').ne.0) then
+     .               index(line,'etajetmax').ne.0) then
                 READ(line(index(line,'=')+1:),*) etajetmax
                 write(*,*) 'Read Etamax = ',etajetmax
              else if(index(line,'NCY').ne.0.or.
-     $               index(line,'ncy').ne.0) then
+     .               index(line,'ncy').ne.0) then
                 READ(line(index(line,'=')+1:),*) ncy
                 write(*,*) 'Read NCY = ',ncy
              else if(index(line,'NCPHI').ne.0.or.
-     $               index(line,'ncphi').ne.0) then
+     .               index(line,'ncphi').ne.0) then
                 READ(line(index(line,'=')+1:),*) ncphi
                 write(*,*) 'Read NCPHI = ',ncphi
              else if(index(line,'NITER').ne.0.or.
-     $               index(line,'niter').ne.0) then
+     .               index(line,'niter').ne.0) then
                 READ(line(index(line,'=')+1:),*) niter
                 write(*,*) 'Read Niter = ',niter
              else if(index(line,'KTSCHE').ne.0.or.
-     $               index(line,'ktsche').ne.0) then
+     .               index(line,'ktsche').ne.0) then
                 READ(line(index(line,'=')+1:),*) ktsche
                 write(*,*) 'Read Ktsche = ',ktsche
              endif
