@@ -81,14 +81,14 @@ c        CALL PYEVNW
             read(u,1000)  d1 , d2 , d3 , d4 , d5 , d6, d7, 
      $                    d8 , d9 , d10, d11, d12,
      $                    d13, d14, d15, d16
-            write(*,*) 'd1 =',d1,', d2 = ' , d2
-            write(*,*) 'd3 =',d3,', d4 = ' , d4
-            write(*,*) 'd5 =',d5,', d6 = ' , d6
-            write(*,*) 'd7 =',d7,', d8 = ' , d8
-            write(*,*) 'd9 =',d9,', d10= ' , d10
-            write(*,*) 'd11=',d11,', d12= ' , d12
-            write(*,*) 'd13=',d13,', d14= ' , d14
-            write(*,*) 'd15=',d15,', d16= ' , d16
+c            write(*,*) 'd1 =',d1,', d2 = ' , d2
+c            write(*,*) 'd3 =',d3,', d4 = ' , d4
+c            write(*,*) 'd5 =',d5,', d6 = ' , d6
+c            write(*,*) 'd7 =',d7,', d8 = ' , d8
+c            write(*,*) 'd9 =',d9,', d10= ' , d10
+c            write(*,*) 'd11=',d11,', d12= ' , d12
+c            write(*,*) 'd13=',d13,', d14= ' , d14
+c            write(*,*) 'd15=',d15,', d16= ' , d16
 
 c            NEVHEP = evtnum 
 c            NHEP = numptl
@@ -135,9 +135,9 @@ c	CALL LUNHEP(2)
 c        WRITE(*,*) 'test=',K(1,2) 
 
 
-        CALL HEPLST(1)
+c        CALL HEPLST(1)
 
-        CALL PYLIST(1)
+c        CALL PYLIST(1)
 
        call stdxwrt(1,istr,lok)
 c	WRITE(*,*) i

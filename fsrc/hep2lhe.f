@@ -175,7 +175,7 @@ c      WRITE(*,*),'Reading pythia input card'
 c      CALL RPYCARD(pythia_card)
 
 c     IWKIM TEMPORARY
-      NITER = 100
+c      NITER = 100
       NPASEV = 0
 
 c      call stdflpyxsec(NITER)
