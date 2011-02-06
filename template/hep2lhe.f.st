@@ -112,19 +112,25 @@ c      LOGICAL banner_open
 
 C     IWKIM variables
       INTEGER LOK2,ISTR2
-      CHARACTER*80 OUTPUTHEP
+      CHARACTER*250 INHEP,OUTHEPEVT
       INTEGER NCELEP, NCEJET, NPASEV
       DOUBLE PRECISION ETATEMP,ETTEMP
       DOUBLE PRECISION PT_MOM, ETA_MOM
 
 
+      if(iargc().ne.2) then 
+         write(*,*) 'hepevt2stdhep inputfile outputfile'
+         stop
+      endif
+      CALL getarg(1,INHEP)
+      CALL getarg(2,OUTHEPEVT)
+
+      OPEN (22, FILE=OUTHEPEVT, ERR=90)
+
+
 C...Set pythia input card and STDHEP output file
 c      pythia_card='../Cards/pythia_card.dat'
 c      banner_file='banner.txt'
-      input_file='pythia_events.hep'
-      output_file='pythia_events.lhe'
-      init_file='pythia_events.init'
-      OUTPUTHEP='aftercut.hepevt'
 
       ISTREAM=1
       ISTR2=2
@@ -135,32 +141,11 @@ c      banner_file='banner.txt'
          write(*,*)'Using GETJET for jet finding (ijetalg=1)'
       ENDIF
 
-C...Open LHC Olympics output file
-c      banner_open=.false.
-c      OPEN (10, FILE=banner_file, ERR=10 )
-c      banner_open=.true.
-c      WRITE(*,*)'Opened file ',banner_file
-c      GOTO 15
-c 10   WRITE(*,*)'Warning: No file ',banner_file(1:len_trim(banner_file))
-c     .   ,'. No banner will be written.'
- 15   OPEN (20, FILE=output_file, ERR=90 )
-      OPEN (21, FILE=init_file, ERR=90 )
-      OPEN (22, FILE=outputhep, ERR=90)
 
       
-cC...Write banner to .lhe file
-c      WRITE(20,'(a)') '<LesHouchesEvents version="1.0">'
-c      if(banner_open)then
-c        READ(10,'(a)',ERR=5,END=5) buff
-c        DO WHILE(.true.)
-c          READ(10,'(a)',ERR=5,END=5) buff
-c          if(index(buff,'<init>').ne.0) GOTO 5
-c          WRITE(20,'(a)') buff(1:len_trim(buff))
-c        ENDDO
-c      endif
 
 C...Open STDHEP input file
- 5    call stdxropen('pythia_events.hep',NITER,istream,lok)
+ 5    call stdxropen(INHEP,NITER,istream,lok)
       if (lok.ne.0) then
         write(*,'('' STDX: open failure on pythia_events.hep: '',i5)')
      .     lok
@@ -180,9 +165,6 @@ c      NITER = 100
 
 c      call stdflpyxsec(NITER)
 c      call stdxwrt(100,ISTR2,LOK2)
-
-      
-
 
 
       IF(NITER.LE.0)THEN
@@ -206,14 +188,6 @@ c start run record
         endif
         if (itype.eq.200) then
 c end run record        
-C...Write init info to the .lhe init file
-          WRITE(21,'(a)') '<init>'
-          WRITE(21,'(2i6,2E12.5,2i2,2i6,2i2)')
-     .       K(1,2),K(2,2),P(1,4),P(2,4),0,0,
-     .       0,0,3,1
-          WRITE(21,'(3E12.5,i4)')
-     .       stdxsec,0d0,1d0,100
-          WRITE(21,'(a)') '</init>'
           call stdxend(istream)
           GOTO 135
         endif
@@ -575,15 +549,6 @@ c        WRITE (*,*) K(2,1)
 
         CALL FLUSH()
 
- 127    WRITE(20,'(a)') '<event>'
-        WRITE(20,'(I3,I4,4E16.8)')
-     .     NUP,100,1d0,0d0,0d0,0d0
-        DO I=1,NUP
-          WRITE(20,'(I8,I3,2I3,2I2,5E16.8,2F3.0)')
-     .       IDUP(I),ISTUP(I),MOTHUP(1,I),MOTHUP(2,I),0,0,
-     .       (PUP(J,I),J=1,5),0d0,0d0
-        ENDDO
-        WRITE(20,'(a)') '</event>'
 
 C...Print first 0 events   IWKIM
 
@@ -609,22 +574,15 @@ c          call heplst(1)
 
  130  CONTINUE
 
-C...Close lhe file
- 135  WRITE(20,'(a)') '</LesHouchesEvents>'
       
 c     IWKIM
-      WRITE(*,*),'Done. Try ',IEV,' events.'
+ 135  WRITE(*,*),'Done. Try ',IEV,' events.'
 
       WRITE(*,*),'Write ',NPASEV,' lhe events.'
 
 c      call stdflpyxsec(NPASEV)
 c      call stdxwrt(200,ISTR2,LOK2)
 c      call stdxend(ISTR2)
-
-
-
-
-
 
       RETURN
 

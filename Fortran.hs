@@ -44,8 +44,6 @@ compileFortran ssetup uc = do
   let workingdir  = scriptbase ssetup ++ "working/"
       templatedir = scriptbase ssetup ++ "template/"
 
-  -- erase previous run 
-
   let existThenRemoveForAny x = existThenRemove (workingdir ++ x)
       cpFrmTmpl2Working x = copyFile (templatedir ++ x) (workingdir ++ x)
 	
@@ -59,19 +57,21 @@ compileFortran ssetup uc = do
                               , "ktclusdble.f"
                               , "ME2pythia.f" ]
 
+  -- erase previous run 
   mapM_ existThenRemoveForAny  (("hep2lhe.f") : filelistNoTemplate)
 
+  -- setup new hep2lhe.f with a given user cut 
   hep2lhe    <- hep2lheSetup templatedir uc
   writeFile (workingdir ++ "hep2lhe.f") hep2lhe
-  
+
+  -- copy files and compile
   mapM_ cpFrmTmpl2Working filelistNoTemplate 
-  
   setCurrentDirectory workingdir
   readProcess ("./compile.sh") [] "" 
 
   return ()
 
---   renameDirectory (templatedir ++ "getjet.f") (workbase ssetup ++ workname psetup) 
+
 
 
 

@@ -33,6 +33,8 @@ data ProcessSetup = PS {
 
 data ClusterRunType = NoParallel | Parallel Int | Cluster String
 
+data UserCutType = NoUserCutDefined | UserCutDefined
+
 data RunSetup = RS { 
     param   :: Param
   , numevent :: Int
@@ -42,6 +44,7 @@ data RunSetup = RS {
   , match   :: MatchType
   , cut     :: CutType
   , pythia  :: PYTHIAType
+  , usercut :: UserCutType
   , pgs     :: PGSType 
   , cluster :: ClusterRunType 
   , setnum  :: Int 
@@ -99,11 +102,11 @@ existThenRemove fp = do
     then removeFile fp
     else return () 
 
-generateEvents :: ScriptSetup -> ProcessSetup -> RunSetup -> IO () 
-generateEvents ssetup psetup rsetup = do 
+cardPrepare :: ScriptSetup -> ProcessSetup -> RunSetup -> IO () 
+cardPrepare ssetup psetup rsetup = do 
   let taskname = makeRunName psetup rsetup 
   
-  putStrLn $ "generating event for " ++ taskname
+  putStrLn $ "prepare for cards for " ++ taskname
   
   
   let carddir = workbase ssetup ++ workname psetup ++ "/Cards/"
@@ -148,7 +151,18 @@ generateEvents ssetup psetup rsetup = do
     
   case pgscard  of 
     Nothing -> return () 
-    Just str -> writeFile (carddir ++ "pgs_card.dat") str
+    Just str -> case usercut rsetup of 
+      NoUserCutDefined -> writeFile (carddir ++ "pgs_card.dat") str
+      UserCutDefined   -> writeFile (carddir ++ "pgs_card.dat.user") str
+
+
+generateEvents :: ScriptSetup -> ProcessSetup -> RunSetup -> IO () 
+generateEvents ssetup psetup rsetup = do 
+
+  let taskname = makeRunName psetup rsetup 
+  
+  putStrLn $ "generating event for " ++ taskname
+  
   
   
   setCurrentDirectory (workbase ssetup ++ workname psetup)

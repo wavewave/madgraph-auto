@@ -6,6 +6,7 @@ import Model
 import Machine
 import Work
 import Fortran 
+import UserCut 
 
 -- import SimpleQQ
 
@@ -64,7 +65,7 @@ psetup_six_ttbar01j = PS {
 
 rsetup p matchtype num = RS { 
     param   = p
-  , numevent = 100000
+  , numevent = 100
   , machine = TeVatron 
   , rgrun   = Fixed
   , rgscale = 200.0 
@@ -75,7 +76,8 @@ rsetup p matchtype num = RS {
   , pythia  = case matchtype of 
     NoMatch -> NoPYTHIA
     MLM     -> RunPYTHIA
-  , pgs     = NoPGS
+  , usercut = UserCutDefined
+  , pgs     = RunPGS
   , cluster = Cluster "test"
   , setnum  = num
 }
@@ -108,7 +110,7 @@ psetuplist = [ psetup_wp_ttbar01j ]
 --             , psetup_trip_ttbar01j
 --             , psetup_six_ttbar01j ] 
 
-sets = [1,2] -- [ 3..10 ] 
+sets = [1] --  [1,2] -- [ 3..10 ] 
 
 
 wptasklist =  [ (psetup_wp_ttbar01j, rsetup p MLM num) | p <- wpparamset 
@@ -127,11 +129,22 @@ totaltasklist = wptasklist {- ++ zptasklist ++ triptasklist ++ sixtasklist -}
 
 main = do putStrLn "benchmark models 20110205 sets" 
           putStrLn "models : Wp, ZpH, Trip, Six "
-          
+
+	  let combinedfunc (psetup,rsetup) = do 
+                cardPrepare ssetup psetup rsetup
+--                generateEvents ssetup psetup rsetup
+                runHEP2LHE ssetup psetup rsetup
+                runHEPEVT2STDHEP ssetup psetup rsetup
+	        runPGS ssetup psetup rsetup 
+                runClean ssetup psetup rsetup 
+                return () 
+
+
           compileFortran ssetup ucut
-{-
-          mapM_ (createWorkDir ssetup) psetuplist
-          sleep 2
-          mapM_ (\(psetup,rsetup) -> generateEvents ssetup psetup rsetup) $
-            totaltasklist -}
+
+--          mapM_ (createWorkDir ssetup) psetuplist
+--          sleep 2
+          mapM_ combinedfunc totaltasklist 
      
+--          mapM_ (\(psetup,rsetup) -> runHEP2LHE ssetup psetup rsetup) $
+--            totaltasklist 
