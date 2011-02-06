@@ -76,9 +76,6 @@ runPGS ssetup psetup rsetup = do
     then do 
       putStrLn "Start pgs"
       putEnv  $ "PDG_MASS_TBL=" ++ pgsdir ++ "mass_width_2004.mc "
-      let cmd = (pgsdir++"pgs --stdhep " ++ stdhepfilename ++ " --nev 0 --detector ../Cards/pgs_card.dat " ++ uncleanedfilename)
-      putStrLn cmd
---       runCommand cmd
       readProcess (pgsdir++"pgs") ["--stdhep",stdhepfilename,"--nev","0","--detector","../Cards/pgs_card.dat",uncleanedfilename] "" 
     else error "ERROR pythia result does not exist"  
   return () 
@@ -114,9 +111,6 @@ runClean ssetup psetup rsetup = do
   if b 
     then do 
       putStrLn "Start clean_output"
---      let cmd = (pgsdir++"clean_output -muon " ++ uncleanedfilename ++ " " ++ cleanedfilename)
---      putStrLn cmd
---      runCommand cmd
       readProcess (pgsdir++"clean_output") [ "-muon", uncleanedfilename, cleanedfilename ] "" 
       renameFile (eventdir++cleanedfilename) (eventdir++finallhco)
 
@@ -126,5 +120,19 @@ runClean ssetup psetup rsetup = do
 
     else error "ERROR pythia result does not exist"  
   return () 
+
+updateBanner :: ScriptSetup -> ProcessSetup -> RunSetup -> UserCut -> IO () 
+updateBanner ssetup psetup rsetup uc = do
+  let eventdir = workbase ssetup ++ workname psetup ++ "/Events/" 
+      taskname = makeRunName psetup rsetup 
+      carddir = workbase ssetup ++ workname psetup ++ "/Cards/"
+      bannerfilename = taskname ++ "_banner.txt"
+      newbannerfilename = taskname ++ "_newbanner.txt"
+      usercutcontent = prettyprintUserCut uc
+  setCurrentDirectory eventdir
+  bannerstr  <- readFile (eventdir ++ bannerfilename)
+  pgscardstr <- readFile (carddir ++ "pgs_card.dat")  
+  let newbannerstr = bannerstr ++ usercutcontent ++ pgscardstr
+  writeFile (eventdir ++ newbannerfilename) newbannerstr 
 
   

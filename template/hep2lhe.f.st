@@ -151,7 +151,7 @@ C...Open STDHEP input file
      .     lok
         stop
       endif
-      WRITE(*,*) 'ISTR=',ISTREAM
+c      WRITE(*,*) 'ISTR=',ISTREAM
 
 
 C...Read pythia input card
@@ -167,11 +167,11 @@ c      call stdflpyxsec(NITER)
 c      call stdxwrt(100,ISTR2,LOK2)
 
 
-      IF(NITER.LE.0)THEN
-        WRITE(*,*),'Generating all events'
-      ELSE
-        WRITE(*,*),'Generating up to ',NITER,' events'
-      ENDIF
+c      IF(NITER.LE.0)THEN
+c        WRITE(*,*),'Generating all events'
+c      ELSE
+c        WRITE(*,*),'Generating up to ',NITER,' events'
+c      ENDIF
 
       IEV=0
       DO 130 WHILE(.TRUE.)
@@ -195,7 +195,7 @@ c end run record
         IF(IEV.GE.NITER) CYCLE
 
         IEV=IEV+1
-        WRITE(*,*) IEV
+c        WRITE(*,*) IEV
 C...Convert event from STDHEP format to Pythia format
         call lunhep(2)
 C...IWKIM TEST
@@ -485,7 +485,7 @@ C
 
 c       Missing Energy Cut
         IF(Etmiss.LT.$metcut$) THEN
-           WRITE(*,*) 'Event ',IEV,' has not enough missing energy'
+c           WRITE(*,*) 'Event ',IEV,' has not enough missing energy'
            GOTO 130
         ENDIF
 
@@ -523,9 +523,9 @@ C     Four Jet pass eta cut and et cut
         ENDDO
 
         IF( (NCELEP /= 1) .OR. (NCEJET.LT.4) ) THEN
-           WRITE(*,*) 'Event ',IEV,
-     .                ' is not Semileptonic, not passed a cut',
-     .                NCELEP,' ',NCEJET
+c           WRITE(*,*) 'Event ',IEV,
+c     .                ' is not Semileptonic, not passed a cut',
+c     .                NCELEP,' ',NCEJET
            GOTO 130
         ENDIF
 
@@ -552,33 +552,33 @@ c        WRITE (*,*) K(2,1)
 
 C...Print first 0 events   IWKIM
 
- 125    IF(IEV.LE.0) THEN
-          WRITE(*,*)
-          WRITE(*,*),'Event number: ',IEV
-          CALL PYLIST(2)
-          IF(NN.GT.0) WRITE(*,*),'Jet clustering values:'
-          WRITE(*,*),(SQRT(Y(J)),J=1,MIN(4,NN))
-          WRITE(*,*),'Jet momenta (ktclus):'
-          DO I=1,NCJET
-            WRITE(*,*),(PCJET(J,I),J=1,4)
-          ENDDO
-          WRITE(*,*),'Jet Pts:',(ETJETC(KSORTC(NCJET+1-I)),I=1,NCJET)
-          WRITE(*,*),'Jet momenta (getjet):'
-          DO I=1,NJJET
-            WRITE(*,*),(PJJET(J,KSORTJ(NJJET+1-I)),J=1,4)
-          ENDDO
-          WRITE(*,*),'Jet Pts:',(ETJETJ(KSORTJ(NJJET+1-I)),I=1,NJJET)
-c          call heplst(1)
-          CALL FLUSH()
-        ENDIF
+c 125    IF(IEV.LE.0) THEN
+c          WRITE(*,*)
+c          WRITE(*,*),'Event number: ',IEV
+c          CALL PYLIST(2)
+c          IF(NN.GT.0) WRITE(*,*),'Jet clustering values:'
+c          WRITE(*,*),(SQRT(Y(J)),J=1,MIN(4,NN))
+c          WRITE(*,*),'Jet momenta (ktclus):'
+c          DO I=1,NCJET
+c            WRITE(*,*),(PCJET(J,I),J=1,4)
+c          ENDDO
+c          WRITE(*,*),'Jet Pts:',(ETJETC(KSORTC(NCJET+1-I)),I=1,NCJET)
+c          WRITE(*,*),'Jet momenta (getjet):'
+c          DO I=1,NJJET
+c            WRITE(*,*),(PJJET(J,KSORTJ(NJJET+1-I)),J=1,4)
+c          ENDDO
+c          WRITE(*,*),'Jet Pts:',(ETJETJ(KSORTJ(NJJET+1-I)),I=1,NJJET)
+cc          call heplst(1)
+c          CALL FLUSH()
+c        ENDIF
 
  130  CONTINUE
 
       
 c     IWKIM
- 135  WRITE(*,*),'Done. Try ',IEV,' events.'
+c 135  WRITE(*,*),'Done. Try ',IEV,' events.'
 
-      WRITE(*,*),'Write ',NPASEV,' lhe events.'
+c      WRITE(*,*),'Write ',NPASEV,' lhe events.'
 
 c      call stdflpyxsec(NPASEV)
 c      call stdxwrt(200,ISTR2,LOK2)

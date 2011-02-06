@@ -24,6 +24,24 @@ data UserCut = UserCut {
   , uc_etcutjet  :: Double  
 }
 
+prettyprintUserCut :: UserCut -> String 
+prettyprintUserCut uc = 
+  let header =  "\n\n\n" 
+             ++ "-------------------------------\n" 
+             ++ "---       USER CUT         ----\n"
+             ++ "-------------------------------\n"
+             ++ "\n\n\n"
+      footer =  "\n\n\n" 
+             ++ "-------------------------------\n"
+             ++ "---      END USER CUT      ----\n"
+             ++ "-------------------------------\n"
+             ++ "\n\n\n" 
+      content=  " Missing ET cut = " ++ show (uc_metcut uc) ++ " GeV \n"
+             ++ " Lepton eta cut = " ++ show (uc_etacutlep uc) ++ " \n"
+             ++ " Lepton  ET cut = " ++ show (uc_etcutlep uc) ++ " GeV \n"
+             ++ " Jet    eta cut = " ++ show (uc_etacutjet uc) ++ " \n"
+             ++ " Jet     ET cut = " ++ show (uc_etcutjet uc) ++ " GeV \n"
+  in  header ++ content ++ footer
 
 hep2lheSetup :: FilePath -> UserCut -> IO String 
 hep2lheSetup fp uc = do 

@@ -131,12 +131,13 @@ main = do putStrLn "benchmark models 20110205 sets"
           putStrLn "models : Wp, ZpH, Trip, Six "
 
 	  let combinedfunc (psetup,rsetup) = do 
-                cardPrepare ssetup psetup rsetup
+                cardPrepare      ssetup psetup rsetup
 --                generateEvents ssetup psetup rsetup
-                runHEP2LHE ssetup psetup rsetup
+                runHEP2LHE       ssetup psetup rsetup
                 runHEPEVT2STDHEP ssetup psetup rsetup
-	        runPGS ssetup psetup rsetup 
-                runClean ssetup psetup rsetup 
+	        runPGS           ssetup psetup rsetup 
+                runClean         ssetup psetup rsetup 
+                updateBanner     ssetup psetup rsetup ucut
                 return () 
 
 
@@ -145,6 +146,8 @@ main = do putStrLn "benchmark models 20110205 sets"
 --          mapM_ (createWorkDir ssetup) psetuplist
 --          sleep 2
           mapM_ combinedfunc totaltasklist 
+
+          
      
 --          mapM_ (\(psetup,rsetup) -> runHEP2LHE ssetup psetup rsetup) $
 --            totaltasklist 
