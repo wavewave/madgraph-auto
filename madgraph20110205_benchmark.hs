@@ -65,7 +65,7 @@ psetup_six_ttbar01j = PS {
 
 rsetup p matchtype num = RS { 
     param   = p
-  , numevent = 100
+  , numevent = 100000
   , machine = TeVatron 
   , rgrun   = Fixed
   , rgscale = 200.0 
@@ -132,7 +132,7 @@ main = do putStrLn "benchmark models 20110205 sets"
 
 	  let combinedfunc (psetup,rsetup) = do 
                 cardPrepare      ssetup psetup rsetup
---                generateEvents ssetup psetup rsetup
+                generateEvents   ssetup psetup rsetup
                 runHEP2LHE       ssetup psetup rsetup
                 runHEPEVT2STDHEP ssetup psetup rsetup
 	        runPGS           ssetup psetup rsetup 
@@ -143,8 +143,8 @@ main = do putStrLn "benchmark models 20110205 sets"
 
           compileFortran ssetup ucut
 
---          mapM_ (createWorkDir ssetup) psetuplist
---          sleep 2
+          mapM_ (createWorkDir ssetup) psetuplist
+          sleep 2
           mapM_ combinedfunc totaltasklist 
 
           

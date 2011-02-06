@@ -584,7 +584,7 @@ c      call stdflpyxsec(NPASEV)
 c      call stdxwrt(200,ISTR2,LOK2)
 c      call stdxend(ISTR2)
 
-      RETURN
+ 135  RETURN
 
 
  4000 FORMAT(i3,i14,i7)
