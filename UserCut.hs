@@ -6,6 +6,7 @@ import System.IO
 import System.Process
 import System.Directory
 import System.Posix.Unistd (sleep)
+import System.Posix.Env 
 
 import Control.Monad
 
@@ -74,10 +75,11 @@ runPGS ssetup psetup rsetup = do
   if b 
     then do 
       putStrLn "Start pgs"
-      let cmd = "export PDG_MASS_TBL=" ++ pgsdir ++ "mass_width_2004.mc ; " ++ (pgsdir++"pgs --stdhep " ++ stdhepfilename ++ " --nev 0 --detector ../Cards/pgs_card.dat " ++ uncleanedfilename)
+      putEnv  $ "PDG_MASS_TBL=" ++ pgsdir ++ "mass_width_2004.mc "
+      let cmd = (pgsdir++"pgs --stdhep " ++ stdhepfilename ++ " --nev 0 --detector ../Cards/pgs_card.dat " ++ uncleanedfilename)
       putStrLn cmd
-      runCommand cmd
- --     readProcess (pgsdir++"olympics") ["--stdhep",stdhepfilename,"--nev","0","--detector",(carddir ++ pgscardname),uncleanedfilename] "" 
+--       runCommand cmd
+      readProcess (pgsdir++"pgs") ["--stdhep",stdhepfilename,"--nev","0","--detector","../Cards/pgs_card.dat",uncleanedfilename] "" 
     else error "ERROR pythia result does not exist"  
   return () 
 
@@ -106,19 +108,16 @@ runClean ssetup psetup rsetup = do
                                      , cleanedfilename ]
          
 
-
-
-  renameFile (carddir++"pgs_card.dat.user") (carddir++"pgs_card.dat")
-
   setCurrentDirectory eventdir
   
   b <- doesFileExist stdhepfilename 
   if b 
     then do 
       putStrLn "Start clean_output"
-      let cmd = (pgsdir++"clean_output -muon " ++ uncleanedfilename ++ " " ++ cleanedfilename)
-      putStrLn cmd
-      runCommand cmd
+--      let cmd = (pgsdir++"clean_output -muon " ++ uncleanedfilename ++ " " ++ cleanedfilename)
+--      putStrLn cmd
+--      runCommand cmd
+      readProcess (pgsdir++"clean_output") [ "-muon", uncleanedfilename, cleanedfilename ] "" 
       renameFile (eventdir++cleanedfilename) (eventdir++finallhco)
 
       sleep 10
