@@ -19,11 +19,11 @@ ssetup = SS {
   }
 
 ucut = UserCut { 
-    uc_metcut    = 20.0 
-  , uc_etacutlep = 1.0 
-  , uc_etcutlep  = 20.0
+    uc_metcut    = 15.0 
+  , uc_etacutlep = 1.2 
+  , uc_etcutlep  = 18.0
   , uc_etacutjet = 2.5
-  , uc_etcutjet  = 20.0 
+  , uc_etcutjet  = 15.0 
 }
 
 
@@ -83,10 +83,13 @@ rsetup p matchtype num = RS {
 }
 
 
-wpparamset = [ WpParam 200.0 (0.85*sqrt 2) ] 
+-- wpparamset =  [ WpParam 200.0 (0.85*sqrt 2) ] 
+
+zpparamset = [ ZpHParam 300.0 1.41 ]
+
 {-             , WpParam 300.0 (1.20*sqrt 2) 
              , WpParam 400.0 (1.50*sqrt 2)
-             , WpParam 600.0 (2.00*sqrt 2) ] -}
+             , WpParam 600.0 (2.00*sqrt 2) ] 
 
 zpparamset = [ ZpHParam 200.0 (0.70*sqrt 2) 
              , ZpHParam 300.0 (1.00*sqrt 2) 
@@ -102,33 +105,41 @@ tripparamset = [ TripParam 400.0 3.45
              
 sixparamset = [ SixParam  600.0 3.5   
               , SixParam  600.0 3.35 
-              , SixParam  600.0 3.2  ]  
+              , SixParam  600.0 3.2  ]  -}
 
 
-psetuplist = [ psetup_wp_ttbar01j ]
+-- psetuplist = [ psetup_wp_ttbar01j ]
 --             , psetup_zp_ttbar01j
 --             , psetup_trip_ttbar01j
 --             , psetup_six_ttbar01j ] 
 
-sets = [1] --  [1,2] -- [ 3..10 ] 
+psetuplist = [ psetup_zp_ttbar01j ]
+
+sets = [ 1 .. 50 ] -- ] --  [1,2] -- [ 3..10 ] 
+
+zptasklist =  [ (psetup_zp_ttbar01j, rsetup p MLM num) | p <- zpparamset 
+                                                       , num <- sets     ] 
 
 
+{-
 wptasklist =  [ (psetup_wp_ttbar01j, rsetup p MLM num) | p <- wpparamset 
         					       , num <- sets     ]  
 	
-zptasklist =  [ (psetup_zp_ttbar01j, rsetup p MLM num) | p <- zpparamset 
-                                                       , num <- sets     ] 
                   
 triptasklist =  [ (psetup_trip_ttbar01j, rsetup p MLM num) | p <- tripparamset 
                                                            , num <- sets     ]
 
 sixtasklist =  [ (psetup_six_ttbar01j, rsetup p MLM num) | p <- sixparamset 
-                                                         , num <- sets     ] 
+                                                         , num <- sets     ] -}
 
-totaltasklist = wptasklist {- ++ zptasklist ++ triptasklist ++ sixtasklist -}
+
+
+totaltasklist = zptasklist 
+
+-- wptasklist ++ zptasklist ++ triptasklist ++ sixtasklist 
 
 main = do putStrLn "benchmark models 20110205 sets" 
-          putStrLn "models : Wp, ZpH, Trip, Six "
+          putStrLn "models : ZpH "
 
 	  let combinedfunc (psetup,rsetup) = do 
                 cardPrepare      ssetup psetup rsetup
@@ -148,6 +159,3 @@ main = do putStrLn "benchmark models 20110205 sets"
           mapM_ combinedfunc totaltasklist 
 
           
-     
---          mapM_ (\(psetup,rsetup) -> runHEP2LHE ssetup psetup rsetup) $
---            totaltasklist 
