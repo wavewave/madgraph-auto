@@ -14,7 +14,7 @@
 
 (* ::Text:: *)
 (*Log: *)
-(*Changed KSubsets[] to Subsets[] in main reconstruction function. Argument \[OpenCurlyDoubleQuote]2\[CloseCurlyDoubleQuote] in (K)Subsets changed to \[OpenCurlyDoubleQuote]{2}\[CloseCurlyDoubleQuote]. This was necessary for compatibility with Mathematica Version 8.0.*)
+(*Changed KSubsets[] to Subsets[] in main reconstruction function. Argument "2" in (K)Subsets changed to "{2}". This was necessary for compatibility with Mathematica Version 8.0.*)
 
 
 (* ::Section:: *)
@@ -22,10 +22,9 @@
 
 
 (* ::Text:: *)
-(*This should change to the name of the directory where you\[CloseCurlyQuote]ll place the Chameleon package:*)
+(*This should change to the name of the directory where you'll place the Chameleon package:*)
 
 
-(* ::Input:: *)
 SetDirectory["$chameleondir$"];
 <<"Combinatorica`" (* this package is obsolete in version 8, but not in version 7. *)
 <<"$chameleon$" 
@@ -35,7 +34,6 @@ SetDirectory["$chameleondir$"];
 (*These parameters should be the same parameters found in param_card.dat:*)
 
 
-(* ::Input:: *)
 topMass = 174.3;
 wMass = 79.825;
 topWidth = 1.51;
@@ -46,7 +44,6 @@ wWidth = 2.05;
 (*Define file names:*)
 
 
-(* ::Input:: *)
 lhcoFile = "$lhcofile$" ;(* should be the file name/location. e.g. "~/directory/name.lhco" *)
 cutEventsFileName = "$sampleCutEvtsdat$"; (* file extension must be .dat *)
 recoEventsFileName = "$sampleRecoEvtsdat$";(* file extension must be .dat *)
@@ -76,6 +73,9 @@ MassiveFourVectorFrom[{_,_,\[Eta]_,\[Phi]_,pt_,jmas_,___}] := {Sqrt[jmas^2+pt^2 
 FourLengthSq[{pe_,pz_,px_,py_}]:=pe^2-pz^2-px^2-py^2
 
 
+(* lhcoPrtclFormat = {"#","typ","eta","phi","pt","jmas","ntrk","btag","had/em","dum1","dum2"}; *)
+
+
 jmasOf[{_,_,eta_,phi_,pt_,jmas_,_,___}]:=jmas
 
 
@@ -90,7 +90,7 @@ jmasOf[{_,_,eta_,phi_,pt_,jmas_,_,___}]:=jmas
 (* ::Text:: *)
 (*Take the following smearing parameters *)
 (**)
-(*	Electrons and Muons assuming |\[Eta]| < 1.1 and Subscript[p, T] > ?? (pg 5, PRD 71, 052003) for \[OpenCurlyDoubleQuote]high momentum\[CloseCurlyDoubleQuote] track:*)
+(*	Electrons and Muons assuming |\[Eta]| < 1.1 and Subscript[p, T] > ?? (pg 5, PRD 71, 052003) for "high momentum" track:*)
 (*	\[Delta]pT/pT = 0.001 pT*)
 (*	Assume angular resolution is essentially zero.*)
 (*	\[Delta]\[Phi] = 0 *)
@@ -114,7 +114,7 @@ jmasOf[{_,_,eta_,phi_,pt_,jmas_,_,___}]:=jmas
 
 
 (* ::Text:: *)
-(*We will assume that events are cut so that no jets have |\[Eta]| > 3 and no leptons have |\[Eta]| > 2.5. Returns the list {Subscript[\[Sigma], \[Eta]], Subscript[\[Sigma], \[Phi]],Subscript[\[Sigma], Subscript[p, T]]}*)
+(*We'll assume that events are cut so that no jets have |\[Eta]| > 3 and no leptons have |\[Eta]| > 2.5. Returns the list {Subscript[\[Sigma], \[Eta]], Subscript[\[Sigma], \[Phi]],Subscript[\[Sigma], Subscript[p, T]]}*)
 
 
 (* ::Text:: *)
@@ -122,20 +122,7 @@ jmasOf[{_,_,eta_,phi_,pt_,jmas_,_,___}]:=jmas
 (*	Sqrt[1 - Tanh^2 Subscript[\[Eta], 0]] \[Delta]\[Eta] = \[Delta]\[Theta]  or  \[Delta]\[Eta] = 1/(Sin Subscript[\[Theta], 0]) \[Delta]\[Theta]*)
 
 
-(* ::Input:: *)
-sigma[typ_,eta_,pt_]:=If[typ==4,{0.02/Sqrt[1 - Tanh[eta]^2],0.02,0.1 pt + 1},If[typ==1||typ==2,{0,0,0.001 pt^2},{0,0,0}]]
-
-
-(* ::Subsection:: *)
-(*smearing functions*)
-
-
-(* ::Text:: *)
-(*This function smears a "particle"*)
-
-
-(* ::Text:: *)
-(*This smears an event:*)
+sigma[typ_,eta_,pt_]:=If[typ==4,(*If[Abs[eta]<3,*){0.02/Sqrt[1 - Tanh[eta]^2],0.02,0.1 pt + 1}(*,{0.02,0.01,\[Delta]ET[{4.8,0.89,0.043,0}][pt]}]*),If[typ==1||typ==2,{0,0,0.001 pt^2},{0,0,0}]]
 
 
 (* ::Subsection:: *)
@@ -231,7 +218,7 @@ extraCovar[listOfPrtcls_]:=Plus@@((covar[sigma[typOf[#],etaOf[#],ptOf[#]]][Take[
 vec[name_]:=Table[ToExpression[ToString[name]<>ToString[i]],{i,0,3}];
 
 
-xvec = Join[vec[pJwA],vec[pJwB],vec[pJtC],vec[pJlep],vec[pL],Take[vec[p\[Nu]],{2,3}],{mW,mT}]
+xvec = Join[vec[pJwA],vec[pJwB],vec[pJtC],vec[pJlep],vec[pL],Take[vec[p\[Nu]],{2,3}],{mW,mT}];
 
 
 dyMatrix[mW_,mT_][{pJwA0_,pJwA1_,pJwA2_,pJwA3_},{pJwB0_,pJwB1_,pJwB2_,pJwB3_},{pJtC0_,pJtC1_,pJtC2_,pJtC3_},{pJlep0_,pJlep1_,pJlep2_,pJlep3_},{pL0_,pL1_,pL2_,pL3_},{p\[Nu]1_,p\[Nu]2_}][p\[Nu]0_,p\[Nu]3_] = Transpose[Outer[D[#1,#2]&,{FourLengthSq[vec[pJwA]+vec[pJwB]]-mW^2,FourLengthSq[vec[pJwA]+vec[pJwB]+vec[pJtC]]-mT^2,FourLengthSq[vec[p\[Nu]]],FourLengthSq[vec[p\[Nu]]+vec[pL]]-mW^2,FourLengthSq[vec[p\[Nu]]+vec[pL]+vec[pJlep]]-mT^2},xvec]];
@@ -441,7 +428,6 @@ eJets=extraPrtcls[min[[2]]][jList];
 (*Upload file:*)
 
 
-(* ::Input:: *)
 lhco = DropComments[LoadEvents[lhcoFile]];
 
 
@@ -449,11 +435,9 @@ lhco = DropComments[LoadEvents[lhcoFile]];
 (*Make semileptonic cuts. (Cut parameters are as described in CDF AFB paper, section II). *)
 
 
-(* ::Input:: *)
 lhcoCutEvts = makeTightHardCuts[1.0,20,20,4,20,2,1][makeSemiLepCuts[lhco]];
 
 
-(* ::Input:: *)
 Export[cutEventsFileName,lhcoCutEvts]
 
 
@@ -461,21 +445,16 @@ Export[cutEventsFileName,lhcoCutEvts]
 (*Keep all events with \[Chi]^2 cut of 32, which corresponds roughly to 5 sigma. Cuts on \[Chi]^2 can easily be done later. Keep 4 hardest jets.*)
 
 
-(* ::Input:: *)
 recoTime = Timing[recoEvts=recoTops[wWidth,topWidth][wMass,topMass][4,1,32]/@lhcoCutEvts;]
 
 
-(* ::Input:: *)
 Export[recoEventsFileName,recoEvts]
 
 
-(* ::Input:: *)
 recoEvtsPassed=DeleteCases[recoEvts,{False,___}];
 
 
-(* ::Input:: *)
 Export[passedEventsFileName,recoEvtsPassed]
 
 
-(* ::Input:: *)
 Export[recoInfoFileName,{"number input events = "<>ToString[Length[lhco]],"events passing semileptonic cut = "<>ToString[Length[lhcoCutEvts]],"time for reconstruction = "<>ToString[Round[First[recoTime]]],"number passed events = "<>ToString[Length[recoEvtsPassed]]}]
