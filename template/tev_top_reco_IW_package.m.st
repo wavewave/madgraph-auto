@@ -67,7 +67,7 @@ oMuEl = {_,1,_,_,_,_,_,__}|{_,2,_,_,_,_,_,__} ;
 typOf[{_,typ_,eta_,phi_,pt_,___}]:=typ
 
 
-MassiveFourVectorFrom[{_,_,\[Eta]_,\[Phi]_,pt_,jmas_,___}] := {Sqrt[jmas^2+pt^2 Cosh[\[Eta]]^2],pt Cos[\[Phi]],pt Sin[\[Phi]],pt Sinh[\[Eta]]}
+MassiveFourVectorFrom[{_,_,\\[Eta]_,\\[Phi]_,pt_,jmas_,___}] := {Sqrt[jmas^2+pt^2 Cosh[\\[Eta]]^2],pt Cos[\\[Phi]],pt Sin[\\[Phi]],pt Sinh[\\[Eta]]}
 
 
 FourLengthSq[{pe_,pz_,px_,py_}]:=pe^2-pz^2-px^2-py^2
@@ -90,19 +90,19 @@ jmasOf[{_,_,eta_,phi_,pt_,jmas_,_,___}]:=jmas
 (* ::Text:: *)
 (*Take the following smearing parameters *)
 (**)
-(*	Electrons and Muons assuming |\[Eta]| < 1.1 and Subscript[p, T] > ?? (pg 5, PRD 71, 052003) for "high momentum" track:*)
-(*	\[Delta]pT/pT = 0.001 pT*)
+(*	Electrons and Muons assuming |\\[Eta]| < 1.1 and Subscript[p, T] > ?? (pg 5, PRD 71, 052003) for "high momentum" track:*)
+(*	\\[Delta]pT/pT = 0.001 pT*)
 (*	Assume angular resolution is essentially zero.*)
-(*	\[Delta]\[Phi] = 0 *)
-(*	\[Delta]\[Theta] = 0*)
+(*	\\[Delta]\\[Phi] = 0 *)
+(*	\\[Delta]\\[Theta] = 0*)
 (*	*)
 (**)
-(*	Jets assuming  |\[Eta]| < 1.1 and 35 < Subscript[E, T] < 450 (end of pg. 5, PRD 71, 052003):*)
-(*	Subscript[\[Delta]E, T] = 0.1 Subscript[E, T] + 1 GeV*)
+(*	Jets assuming  |\\[Eta]| < 1.1 and 35 < Subscript[E, T] < 450 (end of pg. 5, PRD 71, 052003):*)
+(*	Subscript[\\[Delta]E, T] = 0.1 Subscript[E, T] + 1 GeV*)
 (*	*)
 (*	From D0 estimate in (http://pos.sissa.it/archive/conferences/106/113/DIS%202010_113.pdf, top of pg 3)*)
-(*	\[Delta]\[Phi] = 0.02*)
-(*	\[Delta]\[Theta] = 0.02*)
+(*	\\[Delta]\\[Phi] = 0.02*)
+(*	\\[Delta]\\[Theta] = 0.02*)
 
 
 (* ::Text:: *)
@@ -110,19 +110,19 @@ jmasOf[{_,_,eta_,phi_,pt_,jmas_,_,___}]:=jmas
 
 
 (* ::Text:: *)
-(*The following function takes particle type, \[Eta], Subscript[p, T] of an object and returns a list of the form { \[Delta]\[Eta], \[Delta]\[Phi], Subscript[\[Delta]p, T]}*)
+(*The following function takes particle type, \\[Eta], Subscript[p, T] of an object and returns a list of the form { \\[Delta]\\[Eta], \\[Delta]\\[Phi], Subscript[\\[Delta]p, T]}*)
 
 
 (* ::Text:: *)
-(*We'll assume that events are cut so that no jets have |\[Eta]| > 3 and no leptons have |\[Eta]| > 2.5. Returns the list {Subscript[\[Sigma], \[Eta]], Subscript[\[Sigma], \[Phi]],Subscript[\[Sigma], Subscript[p, T]]}*)
+(*We'll assume that events are cut so that no jets have |\\[Eta]| > 3 and no leptons have |\\[Eta]| > 2.5. Returns the list {Subscript[\\[Sigma], \\[Eta]], Subscript[\\[Sigma], \\[Phi]],Subscript[\\[Sigma], Subscript[p, T]]}*)
 
 
 (* ::Text:: *)
-(*Note that lepton polar angle smearing is in terms of \[Theta], not \[Eta]. And since Tanh \[Eta] = Cos \[Theta],*)
-(*	Sqrt[1 - Tanh^2 Subscript[\[Eta], 0]] \[Delta]\[Eta] = \[Delta]\[Theta]  or  \[Delta]\[Eta] = 1/(Sin Subscript[\[Theta], 0]) \[Delta]\[Theta]*)
+(*Note that lepton polar angle smearing is in terms of \\[Theta], not \\[Eta]. And since Tanh \\[Eta] = Cos \\[Theta],*)
+(*	Sqrt[1 - Tanh^2 Subscript[\\[Eta], 0]] \\[Delta]\\[Eta] = \\[Delta]\\[Theta]  or  \\[Delta]\\[Eta] = 1/(Sin Subscript[\\[Theta], 0]) \\[Delta]\\[Theta]*)
 
 
-sigma[typ_,eta_,pt_]:=If[typ==4,(*If[Abs[eta]<3,*){0.02/Sqrt[1 - Tanh[eta]^2],0.02,0.1 pt + 1}(*,{0.02,0.01,\[Delta]ET[{4.8,0.89,0.043,0}][pt]}]*),If[typ==1||typ==2,{0,0,0.001 pt^2},{0,0,0}]]
+sigma[typ_,eta_,pt_]:=If[typ==4,(*If[Abs[eta]<3,*){0.02/Sqrt[1 - Tanh[eta]^2],0.02,0.1 pt + 1}(*,{0.02,0.01,\\[Delta]ET[{4.8,0.89,0.043,0}][pt]}]*),If[typ==1||typ==2,{0,0,0.001 pt^2},{0,0,0}]]
 
 
 (* ::Subsection:: *)
@@ -157,13 +157,13 @@ makeSemiLepCuts[data_]:= Select[data,(NumOf[oL][#]<2)&&(NumOf[oMuEl][#]==1)&&(Nu
 
 
 (* ::Text:: *)
-(*Pt and \[Eta] cuts (still includes photon veto)*)
+(*Pt and \\[Eta] cuts (still includes photon veto)*)
 
 
-makeTightHardCutsTruth[lep\[Eta]_,lepPt_,met_,noTightJets_,tightJetPt_,tightJet\[Eta]_,centralB\[Eta]_]:=(NumOf[{_,6,_,_,pt_,___}/;Abs[pt]>=met][#]===1&&NumOf[{_,4,\[Eta]_,_,pt_,___}/;And[Abs[\[Eta]]<tightJet\[Eta],Abs[pt]>tightJetPt]][#]>= noTightJets&&NumOf[{_,typ_,\[Eta]_,_,pt_,___}/;And[typ==1||typ==2,Abs[\[Eta]]<lep\[Eta],Abs[pt]>lepPt]][#]===1&&NumOf[{_,4,\[Eta]_,_,_,_,_,btag_,___}/;And[Abs[\[Eta]]<centralB\[Eta],btag>0]][#]>0&&NumOf[oPhoton][#]<1)&
+makeTightHardCutsTruth[lep\\[Eta]_,lepPt_,met_,noTightJets_,tightJetPt_,tightJet\\[Eta]_,centralB\\[Eta]_]:=(NumOf[{_,6,_,_,pt_,___}/;Abs[pt]>=met][#]===1&&NumOf[{_,4,\\[Eta]_,_,pt_,___}/;And[Abs[\\[Eta]]<tightJet\\[Eta],Abs[pt]>tightJetPt]][#]>= noTightJets&&NumOf[{_,typ_,\\[Eta]_,_,pt_,___}/;And[typ==1||typ==2,Abs[\\[Eta]]<lep\\[Eta],Abs[pt]>lepPt]][#]===1&&NumOf[{_,4,\\[Eta]_,_,_,_,_,btag_,___}/;And[Abs[\\[Eta]]<centralB\\[Eta],btag>0]][#]>0&&NumOf[oPhoton][#]<1)&
 
 
-makeTightHardCuts[lep\[Eta]_,lepPt_,met_,noTightJets_,tightJetPt_,tightJet\[Eta]_,centralB\[Eta]_][data_]:=Select[data,makeTightHardCutsTruth[lep\[Eta],lepPt,met,noTightJets,tightJetPt,tightJet\[Eta],centralB\[Eta]]]
+makeTightHardCuts[lep\\[Eta]_,lepPt_,met_,noTightJets_,tightJetPt_,tightJet\\[Eta]_,centralB\\[Eta]_][data_]:=Select[data,makeTightHardCutsTruth[lep\\[Eta],lepPt,met,noTightJets,tightJetPt,tightJet\\[Eta],centralB\\[Eta]]]
 
 
 (* ::Section:: *)
@@ -171,30 +171,30 @@ makeTightHardCuts[lep\[Eta]_,lepPt_,met_,noTightJets_,tightJetPt_,tightJet\[Eta]
 
 
 (* ::Text:: *)
-(*Covariance matrix \[LeftAngleBracket]Subscript[p, \[Mu]] Subscript[p, \[Nu]]\[RightAngleBracket] for a single particle species.*)
+(*Covariance matrix \\[LeftAngleBracket]Subscript[p, \\[Mu]] Subscript[p, \\[Nu]]\\[RightAngleBracket] for a single particle species.*)
 
 
 (* ::Text:: *)
-(*Note that \[LeftAngleBracket]Subscript[p, \[Mu]] Subscript[p, \[Nu]]\[RightAngleBracket] = Subscript[\[CapitalSigma], i](\!\( *)
-(*\*SubscriptBox[\(\[PartialD]\), *)
-(*SubscriptBox[\(q\), \(i\)]]*)
-(*\*SubscriptBox[\(p\), \(\[Mu]\)]\)) (\[Delta] Subscript[q, i])^2 (\!\( *)
-(*\*SubscriptBox[\(\[PartialD]\), *)
-(*SubscriptBox[\(q\), \(i\)]]*)
-(*\*SubscriptBox[\(p\), \(\[Nu]\)]\))  where   q = { Subscript[E, T],\[Eta],\[Phi], jmas} for the massive case (covarMassive[]) and  q = { Subscript[E, T],\[Eta],\[Phi]} in the massless case (covar[]).*)
+(*Note that \\[LeftAngleBracket]Subscript[p, \\[Mu]] Subscript[p, \\[Nu]]\\[RightAngleBracket] = Subscript[\\[CapitalSigma], i](\\!\\( *)
+(*\\*SubscriptBox[\\(\\[PartialD]\\), *)
+(*SubscriptBox[\\(q\\), \\(i\\)]]*)
+(*\\*SubscriptBox[\\(p\\), \\(\\[Mu]\\)]\\)) (\\[Delta] Subscript[q, i])^2 (\\!\\( *)
+(*\\*SubscriptBox[\\(\\[PartialD]\\), *)
+(*SubscriptBox[\\(q\\), \\(i\\)]]*)
+(*\\*SubscriptBox[\\(p\\), \\(\\[Nu]\\)]\\))  where   q = { Subscript[E, T],\\[Eta],\\[Phi], jmas} for the massive case (covarMassive[]) and  q = { Subscript[E, T],\\[Eta],\\[Phi]} in the massless case (covar[]).*)
 
 
-pvec[{\[Eta]_,\[Phi]_,eT_,m_}]:={Sqrt[m^2+eT^2 Cosh[\[Eta]]^2],eT Cos[\[Phi]],eT Sin[\[Phi]],eT Sinh[\[Eta]]}
+pvec[{\\[Eta]_,\\[Phi]_,eT_,m_}]:={Sqrt[m^2+eT^2 Cosh[\\[Eta]]^2],eT Cos[\\[Phi]],eT Sin[\\[Phi]],eT Sinh[\\[Eta]]}
 
 
-dpvec[{\[Eta]_,\[Phi]_,eT_,m_}]:={{(eT^2 Cosh[\[Eta]] Sinh[\[Eta]])/Sqrt[m^2+eT^2 Cosh[\[Eta]]^2],0,0,eT Cosh[\[Eta]]},{0,-eT Sin[\[Phi]],eT Cos[\[Phi]],0},{(eT Cosh[\[Eta]]^2)/Sqrt[m^2+eT^2 Cosh[\[Eta]]^2],Cos[\[Phi]],Sin[\[Phi]],Sinh[\[Eta]]}};
+dpvec[{\\[Eta]_,\\[Phi]_,eT_,m_}]:={{(eT^2 Cosh[\\[Eta]] Sinh[\\[Eta]])/Sqrt[m^2+eT^2 Cosh[\\[Eta]]^2],0,0,eT Cosh[\\[Eta]]},{0,-eT Sin[\\[Phi]],eT Cos[\\[Phi]],0},{(eT Cosh[\\[Eta]]^2)/Sqrt[m^2+eT^2 Cosh[\\[Eta]]^2],Cos[\\[Phi]],Sin[\\[Phi]],Sinh[\\[Eta]]}};
 
 
-covar[{\[Delta]\[Eta]_,\[Delta]\[Phi]_,\[Delta]eT_}][{\[Eta]_,\[Phi]_,eT_,m_}]=Transpose[dpvec[{\[Eta],\[Phi],eT,m}]].(DiagonalMatrix[{\[Delta]\[Eta]^2,\[Delta]\[Phi]^2,\[Delta]eT^2}].dpvec[{\[Eta],\[Phi],eT,m}])//Simplify;
+covar[{\\[Delta]\\[Eta]_,\\[Delta]\\[Phi]_,\\[Delta]eT_}][{\\[Eta]_,\\[Phi]_,eT_,m_}]=Transpose[dpvec[{\\[Eta],\\[Phi],eT,m}]].(DiagonalMatrix[{\\[Delta]\\[Eta]^2,\\[Delta]\\[Phi]^2,\\[Delta]eT^2}].dpvec[{\\[Eta],\\[Phi],eT,m}])//Simplify;
 
 
 (* ::Text:: *)
-(*Function that sums the covariance matrices \[LeftAngleBracket]Subscript[p, \[Mu]] Subscript[p, \[Nu]]\[RightAngleBracket] of particles in the list, listOfPrtcls.*)
+(*Function that sums the covariance matrices \\[LeftAngleBracket]Subscript[p, \\[Mu]] Subscript[p, \\[Nu]]\\[RightAngleBracket] of particles in the list, listOfPrtcls.*)
 
 
 covarP[prtcl_]:=covar[sigma[typOf[prtcl],etaOf[prtcl],ptOf[prtcl]]][Take[prtcl,{3,6}]]
@@ -208,20 +208,20 @@ extraCovar[listOfPrtcls_]:=Plus@@((covar[sigma[typOf[#],etaOf[#],ptOf[#]]][Take[
 
 
 (* ::Text:: *)
-(*Matrix d/(d Subscript[x, i]) Subscript[y, j] where y = {(Subscript[p, W jet 1]+Subscript[p, W jet 2])^2-Subscript[m, W]^2,(Subscript[p, W jet 1]+Subscript[p, W jet 2]+Subscript[p, t jet])^2-Subscript[m, top]^2,Subscript[p, \[Nu]]^2,(Subscript[p, \[Nu]]+Subscript[p, lep])^2-Subscript[m, W]^2,(Subscript[p, \[Nu]]+Subscript[p, lep]+Subscript[p, jet])^2-Subscript[m, top]^2} and Subscript[x, j] are "measured" quantities---including measured momentum components, in addition to the masses Subscript[m, W], Subscript[m, t], and Subscript[m, \[Nu]].  The masses are sometimes called nuisance parameters. *)
+(*Matrix d/(d Subscript[x, i]) Subscript[y, j] where y = {(Subscript[p, W jet 1]+Subscript[p, W jet 2])^2-Subscript[m, W]^2,(Subscript[p, W jet 1]+Subscript[p, W jet 2]+Subscript[p, t jet])^2-Subscript[m, top]^2,Subscript[p, \\[Nu]]^2,(Subscript[p, \\[Nu]]+Subscript[p, lep])^2-Subscript[m, W]^2,(Subscript[p, \\[Nu]]+Subscript[p, lep]+Subscript[p, jet])^2-Subscript[m, top]^2} and Subscript[x, j] are "measured" quantities---including measured momentum components, in addition to the masses Subscript[m, W], Subscript[m, t], and Subscript[m, \\[Nu]].  The masses are sometimes called nuisance parameters. *)
 
 
 (* ::Text:: *)
-(*Here x  = {pJwA0,pJwA1,pJwA2,pJwA3,pJwB0,pJwB1,pJwB2,pJwB3,pJtC0,pJtC1,pJtC2,pJtC3,pJlep0,pJlep1,pJlep2,pJlep3,pL0,pL1,pL2,pL3,p\[Nu]1,p\[Nu]2,mW,mT}. The matrix also depends on the 0 and z component of the neutrino (missing energy) momentum four-vector. These will eventually be set to the values for which \[Chi]^2 is minimized.*)
+(*Here x  = {pJwA0,pJwA1,pJwA2,pJwA3,pJwB0,pJwB1,pJwB2,pJwB3,pJtC0,pJtC1,pJtC2,pJtC3,pJlep0,pJlep1,pJlep2,pJlep3,pL0,pL1,pL2,pL3,p\\[Nu]1,p\\[Nu]2,mW,mT}. The matrix also depends on the 0 and z component of the neutrino (missing energy) momentum four-vector. These will eventually be set to the values for which \\[Chi]^2 is minimized.*)
 
 
 vec[name_]:=Table[ToExpression[ToString[name]<>ToString[i]],{i,0,3}];
 
 
-xvec = Join[vec[pJwA],vec[pJwB],vec[pJtC],vec[pJlep],vec[pL],Take[vec[p\[Nu]],{2,3}],{mW,mT}];
+xvec = Join[vec[pJwA],vec[pJwB],vec[pJtC],vec[pJlep],vec[pL],Take[vec[p\\[Nu]],{2,3}],{mW,mT}];
 
 
-dyMatrix[mW_,mT_][{pJwA0_,pJwA1_,pJwA2_,pJwA3_},{pJwB0_,pJwB1_,pJwB2_,pJwB3_},{pJtC0_,pJtC1_,pJtC2_,pJtC3_},{pJlep0_,pJlep1_,pJlep2_,pJlep3_},{pL0_,pL1_,pL2_,pL3_},{p\[Nu]1_,p\[Nu]2_}][p\[Nu]0_,p\[Nu]3_] = Transpose[Outer[D[#1,#2]&,{FourLengthSq[vec[pJwA]+vec[pJwB]]-mW^2,FourLengthSq[vec[pJwA]+vec[pJwB]+vec[pJtC]]-mT^2,FourLengthSq[vec[p\[Nu]]],FourLengthSq[vec[p\[Nu]]+vec[pL]]-mW^2,FourLengthSq[vec[p\[Nu]]+vec[pL]+vec[pJlep]]-mT^2},xvec]];
+dyMatrix[mW_,mT_][{pJwA0_,pJwA1_,pJwA2_,pJwA3_},{pJwB0_,pJwB1_,pJwB2_,pJwB3_},{pJtC0_,pJtC1_,pJtC2_,pJtC3_},{pJlep0_,pJlep1_,pJlep2_,pJlep3_},{pL0_,pL1_,pL2_,pL3_},{p\\[Nu]1_,p\\[Nu]2_}][p\\[Nu]0_,p\\[Nu]3_] = Transpose[Outer[D[#1,#2]&,{FourLengthSq[vec[pJwA]+vec[pJwB]]-mW^2,FourLengthSq[vec[pJwA]+vec[pJwB]+vec[pJtC]]-mT^2,FourLengthSq[vec[p\\[Nu]]],FourLengthSq[vec[p\\[Nu]]+vec[pL]]-mW^2,FourLengthSq[vec[p\\[Nu]]+vec[pL]+vec[pJlep]]-mT^2},xvec]];
 
 
 (* ::Subsection:: *)
@@ -229,10 +229,10 @@ dyMatrix[mW_,mT_][{pJwA0_,pJwA1_,pJwA2_,pJwA3_},{pJwB0_,pJwB1_,pJwB2_,pJwB3_},{p
 
 
 (* ::Text:: *)
-(*24 x 24 matrix \[LeftAngleBracket]Subscript[x, i] Subscript[x, j]\[RightAngleBracket] - Massive case, includes top and w mass errors*)
+(*24 x 24 matrix \\[LeftAngleBracket]Subscript[x, i] Subscript[x, j]\\[RightAngleBracket] - Massive case, includes top and w mass errors*)
 
 
-uU[\[Delta]mw_,\[Delta]mt_][visPrtcls_][extraPrtcls_]:=Module[{numvis,mlength,matrix,missVis,diagMiss,diagMwMt},
+uU[\\[Delta]mw_,\\[Delta]mt_][visPrtcls_][extraPrtcls_]:=Module[{numvis,mlength,matrix,missVis,diagMiss,diagMwMt},
 numvis = Length[visPrtcls];
 (* size of matrix is 4 x num of visible particles + 2 (missing eT) + 2 (mW, mT) *)
 mlength = 4*numvis+4;
@@ -248,7 +248,7 @@ missVis = missVis+Transpose[missVis];
 diagMiss = ArrayPad[Take[#,{2,3}]&/@Take[extraCovar[Join[visPrtcls,extraPrtcls]],{2,3}],{mlength-4,2}];
 
 (* W and top mass correlation *)
-diagMwMt = ArrayPad[{{\[Delta]mw^2,0},{0,\[Delta]mt^2}},{mlength-2,0}];
+diagMwMt = ArrayPad[{{\\[Delta]mw^2,0},{0,\\[Delta]mt^2}},{mlength-2,0}];
 
 (* sum all matrices in the appropriate way*)
 matrix - missVis+diagMiss+diagMwMt
@@ -275,7 +275,7 @@ matrix - missVis+diagMiss+diagMwMt
 (*"SA" is for Simulated Annealing*)
 
 
-\[Chi]SqMinSA[mW_,mT_][\[Delta]mW_,\[Delta]mT_][fourJetsAndLepton_][pTmiss_List][remainingVisPrtcls_]:=Module[{pL,pJwA,pJwB,pJtC,pJlep,pTnu,\[Phi]Nu,p\[Nu], p0Nu,pzNu,yvec, vV24,vV5,min},
+\\[Chi]SqMinSA[mW_,mT_][\\[Delta]mW_,\\[Delta]mT_][fourJetsAndLepton_][pTmiss_List][remainingVisPrtcls_]:=Module[{pL,pJwA,pJwB,pJtC,pJlep,pTnu,\\[Phi]Nu,p\\[Nu], p0Nu,pzNu,yvec, vV24,vV5,min},
 (* Interrupt evaluation if the length of fourJetsAndLepton is not exactly 5. *)
 If[Length[fourJetsAndLepton ]!=5,"Wrong number of visible particles input as third argument.",
 
@@ -292,23 +292,23 @@ pJlep = MassiveFourVectorFrom[fourJetsAndLepton[[4]]];
 
 (* and neutrino four-vecor *)
 pTnu =ptOf[pTmiss];
-\[Phi]Nu = phiOf[pTmiss];
-p\[Nu] = {p0Nu,pTnu Cos[\[Phi]Nu],pTnu Sin[\[Phi]Nu],pzNu};
+\\[Phi]Nu = phiOf[pTmiss];
+p\\[Nu] = {p0Nu,pTnu Cos[\\[Phi]Nu],pTnu Sin[\\[Phi]Nu],pzNu};
 
 (* form the hypothesis vector *)
-yvec={FourLengthSq[pJwA+pJwB]-mW^2,FourLengthSq[pJwA+pJwB+pJtC]-mT^2,FourLengthSq[p\[Nu]],FourLengthSq[p\[Nu]+pL]-mW^2,FourLengthSq[p\[Nu]+pL+pJlep]-mT^2};
+yvec={FourLengthSq[pJwA+pJwB]-mW^2,FourLengthSq[pJwA+pJwB+pJtC]-mT^2,FourLengthSq[p\\[Nu]],FourLengthSq[p\\[Nu]+pL]-mW^2,FourLengthSq[p\\[Nu]+pL+pJlep]-mT^2};
 
 (* evaluate 24 x 24 covariance matrix *)
-vV24 = uU[\[Delta]mW,\[Delta]mT][fourJetsAndLepton][remainingVisPrtcls];
+vV24 = uU[\\[Delta]mW,\\[Delta]mT][fourJetsAndLepton][remainingVisPrtcls];
 
 (* evaluate 5 x 5 covariance matrix *)
-vV5 = Collect[Transpose[dyMatrix[mW,mT][pJwA,pJwB,pJtC,pJlep,pL,Take[p\[Nu],{2,3}]][p0Nu,pzNu]].vV24.dyMatrix[mW,mT][pJwA,pJwB,pJtC,pJlep,pL,Take[p\[Nu],{2,3}]][p0Nu,pzNu],{p0Nu,pzNu}];
+vV5 = Collect[Transpose[dyMatrix[mW,mT][pJwA,pJwB,pJtC,pJlep,pL,Take[p\\[Nu],{2,3}]][p0Nu,pzNu]].vV24.dyMatrix[mW,mT][pJwA,pJwB,pJtC,pJlep,pL,Take[p\\[Nu],{2,3}]][p0Nu,pzNu],{p0Nu,pzNu}];
 
-(* minimize \[Chi]^2 *)
+(* minimize \\[Chi]^2 *)
  min =  NMinimize[yvec.(Inverse[vV5].yvec),{p0Nu,pzNu},Method->"SimulatedAnnealing"]; 
 
-(* return {\[Chi]^2, p\[Nu] four vector} *)
-Re[{min[[1]],p\[Nu]/.min[[2]]}]
+(* return {\\[Chi]^2, p\\[Nu] four vector} *)
+Re[{min[[1]],p\\[Nu]/.min[[2]]}]
 
 ]
 ]
@@ -349,7 +349,7 @@ extraPrtcls[notList_List][evt_]:=Select[evt,Not[(Or@@matchList[notList][#])]&]
 (*I assume that there is *at least* one b-jet.*)
 
 
-recoTops[\[Delta]mW_,\[Delta]mT_][mW_,mT_][jetNum_,bJetNum_,chiCut_][evt_]:=
+recoTops[\\[Delta]mW_,\\[Delta]mT_][mW_,mT_][jetNum_,bJetNum_,chiCut_][evt_]:=
 Module[{evtN,lep,pTmiss,jList,bjList,nonbjList,extra,btuples,nonbtuples,tuples,chiList,min,eJets},
 (* event number *)
 evtN=Flatten[Cases[evt,oTrigger]][[2]];
@@ -393,19 +393,19 @@ tuples = Join[(Insert[#,bjList[[1]],-1]&/@nonbtuples),(Insert[#,bjList[[1]],-2]&
 (* append the lepton so that tuples has the form {Wjet,Wjet,Bjet,lepBjet,lep}*)
 tuples=Append[#,lep]&/@tuples;
 
-(* find minimum \[Chi]^2 of all the tuples (using Simulated Annealing), return the list {{\[Chi]^2,\[Nu]vec},listOfPrtcls} *)
-chiList = {\[Chi]SqMinSA[mW,mT][\[Delta]mW,\[Delta]mT][#][pTmiss][extraPrtcls[Join[#,{oTrigger,pTmiss}]][evt]],#}&/@tuples;
+(* find minimum \\[Chi]^2 of all the tuples (using Simulated Annealing), return the list {{\\[Chi]^2,\\[Nu]vec},listOfPrtcls} *)
+chiList = {\\[Chi]SqMinSA[mW,mT][\\[Delta]mW,\\[Delta]mT][#][pTmiss][extraPrtcls[Join[#,{oTrigger,pTmiss}]][evt]],#}&/@tuples;
 
-(* take the element with smallest \[Chi]^2 *)
+(* take the element with smallest \\[Chi]^2 *)
 min=First[Sort[chiList,#1[[1,1]]<#2[[1,1]]&]];
 
-(* implement the \[Chi]^2 cut *)
+(* implement the \\[Chi]^2 cut *)
 If[min[[1,1]]> chiCut,{False,"failed to pass chi sq cut"},
 
 (* hard jets that were not used in reconstruction *)
 eJets=extraPrtcls[min[[2]]][jList];
 
-(* return {{{\[Chi]^2,\[Nu]vec},listOfPrtcls}, {Wjet,Wjet,Bjet,lepBjet,lep}, event #} *)
+(* return {{{\\[Chi]^2,\\[Nu]vec},listOfPrtcls}, {Wjet,Wjet,Bjet,lepBjet,lep}, event #} *)
 {min,eJets,evtN}
 ]
 ]
@@ -442,7 +442,7 @@ Export[cutEventsFileName,lhcoCutEvts]
 
 
 (* ::Text:: *)
-(*Keep all events with \[Chi]^2 cut of 32, which corresponds roughly to 5 sigma. Cuts on \[Chi]^2 can easily be done later. Keep 4 hardest jets.*)
+(*Keep all events with \\[Chi]^2 cut of 32, which corresponds roughly to 5 sigma. Cuts on \\[Chi]^2 can easily be done later. Keep 4 hardest jets.*)
 
 
 recoTime = Timing[recoEvts=recoTops[wWidth,topWidth][wMass,topMass][4,1,32]/@lhcoCutEvts;]

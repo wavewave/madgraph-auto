@@ -61,7 +61,7 @@ sixparamset = [ SixParam  600.0 3.65 ]
 
 psetuplist = [ psetup_zp_ttbar01j ]
 
-sets = [ 1..50 ]
+sets = [ 1..2]
 
 zptasklist =  [ (psetup_zp_ttbar01j, rsetup p MLM num) | p <- zpparamset 
                                                        , num <- sets     ] 

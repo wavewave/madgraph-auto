@@ -1,7 +1,7 @@
 #PBS -q flux
 ##PBS -l nodes=1:ppn=1
 #PBS -N math1
-#PBS -o $ofile$
+##PBS -o $ofile$
 #PBS -S /bin/bash
 #PBS -M iankim@umich.edu
 #PBS -j oe
