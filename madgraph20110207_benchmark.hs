@@ -62,7 +62,7 @@ tripparamset = [ TripParam 600.0 4.4 ]
 
 psetuplist = [ psetup_trip_ttbar01j ]
 
-sets = [ 1 .. 50 ]
+sets = [ 31 .. 50 ]
 
 triptasklist =  [ (psetup_trip_ttbar01j, rsetup p MLM num) | p <- tripparamset 
                                                            , num <- sets     ]
@@ -85,7 +85,7 @@ main = do putStrLn "benchmark models 20110207 sets"
 
           compileFortran ssetup ucut
 
-          mapM_ (createWorkDir ssetup) psetuplist
+--          mapM_ (createWorkDir ssetup) psetuplist
           sleep 2
           mapM_ combinedfunc totaltasklist 
 
