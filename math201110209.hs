@@ -27,6 +27,23 @@ psetup_zp_ttbar01j = PS {
   , workname   = "205ZpH1J"
   }
 
+psetup_wp_ttbar01j = PS {  
+    mversion = MadGraph4
+  , model = Wp 
+  , process = processTTBar0or1jet 
+  , processBrief = "ttbar01j"  
+  , workname   = "206Wp1J"
+  }
+
+psetup_trip_ttbar01j = PS {  
+    mversion = MadGraph5
+  , model = Trip 
+  , process = processTTBar0or1jet 
+  , processBrief = "ttbar01j"  
+  , workname   = "207Trip1J"
+  }
+
+
 psetup_six_ttbar01j = PS {  
     mversion = MadGraph5
   , model = Six
@@ -56,24 +73,31 @@ rsetup p matchtype num = RS {
 
 zpparamset = [ ZpHParam 300.0 1.41 ]
 
+wpparamset =  [ WpParam 200.0 1.60 ] 
+
+tripparamset = [ TripParam 600.0 4.4 ]
+
 sixparamset = [ SixParam  600.0 3.65 ]
 
-
-psetuplist = [ psetup_zp_ttbar01j ]
-
-sets = [ 1..2]
+sets = [1..50]
 
 zptasklist =  [ (psetup_zp_ttbar01j, rsetup p MLM num) | p <- zpparamset 
                                                        , num <- sets     ] 
 
+wptasklist =  [ (psetup_wp_ttbar01j, rsetup p MLM num) | p <- wpparamset 
+        					       , num <- sets     ]  
+
+triptasklist =  [ (psetup_trip_ttbar01j, rsetup p MLM num) | p <- tripparamset 
+                                                           , num <- sets     ]
 
 sixtasklist =  [ (psetup_six_ttbar01j, rsetup p MLM num) | p <- sixparamset 
                             			         , num <- sets     ]
 
-totaltasklist = zptasklist 
 
-main = do putStrLn "mathematica reconstruction 20110205 set" 
-          putStrLn "models : Zp "
+totaltasklist = wptasklist ++ triptasklist ++ sixtasklist  {- ++ zptasklist -}
+
+main = do putStrLn "mathematica reconstruction 20110206,07,08 set" 
+          putStrLn "models : Wp, Trip, Six "
 
 	  let mathematica_analysis (psetup,rsetup) = do 
 		let runname = makeRunName psetup rsetup  		
