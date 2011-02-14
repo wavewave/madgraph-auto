@@ -403,7 +403,7 @@ min=First[Sort[chiList,#1[[1,1]]<#2[[1,1]]&]];
 If[min[[1,1]]> chiCut,{False,"failed to pass chi sq cut"},
 
 (* hard jets that were not used in reconstruction *)
-eJets=extraPrtcls[min[[2]]][jList];
+eJets=extraPrtcls[min[[2]]][evt];
 
 (* return {{{\\[Chi]^2,\\[Nu]vec},listOfPrtcls}, {Wjet,Wjet,Bjet,lepBjet,lep}, event #} *)
 {min,eJets,evtN}
