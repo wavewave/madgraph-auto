@@ -1,0 +1,1 @@
+ghc -Wall -fno-warn-unused-do-bind --make madgraphRun.hs -package mtl -ignore-package monads-tf 
