@@ -29,10 +29,6 @@ data MathematicaSetup = MSetup {
   , ms_pbsfile             :: FilePath
 } deriving (Show)
 
-
-
-
-
 mathematicaSetup :: MathematicaSetup -> FilePath -> IO () 
 mathematicaSetup ms tp = do 
   templates <- directoryGroup tp 
@@ -52,8 +48,6 @@ mathematicaSetup ms tp = do
   writeFile (ms_mfile ms) str  
   return () 
 
-
-
 mathematicaSendBatch :: MathematicaSetup -> FilePath -> FilePath -> IO () 
 mathematicaSendBatch ms tp workdir = do 
   mathematicaSetup ms tp 
@@ -71,11 +65,3 @@ mathematicaSendBatch ms tp workdir = do
 --  sleep 2 
   readProcess "qsub" [ms_pbsfile ms] "" 
   return () 
-
-
-
-
-
-
-
-  

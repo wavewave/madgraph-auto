@@ -10,7 +10,15 @@ data Model = Wp | ZpH | Six | Trip
 
 data ModelVersion = MadGraph4 | MadGraph5
 
-decayWidthExotic  y mphi mt = y^2 / (16.0 * pi ) * (mphi^2 - mt^2)^2 / (mphi^3)
+mtop :: Double
+mtop = 174.3           
+
+
+
+decayWidthExotic :: Double -> Double -> Double -> Double
+decayWidthExotic  y mphi mt = y^(2 :: Int) / (16.0 * pi )
+                              * (mphi^(2 :: Int) - mt^(2 :: Int))^(2 :: Int) 
+                              / (mphi^(3 :: Int))
 
 
 data Param = WpParam { massWp :: Double, gRWp :: Double } 
@@ -39,12 +47,11 @@ paramCard4Model ZpH  = "param_card_zHorizontal.dat"
 paramCard4Model Six  = "param_card_six.dat"
 paramCard4Model Trip = "param_card_trip.dat" 
 
-mtop = 174.3           
 
 gamma :: Double -> Double -> Double            
 gamma mass coup = 
-  let r = mtop^2 / mass^2 
-  in  coup^2 / (16.0 * pi) * mass * ( 1.0 - 1.5 * r + 0.5 * r^3 ) 
+  let r = mtop^(2 :: Int)/ mass^(2 :: Int)  
+  in  coup^(2 :: Int) / (16.0 * pi) *mass*( 1.0 - 1.5 * r + 0.5 * r^(3 :: Int))
 
 
 
@@ -83,3 +90,4 @@ paramCardSetup tpath Trip (TripParam m g) = do
                , ("widthTrip", (printf "%.4e" (decayWidthExotic g m mtop) :: String)) ]
                (paramCard4Model Trip) ) ++ "\n\n\n"
 
+paramCardSetup _ _ _ = error "No matching param card type" 

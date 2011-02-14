@@ -1,6 +1,5 @@
 module Machine where
 
-import Text.Printf
 import Text.StringTemplate
 import Text.StringTemplate.Helpers
 
@@ -22,6 +21,8 @@ runCard4CutMatch :: CutType -> MatchType -> String
 runCard4CutMatch NoCut  NoMatch = "run_card_NoCut_NoMatch.dat"
 runCard4CutMatch DefCut MLM     = "run_card_DefCut_MLM.dat"
 runCard4CutMatch KCut   MLM     = "run_card_KCut_MLM.dat"
+runCard4CutMatch _ _ = error "cut mlm does not match"
+
 
 pythiaCardMatch :: MatchType -> String
 pythiaCardMatch NoMatch = "pythia_card_default.dat"
