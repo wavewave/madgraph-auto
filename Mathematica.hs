@@ -17,6 +17,7 @@ data MathematicaSetup = MSetup {
   , ms_sampleRecoEvtsdat   :: FilePath
   , ms_samplePassedEvtsdat :: FilePath
   , ms_sampleRecoInfodat   :: FilePath
+  , ms_chisqrcut           :: Double
   , ms_mfile               :: FilePath
   , ms_ofile               :: FilePath
   , ms_pbsfile             :: FilePath
@@ -34,6 +35,7 @@ mathematicaSetup ms tp = do
               , ("sampleRecoEvtsdat"   , (ms_sampleRecoEvtsdat   ms )) 
               , ("samplePassedEvtsdat" , (ms_samplePassedEvtsdat ms )) 
               , ("sampleRecoInfodat"   , (ms_sampleRecoInfodat   ms ))
+              , ("chisqrcut"           , show  (ms_chisqrcut           ms )) 
               ] 
               "tev_top_reco_IW_package.m") ++ "\n\n\n" 
   

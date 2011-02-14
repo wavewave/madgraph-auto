@@ -110,15 +110,12 @@ sixtasklist =  [ (psetup_six_ttbar01j, rsetup p MLM num) | p <- sixparamset
                             			         , num <- sets     ]
 
 
-totaltasklist = wptasklist ++ triptasklist ++ sixtasklist  {- ++ zptasklist -}
-
-
-chisqrcutvalue=100000
+totaltasklist = zptasklist ++ wptasklist ++ triptasklist ++ sixtasklist
 
 main = do putStrLn "mathematica reconstruction 20110206,07,08 set" 
           putStrLn "models : Wp, Trip, Six "
 
-	  let mathematica_analysis chisqrcut (psetup,rsetup) = do 
+	  let mathematica_analysis (psetup,rsetup) = do 
 		let runname = makeRunName psetup rsetup  		
 	        putStrLn runname
                 let tp = (scriptbase ssetup) ++ "template/" 
@@ -127,10 +124,10 @@ main = do putStrLn "mathematica reconstruction 20110206,07,08 set"
                     chameleondir = tp 
                     chameleon = "Chameleon1_02.m"
                     lhcofile = eventdir ++ runname ++ "_pgs_events.lhco"
-                    sampleCutEvtsdat = eventdir++runname++"_sampleCutEvts_"++"ChiSqrCut"++ (show chisqrcut) ++ ".dat"
-                    sampleRecoEvtsdat = eventdir++runname++"_sampleRecoEvts_"++"ChiSqrCut"++ (show chisqrcut) ++ ".dat"
-                    samplePassedEvtsdat = eventdir++runname++"_samplePassedEvts_"++"ChiSqrCut"++(show chisqrcut) ++ ".dat"
-                    sampleRecoInfodat = eventdir++runname++"_sampleRecoInfo_"++"ChiSqrCut"++(show chisqrcut) ++".dat"
+                    sampleCutEvtsdat = eventdir++runname++"_sampleCutEvts.dat"
+                    sampleRecoEvtsdat = eventdir++runname++"_sampleRecoEvts.dat"
+                    samplePassedEvtsdat = eventdir++runname++"_samplePassedEvts.dat"
+                    sampleRecoInfodat = eventdir++runname++"_sampleRecoInfo.dat"
                     mfile = workdir ++ runname ++ ".m"
                     ofile = workdir ++ runname ++ ".log"
                     pbsfile = workdir ++ runname ++ ".pbs"
@@ -142,7 +139,6 @@ main = do putStrLn "mathematica reconstruction 20110206,07,08 set"
                                        ms_sampleRecoEvtsdat = sampleRecoEvtsdat, 
                                        ms_samplePassedEvtsdat = samplePassedEvtsdat, 
                                        ms_sampleRecoInfodat = sampleRecoInfodat, 
-                                       ms_chisqrcut = chisqrcut,
                                        ms_mfile = mfile, 
                                        ms_ofile = ofile,
                                        ms_pbsfile = pbsfile
@@ -150,7 +146,7 @@ main = do putStrLn "mathematica reconstruction 20110206,07,08 set"
                                      tp workdir
                 return () 
 
-	  mapM_ (mathematica_analysis chisqrcutvalue) totaltasklist 
+	  mapM_ mathematica_analysis totaltasklist 
 
 
           

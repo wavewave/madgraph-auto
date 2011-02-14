@@ -445,7 +445,7 @@ Export[cutEventsFileName,lhcoCutEvts]
 (*Keep all events with \\[Chi]^2 cut of 32, which corresponds roughly to 5 sigma. Cuts on \\[Chi]^2 can easily be done later. Keep 4 hardest jets.*)
 
 
-recoTime = Timing[recoEvts=recoTops[wWidth,topWidth][wMass,topMass][4,1,32]/@lhcoCutEvts;]
+recoTime = Timing[recoEvts=recoTops[wWidth,topWidth][wMass,topMass][4,1,$chisqrcut$]/@lhcoCutEvts;]
 
 
 Export[recoEventsFileName,recoEvts]
