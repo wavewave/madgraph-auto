@@ -2,19 +2,12 @@
 
 module Mathematica where
 
-import System.IO
 import System.Process
-import System.Directory
-import System.Posix.Unistd (sleep)
-
-import Control.Monad
 
 import Text.StringTemplate
 import Text.StringTemplate.Helpers
 
-import Text.Printf
-
-import Work 
+import Util
 
 data MathematicaSetup = MSetup { 
     ms_chameleondir        :: FilePath
