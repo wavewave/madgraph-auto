@@ -339,6 +339,7 @@ c            NE=NE+1
 c            PTE(NE)=PYP(I,10)
 c            ETAE(NE)=PYP(I,19)
 c            PHIE(NE)=PYP(I,15)
+            WRITE(*,*) 'I = ',I
             NUP=NUP+1
             IDUP(NUP)=K(I,2)
             ISTUP(NUP)=1
@@ -565,6 +566,10 @@ c        ENDDO
         
 
         CALL LUNHEP(1)
+
+        call PYLIST(3)
+
+c IWKIM
         WRITE(22,500) IEV, N
 c        WRITE (*,*) K(2,1)
         DO J=1,N
@@ -575,15 +580,16 @@ c        WRITE (*,*) K(2,1)
 
         CALL FLUSH()
 
- 127    WRITE(20,'(a)') '<event>'
-        WRITE(20,'(I3,I4,4E16.8)')
+ 127    WRITE(*,'(a)') '<event>'
+        WRITE(*,'(I3,I4,4E16.8)')
      $     NUP,100,1d0,0d0,0d0,0d0
         DO I=1,NUP
-          WRITE(20,'(I8,I3,2I3,2I2,5E16.8,2F3.0)')
+          WRITE(*,'(I8,I3,2I3,2I2,5E16.8,2F3.0)')
      $       IDUP(I),ISTUP(I),MOTHUP(1,I),MOTHUP(2,I),0,0,
      $       (PUP(J,I),J=1,5),0d0,0d0
         ENDDO
-        WRITE(20,'(a)') '</event>'
+        WRITE(*,'(a)') '</event>'
+        CALL FLUSH()
 
 C...Print first 0 events   IWKIM
 
