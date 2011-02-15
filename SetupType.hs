@@ -1,6 +1,8 @@
+{-# LANGUAGE PackageImports #-}
+
 module SetupType where
 
-import Control.Monad.Reader
+import "mtl" Control.Monad.Reader
 
 import Model
 import Machine

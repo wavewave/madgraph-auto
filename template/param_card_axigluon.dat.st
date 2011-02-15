@@ -4,7 +4,7 @@ Block AXIGLUONS
   1  $gvq$          # gVq
   2  $gvt$          # gVt
   3  $gaq$          # gAq
-  4  $qat$          # gAt
+  4  $gat$          # gAt
 Block CKMBLOCK
   1  2.2773600000000E-01  # cabi
 Block SMINPUTS

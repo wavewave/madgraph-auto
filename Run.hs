@@ -1,4 +1,4 @@
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE ScopedTypeVariables, PackageImports #-}
 
 module Run where
 
@@ -8,7 +8,7 @@ import System.Posix.Unistd (sleep)
 import System.Posix.Env 
 
 
-import Control.Monad.Reader
+import "mtl" Control.Monad.Reader
 
 import Util
 import Model 
