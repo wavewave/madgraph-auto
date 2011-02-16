@@ -348,6 +348,23 @@ c            PHIE(NE)=PYP(I,15)
             DO J=1,5
               PUP(J,NUP)=P(I,J)
             ENDDO
+          ELSE IF(K(I,1).LT.10.AND.(IABS(K(I,2)).EQ.11.OR.
+     $       IABS(K(I,2)).EQ.13) 
+     $       .AND.IABS(K(K(I,3),2)).EQ.15
+     $       .AND.IABS(K(K(K(I,3),3),2)).EQ.15) THEN
+c            NE=NE+1
+c            PTE(NE)=PYP(I,10)
+c            ETAE(NE)=PYP(I,19)
+c            PHIE(NE)=PYP(I,15)
+            WRITE(*,*) 'I = ',I
+            NUP=NUP+1
+            IDUP(NUP)=K(I,2)
+            ISTUP(NUP)=1
+            MOTHUP(1,NUP)=0
+            MOTHUP(2,NUP)=MOTHUP(1,NUP)
+            DO J=1,5
+              PUP(J,NUP)=P(I,J)
+            ENDDO
           ELSE IF(K(I,1).LT.10.AND.(IABS(K(I,2)).EQ.12.OR.
      $         IABS(K(I,2)).EQ.14.OR.IABS(K(I,2)).EQ.16.OR.
      $         K(I,2).EQ.1000022))THEN
