@@ -12,24 +12,22 @@ import SetupType
 import Run
 
 
--- import SimpleQQ
-
 import System.Posix.Unistd (sleep)
 
-{-
+
 my_ssetup :: ScriptSetup
 my_ssetup = SS {
     scriptbase = "/nobackup/iankim/script/madgraph_auto/"
   , mg5base    = "/nobackup/iankim/montecarlo/MG_ME_V4.4.44/MadGraph5_v0_6_1/"
   , workbase   = "/nobackup/iankim/wk/"
-  } -}
+  } 
 
-
+{-
 my_ssetup = SS {
     scriptbase = "/home/wavewave/nfs/workspace/ttbar/madgraph_auto/"
   , mg5base    = "/home/wavewave/nfs/montecarlo/MG_ME_V4.4.44/MadGraph5_v0_6_1/"
   , workbase   = "/home/wavewave/nfs/workspace/ttbar/mc/"
-  }
+  } -}
 
 
 ucut :: UserCut
@@ -83,7 +81,7 @@ psetuplist :: [ProcessSetup]
 psetuplist = [ psetup_axi_ttbar01j ]
 
 sets :: [Int]
-sets = [1] -- [ 31 .. 50 ]
+sets = [7 .. 50 ]
 
 axitasklist :: [WorkSetup]
 axitasklist =  [ WS my_ssetup (psetup_axi_ttbar01j) (rsetupGen p MLM num) my_csetup  
@@ -98,18 +96,18 @@ main = do putStrLn "benchmark models 20110215 sets"
           putStrLn "models : axigluon "
 
 	  let cmdSequence = do 
- --               compileFortran
+                compileFortran
                 cardPrepare                      
- --               generateEvents   
- --               runHEP2LHE       
- --               runHEPEVT2STDHEP
---	        runPGS            
- --               runClean          
- --               updateBanner     
+                generateEvents   
+                runHEP2LHE       
+                runHEPEVT2STDHEP
+	        runPGS            
+                runClean          
+                updateBanner     
           
        
           -- create working directory (only once for each process)
-          mapM_ (createWorkDir my_ssetup) psetuplist
+--          mapM_ (createWorkDir my_ssetup) psetuplist
           sleep 2
           mapM_ (runReaderT cmdSequence) totaltasklist 
 
