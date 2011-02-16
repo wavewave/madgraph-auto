@@ -17,10 +17,23 @@ import System.Posix.Unistd (sleep)
 
 my_ssetup :: ScriptSetup
 my_ssetup = SS {
+v v v v v v v
+    scriptbase = "/nobackup/iankim/script/madgraph_auto/"
+  , mg5base    = "/nobackup/iankim/montecarlo/MG_ME_V4.4.44/MadGraph5_v0_6_1/"
+  , workbase   = "/nobackup/iankim/wk/"
+  } -}
+
+=============
+    scriptbase = "/Users/iankim/mac/workspace/ttbar/madgraph_auto/"
+  , mg5base    = "/Users/iankim/mac/montecarlo/MG_ME_V4.4.44/MadGraph5_v0_6_1/"
+  , workbase   = "/Users/iankim/mac/workspace/ttbar/mc/"
+  } 
+*************
     scriptbase = "/nobackup/iankim/script/madgraph_auto/"
   , mg5base    = "/nobackup/iankim/montecarlo/MG_ME_V4.4.44/MadGraph5_v0_6_1/"
   , workbase   = "/nobackup/iankim/wk/"
   } 
+^ ^ ^ ^ ^ ^ ^
 
 {-
 my_ssetup = SS {
@@ -49,7 +62,7 @@ psetup_axi_ttbar01j = PS {
   , model = AxiGluon 
   , process = processTTBar0or1jet 
   , processBrief = "ttbar01j"  
-  , workname   = "215Axi1J"
+  , workname   = "216Axi1J"
   }
 
 rsetupGen :: Param -> MatchType -> Int -> RunSetup
@@ -72,7 +85,9 @@ rsetupGen p matchtype num = RS {
 }
 
 my_csetup :: ClusterSetup
-my_csetup = CS { cluster = Cluster "test" }
+my_csetup = CS { cluster = Parallel 3 
+ -- Cluster "test" 
+}
 
 axiparamset :: [Param]
 axiparamset = [ AxiGluonParam 1800.0 0.0 0.0 1.5 (-1.5) ]

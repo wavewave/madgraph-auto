@@ -205,7 +205,7 @@ runPGS = do
 
 runClean :: WorkIO () 
 runClean = do
-  WS ssetup psetup rsetup _ <- ask 
+  WS ssetup psetup rsetup _ <- ask
   liftIO $ do
     let eventdir = workbase ssetup ++ workname psetup ++ "/Events/" 
         pgsdir = workbase ssetup ++ workname psetup ++ "/../pythia-pgs/src/"
@@ -216,13 +216,7 @@ runClean = do
         uncleanedfilename = "pgs_uncleaned.lhco"
         cleanedfilename = "pgs_cleaned.lhco"
         finallhco = taskname ++ "_pgs_events.lhco"
-        existThenRemoveForAny x = existThenRemove (eventdir ++ x)
-        clean_event_directory = 
-          mapM_ existThenRemoveForAny  [ hepfilename
-                                       , hepevtfilename
-                                       , stdhepfilename
-                                       , uncleanedfilename
-                                       , cleanedfilename ]
+
     setCurrentDirectory eventdir
     b <- doesFileExist stdhepfilename 
     if b 
@@ -230,8 +224,6 @@ runClean = do
         putStrLn "Start clean_output"
         readProcess (pgsdir++"clean_output") [ "-muon", uncleanedfilename, cleanedfilename ] "" 
         renameFile (eventdir++cleanedfilename) (eventdir++finallhco)
-        sleep 10
-        clean_event_directory
       else error "ERROR pythia result does not exist"  
     return () 
 
@@ -253,3 +245,32 @@ updateBanner = do
         pgscardstr <- readFile (carddir ++ "pgs_card.dat")  
         let newbannerstr = bannerstr ++ usercutcontent ++ pgscardstr
         writeFile (eventdir ++ newbannerfilename) newbannerstr 
+
+cleanHepFiles :: WorkIO () 
+cleanHepFiles = do 
+  WS ssetup psetup rsetup _ <- ask 
+
+  let taskname = makeRunName psetup rsetup 
+      eventdir = workbase ssetup ++ workname psetup ++ "/Events/" 
+      existThenRemoveForAny x = existThenRemove (eventdir ++ x)
+      clean = mapM_ existThenRemoveForAny  
+      hepfilename = taskname++"_pythia_events.hep"
+      hepevtfilename = "afterusercut.hepevt"  
+      stdhepfilename = "afterusercut.stdhep"      
+      uncleanedfilename = "pgs_uncleaned.lhco"
+      cleanedfilename = "pgs_cleaned.lhco"
+      onlyhep = [ hepfilename ] 
+      allhep  = [ hepfilename
+                , hepevtfilename
+                , stdhepfilename
+                , uncleanedfilename
+                , cleanedfilename ]
+      dellst = case (pythia rsetup, match rsetup, usercut rsetup) of 
+                 (NoPYTHIA,NoMatch,_) -> []
+                 (_,MLM,NoUserCutDef) -> onlyhep
+                 (_,MLM,UserCutDef _) -> allhep
+                 (RunPYTHIA,_,NoUserCutDef) -> onlyhep
+                 (RunPYTHIA,_,UserCutDef _) -> allhep
+  liftIO $ do 
+    sleep 5
+    clean dellst
