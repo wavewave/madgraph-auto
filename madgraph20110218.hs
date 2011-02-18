@@ -23,8 +23,8 @@ my_ssetup = SS {
   , workbase   = "/Users/iankim/mac/workspace/ttbar/mc/"
   } 
 
-processTTbar0or1jSemiTau :: [Char]
-processTTbar0or1jSemiTau = 
+processTTBar0or1jSemiTau :: [Char]
+processTTBar0or1jSemiTau = 
   "\ngenerate P P > t t~ QED=99, (t > b w+, w+ > J J), (t~ > b~ w-, w- > ta- vt~) QED=99 @1\nadd process P P > t t~ QED=99,  ( t > b w+, w+ > ta+ vt ),  ( t~ > b~ w-, w- > J J ) QED=99 @2\nadd process P P > t t~ J QED=99, (t > b w+, w+ > J J), (t~ > b~ w-, w- > ta- vt~) QED=99 @3\nadd process P P > t t~ J QED=99,  ( t > b w+, w+ > ta+ vt ),  ( t~ > b~ w-, w- > J J ) QED=99 @4 \n"
 
 
