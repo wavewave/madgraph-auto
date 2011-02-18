@@ -107,7 +107,7 @@ main = do putStrLn "benchmark models 20110216 sets"
                 cleanHepFiles
                  
           -- create working directory (only once for each process)
-          mapM_ (createWorkDir my_ssetup) psetuplist
+--          mapM_ (createWorkDir my_ssetup) psetuplist
           sleep 2
           mapM_ (runReaderT cmdSequence) totaltasklist 
 
