@@ -323,9 +323,9 @@ c            PHIE(NE)=PYP(I,15)
             ENDDO
 c  IWKIM : take care of tau lepton correctly
           ELSE IF(K(I,1).LT.10.AND.(IABS(K(I,2)).EQ.11.OR.
-     $       IABS(K(I,2)).EQ.13) 
-     $       .AND.IABS(K(K(I,3),2)).EQ.15
-     $       .AND.IABS(K(K(K(I,3),3),2)).EQ.15) THEN
+     .       IABS(K(I,2)).EQ.13) 
+     .       .AND.IABS(K(K(I,3),2)).EQ.15
+     .       .AND.IABS(K(K(K(I,3),3),2)).EQ.15) THEN
 c            NE=NE+1
 c            PTE(NE)=PYP(I,10)
 c            ETAE(NE)=PYP(I,19)

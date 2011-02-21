@@ -33,7 +33,7 @@ psetup_wp_ttbar01j_semitau = PS {
   , model = Wp 
   , process = processTTBar0or1jSemiTau
   , processBrief = "ttbar01jsemitau"  
-  , workname   = "217Wp1J"
+  , workname   = "218Wp1J"
   }
 
 psetup_zp_ttbar01j_semitau = PS {  
@@ -41,7 +41,7 @@ psetup_zp_ttbar01j_semitau = PS {
   , model = ZpH 
   , process = processTTBar0or1jSemiTau
   , processBrief = "ttbar01jsemitau"  
-  , workname   = "217Zp1J"
+  , workname   = "218Zp1J"
   }
 
 psetup_trip_ttbar01j_semitau = PS {  
@@ -49,7 +49,7 @@ psetup_trip_ttbar01j_semitau = PS {
   , model = Trip 
   , process = processTTBar0or1jSemiTau
   , processBrief = "ttbar01jsemitau"  
-  , workname   = "217Trip1J"
+  , workname   = "218Trip1J"
   }
 
 psetup_six_ttbar01j_semitau = PS {  
@@ -57,7 +57,7 @@ psetup_six_ttbar01j_semitau = PS {
   , model = Six
   , process = processTTBar0or1jSemiTau
   , processBrief = "ttbar01jsemitau"  
-  , workname   = "217Six1J"
+  , workname   = "218Six1J"
   }
 
 rsetupGen :: Param -> MatchType -> Int -> RunSetup
@@ -126,8 +126,8 @@ totaltasklist = wptasklist ++ zptasklist ++ triptasklist ++ sixtasklist
 
 
 main :: IO ()
-main = do putStrLn "benchmark models 20110216 sets" 
-          putStrLn "models : trip "
+main = do putStrLn "benchmark models 20110205 06 07 08 again with semitau decay" 
+          putStrLn "models : wp zp trip six "
 
 	  let cmdSequence = do 
                 compileFortran
