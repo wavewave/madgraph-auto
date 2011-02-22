@@ -62,6 +62,7 @@ createWorkDir ssetup psetup = do
   let tempdir = scriptbase ssetup ++ "working/"
       processfilecontent = makeProcessFile (model psetup) (mversion psetup) (process psetup) (workname psetup)
   writeFile (tempdir ++ "proc_card_mg5.dat") processfilecontent
+  sleep 1
 
   setCurrentDirectory (mg5base ssetup)
   readProcess ("bin/mg5") [tempdir ++ "proc_card_mg5.dat"] ""

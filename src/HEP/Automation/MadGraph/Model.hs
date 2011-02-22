@@ -6,7 +6,7 @@ import Text.StringTemplate
 import Text.StringTemplate.Helpers
 
 
-data Model = Wp | ZpH | Six | Trip | AxiGluon
+data Model = SM | Wp | ZpH | Six | Trip | AxiGluon
 
 data ModelVersion = MadGraph4 | MadGraph5
 
@@ -14,15 +14,15 @@ mtop :: Double
 mtop = 174.3           
 
 
-
-
-data Param = WpParam { massWp :: Double, gRWp :: Double } 
+data Param = SMParam 
+           | WpParam { massWp :: Double, gRWp :: Double } 
            | ZpHParam { massZp :: Double, gRZp :: Double }
            | SixParam { massSix :: Double, gRSix :: Double } 
            | TripParam { massTrip :: Double, gRTrip :: Double  } 
            | AxiGluonParam { massAxiG :: Double, gVq :: Double , gVt :: Double , gAq :: Double , gAt :: Double } 
 
 modelName :: Model -> String
+modelName SM = "sm"
 modelName Wp = "fvwp200_MG"
 modelName ZpH = "zHorizontal_MG"
 modelName Six = "sextets_fv"
@@ -38,6 +38,7 @@ makeProcessFile model modelversion process dirname =
 
 
 paramCard4Model :: Model -> String
+paramCard4Model SM   = "param_card_sm.dat"
 paramCard4Model Wp   = "param_card_wP.dat"
 paramCard4Model ZpH  = "param_card_zHorizontal.dat" 
 paramCard4Model Six  = "param_card_six.dat"
@@ -65,6 +66,9 @@ decayWidthExotic  y mphi mt = y^(2 :: Int) / (16.0 * pi )
 
 
 paramCardSetup :: FilePath -> Model -> Param -> IO String
+paramCardSetup tpath SM SMParam = do  
+  str <- readFile (tpath ++ "/" ++ paramCard4Model SM ++ ".st" )  
+  return str
 paramCardSetup tpath Wp (WpParam m g) = do 
   templates <- directoryGroup tpath 
   return $ ( renderTemplateGroup

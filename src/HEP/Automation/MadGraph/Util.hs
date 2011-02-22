@@ -16,12 +16,14 @@ existThenRemove fp = do
 makeRunName :: ProcessSetup -> RunSetup -> String 
 makeRunName psetup rsetup = 
   let mprefix = case (model psetup) of 
+        SM -> "SM"
         Wp -> "Wp"
         ZpH -> "Zp"
         Six -> "Six"
         Trip -> "Trip"
         AxiGluon -> "Axi" 
       masscoup =  case (param rsetup) of 
+        SMParam -> "" 
         WpParam  m g -> "M"++show m++"G"++show g
         ZpHParam m g -> "M"++show m++"G"++show g 
         SixParam m g -> "M"++show m++"G"++show g
