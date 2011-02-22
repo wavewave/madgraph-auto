@@ -1,13 +1,13 @@
 {-# LANGUAGE PackageImports #-}
 
-module SetupType where
+module HEP.Automation.MadGraph.SetupType where
 
 import "mtl" Control.Monad.Reader
 
-import Model
-import Machine
-import Cluster
-import UserCut
+import HEP.Automation.MadGraph.Model
+import HEP.Automation.MadGraph.Machine
+import HEP.Automation.MadGraph.Cluster
+import HEP.Automation.MadGraph.UserCut
 
 data ScriptSetup = SS { 
     scriptbase :: String

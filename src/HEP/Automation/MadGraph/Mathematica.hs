@@ -1,13 +1,13 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Mathematica where
+module HEP.Automation.MadGraph.Mathematica where
 
 import System.Process
 
 import Text.StringTemplate
 import Text.StringTemplate.Helpers
 
-import Util
+import HEP.Automation.MadGraph.Util
 
 data MathematicaSetup = MSetup { 
     ms_chameleondir        :: FilePath

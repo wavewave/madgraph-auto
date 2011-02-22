@@ -1,10 +1,10 @@
-module Util where
+module HEP.Automation.MadGraph.Util where
 
 import System.Directory
 
-import Model 
-import Machine
-import SetupType
+import HEP.Automation.MadGraph.Model 
+import HEP.Automation.MadGraph.Machine
+import HEP.Automation.MadGraph.SetupType
 
 existThenRemove :: FilePath -> IO () 
 existThenRemove fp = do 

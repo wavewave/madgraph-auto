@@ -1,18 +1,15 @@
--- {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE PackageImports #-}
 
 module Main where
 
-import Control.Monad.Reader 
+import "mtl" Control.Monad.Reader 
 
-import Model
-import Machine
-import UserCut
-import Cluster
-import SetupType
-import Run
-
-
--- import SimpleQQ
+import HEP.Automation.MadGraph.Model
+import HEP.Automation.MadGraph.Machine
+import HEP.Automation.MadGraph.UserCut
+import HEP.Automation.MadGraph.Cluster
+import HEP.Automation.MadGraph.SetupType
+import HEP.Automation.MadGraph.Run
 
 import System.Posix.Unistd (sleep)
 

@@ -1,6 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables, PackageImports #-}
 
-module Run where
+module HEP.Automation.MadGraph.Run where
 
 import System.Process
 import System.Directory
@@ -10,12 +10,12 @@ import System.Posix.Env
 
 import "mtl" Control.Monad.Reader
 
-import Util
-import Model 
-import Machine
-import Cluster
-import UserCut
-import SetupType
+import HEP.Automation.MadGraph.Util
+import HEP.Automation.MadGraph.Model 
+import HEP.Automation.MadGraph.Machine
+import HEP.Automation.MadGraph.Cluster
+import HEP.Automation.MadGraph.UserCut
+import HEP.Automation.MadGraph.SetupType
 
 
 compileFortran :: WorkIO ()

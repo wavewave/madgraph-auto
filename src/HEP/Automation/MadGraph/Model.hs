@@ -1,4 +1,4 @@
-module Model where
+module HEP.Automation.MadGraph.Model where
 
 import Text.Printf
 

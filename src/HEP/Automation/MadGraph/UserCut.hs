@@ -1,6 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module UserCut where
+module HEP.Automation.MadGraph.UserCut where
 
 import Text.StringTemplate
 import Text.StringTemplate.Helpers

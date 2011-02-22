@@ -1,4 +1,4 @@
-module Machine where
+module HEP.Automation.MadGraph.Machine where
 
 import Text.StringTemplate
 import Text.StringTemplate.Helpers

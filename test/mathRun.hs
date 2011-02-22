@@ -2,13 +2,13 @@
 
 module Main where
 
-import Util
-import Model
-import Machine
-import UserCut
-import Cluster
-import SetupType
-import Mathematica
+import HEP.Automation.MadGraph.Util
+import HEP.Automation.MadGraph.Model
+import HEP.Automation.MadGraph.Machine
+import HEP.Automation.MadGraph.UserCut
+import HEP.Automation.MadGraph.Cluster
+import HEP.Automation.MadGraph.SetupType
+import HEP.Automation.MadGraph.Mathematica
 
 
 import System.Posix.Unistd (sleep)
