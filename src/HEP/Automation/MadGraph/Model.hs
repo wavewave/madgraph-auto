@@ -7,8 +7,10 @@ import Text.StringTemplate.Helpers
 
 
 data Model = SM | Wp | ZpH | Six | Trip | AxiGluon
+           deriving Show
 
 data ModelVersion = MadGraph4 | MadGraph5
+                  deriving Show
 
 mtop :: Double
 mtop = 174.3           
@@ -20,6 +22,7 @@ data Param = SMParam
            | SixParam { massSix :: Double, gRSix :: Double } 
            | TripParam { massTrip :: Double, gRTrip :: Double  } 
            | AxiGluonParam { massAxiG :: Double, gVq :: Double , gVt :: Double , gAq :: Double , gAt :: Double } 
+           deriving Show
 
 modelName :: Model -> String
 modelName SM = "sm"
