@@ -4,7 +4,8 @@ import Text.StringTemplate
 import Text.StringTemplate.Helpers
 
 
-data MachineType = TeVatron | LHC7 | LHC14
+data MachineType = TeVatron | LHC7 | LHC14 | TeVatronParton
+                 deriving Show
 
 data RGRunType = Fixed | Auto 
 
@@ -39,6 +40,7 @@ runCardSetup tpath machine ctype mtype rgtype scale numevt = do
         TeVatron -> ("1","-1","980")
         LHC7     -> ("1","1","3500")
         LHC14    -> ("1","1","7000")
+        TeVatronParton -> ("0","0","980")
       isFixedRG = case rgtype of 
         Fixed -> "T"
         Auto  -> "F"
