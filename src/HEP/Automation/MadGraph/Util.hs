@@ -33,6 +33,7 @@ makeRunName psetup rsetup =
         TeVatron -> "TeVa" 
         LHC7 -> "LHC7"
         LHC14 -> "LHC14"
+        TeVatronParton -> "TeVaPtn"
       matchName = case (match rsetup) of 
         MLM -> "MLM"
         NoMatch -> "NoMatch"
