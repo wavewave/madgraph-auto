@@ -8,14 +8,19 @@ data MachineType = TeVatron | LHC7 | LHC14 | TeVatronParton
                  deriving Show
 
 data RGRunType = Fixed | Auto 
+               deriving Show 
 
 data CutType = NoCut | DefCut | KCut 
+             deriving Show
 
 data MatchType = NoMatch | MLM
+               deriving Show
 
 data PYTHIAType = NoPYTHIA | RunPYTHIA
+                deriving Show
 
 data PGSType = NoPGS | RunPGS
+             deriving Show
 
 
 runCard4CutMatch :: CutType -> MatchType -> String

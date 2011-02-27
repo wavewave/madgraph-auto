@@ -13,7 +13,7 @@ data ScriptSetup = SS {
     scriptbase :: String
   , mg5base    :: String
   , workbase   :: String
-}
+} deriving Show
 
 data ProcessSetup = PS { 
     mversion :: ModelVersion
@@ -21,7 +21,7 @@ data ProcessSetup = PS {
   , process :: String
   , processBrief :: String  
   , workname :: String 
-  }
+  } deriving Show
 
 data RunSetup = RS { 
     param   :: Param
@@ -35,17 +35,17 @@ data RunSetup = RS {
   , usercut :: UserCutSet
   , pgs     :: PGSType 
   , setnum  :: Int 
-}
+} deriving Show
 
 data ClusterSetup = CS { 
   cluster :: ClusterRunType
-}
+} deriving Show
 
 data WorkSetup = WS { 
   ws_ssetup :: ScriptSetup, 
   ws_psetup :: ProcessSetup, 
   ws_rsetup :: RunSetup, 
   ws_csetup :: ClusterSetup
-} 
+} deriving Show
 
 type WorkIO a = ReaderT WorkSetup IO a 

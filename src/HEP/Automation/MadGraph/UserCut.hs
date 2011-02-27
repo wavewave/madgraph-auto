@@ -6,6 +6,7 @@ import Text.StringTemplate
 import Text.StringTemplate.Helpers
 
 data UserCutSet = NoUserCutDef | UserCutDef UserCut
+                deriving Show
 
 data UserCut = UserCut {
     uc_metcut    :: Double 
@@ -13,7 +14,7 @@ data UserCut = UserCut {
   , uc_etcutlep  :: Double
   , uc_etacutjet :: Double
   , uc_etcutjet  :: Double  
-}
+} deriving Show
 
 prettyprintUserCut :: UserCut -> String 
 prettyprintUserCut uc = 
