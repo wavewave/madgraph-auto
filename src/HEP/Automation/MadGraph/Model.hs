@@ -57,7 +57,7 @@ gammaWpZp mass coup =
 
 gammaAxigluon :: Double -> Double -> Double -> Double -> Double -> Double -> Double
 gammaAxigluon  alphas mass gvq gvt gaq gat = 
-  alphas / 6.0 * mass * (gvt^(2 :: Int) + gat^(2 :: Int) 
+  alphas / 3.0 * mass * (gvt^(2 :: Int) + gat^(2 :: Int) 
                          + 2.0 * ( gvq^(2 :: Int) + gaq^(2 :: Int) ) )
 
 
