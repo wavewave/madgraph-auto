@@ -25,6 +25,7 @@ data PGSType = NoPGS | RunPGS
 
 runCard4CutMatch :: CutType -> MatchType -> String
 runCard4CutMatch NoCut  NoMatch = "run_card_NoCut_NoMatch.dat"
+runCard4CutMatch DefCut NoMatch = "run_card_DefCut_NoMatch.dat"
 runCard4CutMatch DefCut MLM     = "run_card_DefCut_MLM.dat"
 runCard4CutMatch KCut   MLM     = "run_card_KCut_MLM.dat"
 runCard4CutMatch _ _ = error "cut mlm does not match"
