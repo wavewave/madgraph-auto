@@ -126,7 +126,7 @@ paramCardSetup tpath SixFull (SixFullParam m g gd) = do
                , ("gRSix"   , (printf "%.4e" g :: String))
                , ("gRSixD"  , (printf "%.4e" gd :: String))
                , ("widthSix", (printf "%.4e" (decayWidthExotic g m mtop) :: String)) ]
-               (paramCard4Model Six) ) ++ "\n\n\n"
+               (paramCard4Model SixFull) ) ++ "\n\n\n"
  -- Decay width is not right. 
 
 
