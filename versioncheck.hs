@@ -47,6 +47,7 @@ main = do
        removeLink linkpath 
      else return ()
  {-  readProcess "ln" ["-s", origpath, linkpath] "" -} 
+  
   createSymbolicLink origpath linkpath
     
   return () 

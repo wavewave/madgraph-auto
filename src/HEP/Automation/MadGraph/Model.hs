@@ -6,7 +6,7 @@ import Text.StringTemplate
 import Text.StringTemplate.Helpers
 
 
-data Model = SM | Wp | ZpH | Six | Trip | AxiGluon
+data Model = SM | Wp | ZpH | Six | Trip | AxiGluon | SixFull
            deriving Show
 
 data ModelVersion = MadGraph4 | MadGraph5
@@ -22,6 +22,7 @@ data Param = SMParam
            | SixParam { massSix :: Double, gRSix :: Double } 
            | TripParam { massTrip :: Double, gRTrip :: Double  } 
            | AxiGluonParam { massAxiG :: Double, gVq :: Double , gVt :: Double , gAq :: Double , gAt :: Double } 
+           | SixFullParam { massSix :: Double, gRSix :: Double, gRSixD :: Double } 
            deriving Show
 
 modelName :: Model -> String
@@ -31,6 +32,7 @@ modelName ZpH = "zHorizontal_MG"
 modelName Six = "sextets_fv"
 modelName Trip = "triplets_fv"
 modelName AxiGluon = "Axigluon_AV_MG"
+modelName SixFull = "sextetsfull3"
 
 makeProcessFile :: Model -> ModelVersion -> String -> String -> String
 makeProcessFile model modelversion process dirname = 
@@ -47,6 +49,7 @@ paramCard4Model ZpH  = "param_card_zHorizontal.dat"
 paramCard4Model Six  = "param_card_six.dat"
 paramCard4Model Trip = "param_card_trip.dat" 
 paramCard4Model AxiGluon = "param_card_axigluon.dat"
+paramCard4Model SixFull = "param_card_sixfull.dat"
 
 gammaWpZp :: Double -> Double -> Double            
 gammaWpZp mass coup = 
@@ -115,5 +118,16 @@ paramCardSetup tpath AxiGluon (AxiGluonParam m gvq gvt gaq gat) = do
                , ("gat"  , (printf "%.4e" gat :: String))
                , ("waxi", (printf "%.4e" (gammaAxigluon 0.118 m gvq gvt gaq gat) :: String)) ]
                (paramCard4Model AxiGluon) ) ++ "\n\n\n"
+paramCardSetup tpath SixFull (SixFullParam m g gd) = do 
+  templates <- directoryGroup tpath 
+  return $ ( renderTemplateGroup
+               templates
+               [ ("massSix" , (printf "%.4e" m :: String))
+               , ("gRSix"   , (printf "%.4e" g :: String))
+               , ("gRSixD"  , (printf "%.4e" gd :: String))
+               , ("widthSix", (printf "%.4e" (decayWidthExotic g m mtop) :: String)) ]
+               (paramCard4Model Six) ) ++ "\n\n\n"
+ -- Decay width is not right. 
+
 
 paramCardSetup _ _ _ = error "No matching param card type" 
