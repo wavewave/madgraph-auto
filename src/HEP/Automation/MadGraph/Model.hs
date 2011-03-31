@@ -6,7 +6,8 @@ import Text.StringTemplate
 import Text.StringTemplate.Helpers
 
 
-data Model = SM | Wp | ZpH | Six | Trip | AxiGluon | SixFull | TripFull
+data Model = SM | Wp | ZpH | Six | Trip | AxiGluon 
+           | SixFull | TripFull | WpFull
            deriving Show
 
 data ModelVersion = MadGraph4 | MadGraph5
@@ -24,6 +25,7 @@ data Param = SMParam
            | AxiGluonParam { massAxiG :: Double, gVq :: Double , gVt :: Double , gAq :: Double , gAt :: Double } 
            | SixFullParam { massSix :: Double, gRSix :: Double, gRSixD :: Double } 
            | TripFullParam { massTrip :: Double, gRTrip :: Double, gRTripD :: Double } 
+           | WpFullParam { massWp :: Double, gRWp :: Double, gRWpU :: Double }
            deriving Show
 
 modelName :: Model -> String
@@ -35,6 +37,8 @@ modelName Trip = "triplets_fv"
 modelName AxiGluon = "Axigluon_AV_MG"
 modelName SixFull = "sextetsfull3"
 modelName TripFull = "tripletsfull3"
+modelName WpFull = "fvwp600ub_MG" 
+
 
 makeProcessFile :: Model -> ModelVersion -> String -> String -> String
 makeProcessFile model modelversion process dirname = 
@@ -53,6 +57,7 @@ paramCard4Model Trip = "param_card_trip.dat"
 paramCard4Model AxiGluon = "param_card_axigluon.dat"
 paramCard4Model SixFull = "param_card_sixfull.dat"
 paramCard4Model TripFull = "param_card_tripfull.dat"
+paramCard4Model WpFull   = "param_card_wPfull.dat"
 
 gammaWpZp :: Double -> Double -> Double            
 gammaWpZp mass coup = 
@@ -136,12 +141,19 @@ paramCardSetup tpath TripFull (TripFullParam m g gd) = do
   return $ ( renderTemplateGroup
                templates
                [ ("massTrip" , (printf "%.4e" m :: String))
-               , ("gRTrip"   , (printf "%.4e" g :: String))
-               , ("gRTripD"  , (printf "%.4e" gd :: String))
+               , ("gRtrip"   , (printf "%.4e" g :: String))
+               , ("gRtripD"  , (printf "%.4e" gd :: String))
                , ("widthTrip", (printf "%.4e" (decayWidthExotic g m mtop) :: String)) ]
                (paramCard4Model TripFull) ) ++ "\n\n\n"
  -- Decay width is not right. 
-
-
-
+paramCardSetup tpath WpFull (WpFullParam m g gu) = do 
+  templates <- directoryGroup tpath 
+  return $ ( renderTemplateGroup
+               templates
+               [ ("massWp"       , (printf "%.4e" m :: String))
+               , ("gRWpoverSqrtTwo", (printf "%.4e" (g / (sqrt 2.0)) :: String))
+               , ("gRWpUoverSqrtTwo", (printf "%.4e" (gu / (sqrt 2.0)) :: String))
+               , ("widthWp"      , (printf "%.4e" (gammaWpZp m g) :: String)) ]
+               (paramCard4Model WpFull)  ) ++ "\n\n\n"
+ -- Decay width is not right. 
 paramCardSetup _ _ _ = error "No matching param card type" 
