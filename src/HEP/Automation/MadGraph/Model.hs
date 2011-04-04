@@ -74,7 +74,7 @@ gammaWpZp mass coup =
 
 gammaWpZpFullBelowTopMass :: Double -> Double -> Double -> Double -> Double -> Double-> (Double,Double)  
 gammaWpZpFullBelowTopMass mWp mZp gWpub gZpuu gZpdd gZpbb = 
-  let gammaWp = 2.0*gWpub^(2::Int)*(1/(16.0*pi)) * mWp 
+  let gammaWp = gWpub^(2::Int)*(1/(16.0*pi)) * mWp 
       gammaZp = (gZpuu^(2::Int)+gZpdd^(2::Int)+gZpbb^(2::Int))*(2.0/(16.0*pi))*mZp 
   in  (gammaWp,gammaZp)
 
