@@ -7,7 +7,7 @@ import Text.StringTemplate.Helpers
 
 
 data Model = SM | Wp | ZpH | Six | Trip | AxiGluon 
-           | SixFull | TripFull | WpFull
+           | SixFull | TripFull | WpZpFull
            deriving Show
 
 data ModelVersion = MadGraph4 | MadGraph5
@@ -25,7 +25,15 @@ data Param = SMParam
            | AxiGluonParam { massAxiG :: Double, gVq :: Double , gVt :: Double , gAq :: Double , gAt :: Double } 
            | SixFullParam { massSix :: Double, gRSix :: Double, gRSixD :: Double } 
            | TripFullParam { massTrip :: Double, gRTrip :: Double, gRTripD :: Double } 
-           | WpFullParam { massWp :: Double, gRWp :: Double, gRWpU :: Double }
+           | WpZpFullParam { mWp :: Double,
+                             mZp :: Double,  
+                             gWpdt :: Double, 
+                             gWpub :: Double, 
+                             gZpbb :: Double, 
+                             gZptt :: Double, 
+                             gZpuu :: Double, 
+                             gZpdd :: Double, 
+                             gwp   :: Double }
            deriving Show
 
 modelName :: Model -> String
@@ -37,7 +45,7 @@ modelName Trip = "triplets_fv"
 modelName AxiGluon = "Axigluon_AV_MG"
 modelName SixFull = "sextetsfull3"
 modelName TripFull = "tripletsfull3"
-modelName WpFull = "fvwp600ub_MG" 
+modelName WpZpFull = "fvwpzpLight_MG" 
 
 
 makeProcessFile :: Model -> ModelVersion -> String -> String -> String
@@ -57,7 +65,7 @@ paramCard4Model Trip = "param_card_trip.dat"
 paramCard4Model AxiGluon = "param_card_axigluon.dat"
 paramCard4Model SixFull = "param_card_sixfull.dat"
 paramCard4Model TripFull = "param_card_tripfull.dat"
-paramCard4Model WpFull   = "param_card_wPfull.dat"
+paramCard4Model WpZpFull   = "param_card_wpzpfull.dat"
 
 gammaWpZp :: Double -> Double -> Double            
 gammaWpZp mass coup = 
@@ -146,14 +154,25 @@ paramCardSetup tpath TripFull (TripFullParam m g gd) = do
                , ("widthTrip", (printf "%.4e" (decayWidthExotic g m mtop) :: String)) ]
                (paramCard4Model TripFull) ) ++ "\n\n\n"
  -- Decay width is not right. 
-paramCardSetup tpath WpFull (WpFullParam m g gu) = do 
+paramCardSetup tpath WpZpFull (WpZpFullParam mWp' mZp' gWpdt' gWpub' gZpbb'
+                                             gZptt' gZpuu' gZpdd' gwp' ) = do 
   templates <- directoryGroup tpath 
   return $ ( renderTemplateGroup
                templates
-               [ ("massWp"       , (printf "%.4e" m :: String))
-               , ("gRWpoverSqrtTwo", (printf "%.4e" (g / (sqrt 2.0)) :: String))
-               , ("gRWpUoverSqrtTwo", (printf "%.4e" (gu / (sqrt 2.0)) :: String))
-               , ("widthWp"      , (printf "%.4e" (gammaWpZp m g) :: String)) ]
-               (paramCard4Model WpFull)  ) ++ "\n\n\n"
+               [ ("mWp"         , (printf "%.4e" mWp'   :: String))
+               , ("mZp"         , (printf "%.4e" mZp'   :: String))
+               , ("gWpdt"       , (printf "%.4e" gWpdt' :: String))
+               , ("gWpub"       , (printf "%.4e" gWpub' :: String))
+               , ("gZpbb"       , (printf "%.4e" gZpbb' :: String))
+               , ("gZptt"       , (printf "%.4e" gZptt' :: String))
+               , ("gZpuu"       , (printf "%.4e" gZpuu' :: String))
+               , ("gZpdd"       , (printf "%.4e" gZpdd' :: String)) 
+               , ("gwp"         , (printf "%.4e" gwp'   :: String)) ]
+               (paramCard4Model WpZpFull)  ) ++ "\n\n\n"
+
+--               , ("gRWpoverSqrtTwo", (printf "%.4e" (g / (sqrt 2.0)) :: String))
+--               , ("gRWpUoverSqrtTwo", (printf "%.4e" (gu / (sqrt 2.0)) :: String))
+--               , ("widthWp"      , (printf "%.4e" (gammaWpZp m g) :: String)) ]
+
  -- Decay width is not right. 
 paramCardSetup _ _ _ = error "No matching param card type" 
