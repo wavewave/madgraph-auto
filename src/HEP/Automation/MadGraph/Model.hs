@@ -166,8 +166,8 @@ paramCardSetup tpath WpZpFull (WpZpFullParam mWp' mZp' gWpdt' gWpub' gZpbb'
                templates
                [ ("mWp"         , (printf "%.4e" mWp'   :: String))
                , ("mZp"         , (printf "%.4e" mZp'   :: String))
-               , ("gWpdt"       , (printf "%.4e" gWpdt' :: String))
-               , ("gWpub"       , (printf "%.4e" gWpub' :: String))
+               , ("gWpdtOverSqrt2", (printf "%.4e" (gWpdt' / sqrt 2) :: String))
+               , ("gWpubOverSqrt2", (printf "%.4e" (gWpub' / sqrt 2) :: String))
                , ("gZpbb"       , (printf "%.4e" gZpbb' :: String))
                , ("gZptt"       , (printf "%.4e" gZptt' :: String))
                , ("gZpuu"       , (printf "%.4e" gZpuu' :: String))
