@@ -34,7 +34,7 @@ makeRunName psetup rsetup =
         AxiGluonParam m gvq gvt gaq gat -> "M"++show m++"Vq"++show gvq ++ "Vt"++show gvt ++ "Aq" ++ show gaq ++ "At" ++ show gat 
         SixFullParam m g gd -> "M"++show m++"G"++show g ++ "GD" ++ show gd
         TripFullParam m g gd -> "M"++show m++"G"++show g ++ "GD" ++ show gd
-        WpZpFullParam mWp mZp gWpdt gWpub gZpbb gZptt gZpuu gZpdd gwp
+        WpZpFullParam mWp mZp gWpdt gWpub gZpbb gZptt gZpuu gZpdd
             -> ("MWP"++show mWp 
                 ++ "MZP" ++ show mZp 
                 ++ "GWPDT" ++ show gWpdt 
@@ -42,8 +42,7 @@ makeRunName psetup rsetup =
                 ++ "GZPBB" ++ show gZpbb
                 ++ "GZPTT" ++ show gZptt
                 ++ "GZPUU" ++ show gZpuu
-                ++ "GZPDD" ++ show gZpdd
-                ++ "GWP"   ++ show gwp)
+                ++ "GZPDD" ++ show gZpdd)
       machineName = case (machine rsetup) of 
         TeVatron -> "TeVa" 
         LHC7 -> "LHC7"

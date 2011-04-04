@@ -32,8 +32,7 @@ data Param = SMParam
                              gZpbb :: Double, 
                              gZptt :: Double, 
                              gZpuu :: Double, 
-                             gZpdd :: Double, 
-                             gwp   :: Double }
+                             gZpdd :: Double }
            deriving Show
 
 modelName :: Model -> String
@@ -73,6 +72,11 @@ gammaWpZp mass coup =
   in  coup^(2 :: Int) / (16.0 * pi) *mass*( 1.0 - 1.5 * r + 0.5 * r^(3 :: Int))
 
 
+gammaWpZpFullBelowTopMass :: Double -> Double -> Double -> Double -> (Double,Double)  
+gammaWpZpFullBelowTopMass mWp mZp gWpub gZpuu gZpdd gZpbb = 
+  let gammaWp = 2.0*gWpub^(2::Int)*(1/(16.0*pi)) * mWp 
+      gammaZp = (gZpuu^(2::Int)+gZpdd^(2::Int)+gZpbb^(2::Int))*(2.0/(16.0*pi))*mZp 
+  in  (gammaWp,gammaZp)
 
 gammaAxigluon :: Double -> Double -> Double -> Double -> Double -> Double -> Double
 gammaAxigluon  alphas mass gvq gvt gaq gat = 
@@ -155,8 +159,9 @@ paramCardSetup tpath TripFull (TripFullParam m g gd) = do
                (paramCard4Model TripFull) ) ++ "\n\n\n"
  -- Decay width is not right. 
 paramCardSetup tpath WpZpFull (WpZpFullParam mWp' mZp' gWpdt' gWpub' gZpbb'
-                                             gZptt' gZpuu' gZpdd' gwp' ) = do 
-  templates <- directoryGroup tpath 
+                                             gZptt' gZpuu' gZpdd' ) = do 
+  templates <- directoryGroup tpath
+  let (gammaWp,gammaZp) = gammaWpZpFullBelowTopMass mWp' mZp' gWpub' gZpuu' gZpdd' gZpbb'  
   return $ ( renderTemplateGroup
                templates
                [ ("mWp"         , (printf "%.4e" mWp'   :: String))
@@ -167,7 +172,9 @@ paramCardSetup tpath WpZpFull (WpZpFullParam mWp' mZp' gWpdt' gWpub' gZpbb'
                , ("gZptt"       , (printf "%.4e" gZptt' :: String))
                , ("gZpuu"       , (printf "%.4e" gZpuu' :: String))
                , ("gZpdd"       , (printf "%.4e" gZpdd' :: String)) 
-               , ("gwp"         , (printf "%.4e" gwp'   :: String)) ]
+               , ("wWp"         , (printf "%.4e" gammaWp :: String)) 
+               , ("wZp"         , (printf "%.4e" gammaZp :: String))
+               ]
                (paramCard4Model WpZpFull)  ) ++ "\n\n\n"
 
 --               , ("gRWpoverSqrtTwo", (printf "%.4e" (g / (sqrt 2.0)) :: String))
