@@ -1,4 +1,4 @@
-{-# LANGUAGE PackageImports #-}
+{-# LANGUAGE PackageImports, TypeFamilies, FlexibleInstances, FlexibleContexts #-}
 
 module HEP.Automation.MadGraph.SetupType where
 
@@ -15,16 +15,16 @@ data ScriptSetup = SS {
   , workbase   :: String
 } deriving Show
 
-data ProcessSetup = PS { 
-    mversion :: ModelVersion
-  , model   :: Model
+data (Model a) => ProcessSetup a = PS { 
+    mversion :: MadGraphVersion
+  , model   :: a
   , process :: String
   , processBrief :: String  
   , workname :: String 
   } deriving Show
 
-data RunSetup = RS { 
-    param   :: Param
+data (Model a) => RunSetup a = RS { 
+    param   :: ModelParam a
   , numevent :: Int
   , machine :: MachineType
   , rgrun   :: RGRunType
@@ -35,17 +35,17 @@ data RunSetup = RS {
   , usercut :: UserCutSet
   , pgs     :: PGSType 
   , setnum  :: Int 
-} deriving Show
+} -- deriving Show
 
 data ClusterSetup = CS { 
   cluster :: ClusterRunType
 } deriving Show
 
-data WorkSetup = WS { 
+data (Model a) => WorkSetup a = WS { 
   ws_ssetup :: ScriptSetup, 
-  ws_psetup :: ProcessSetup, 
-  ws_rsetup :: RunSetup, 
+  ws_psetup :: ProcessSetup a, 
+  ws_rsetup :: RunSetup a, 
   ws_csetup :: ClusterSetup
-} deriving Show
+} -- deriving Show
 
-type WorkIO a = ReaderT WorkSetup IO a 
+type WorkIO b a = ReaderT (WorkSetup b) IO a 

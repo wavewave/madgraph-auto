@@ -18,7 +18,7 @@ import HEP.Automation.MadGraph.UserCut
 import HEP.Automation.MadGraph.SetupType
 
 
-compileFortran :: WorkIO ()
+compileFortran :: (Model a) => WorkIO a ()
 compileFortran = do 
   WS ssetup _ rsetup _ <- ask   
   liftIO $ 
@@ -56,7 +56,7 @@ compileFortran = do
         return ()
 
 
-createWorkDir :: ScriptSetup -> ProcessSetup -> IO ()
+createWorkDir :: (Model a) => ScriptSetup -> ProcessSetup a -> IO ()
 createWorkDir ssetup psetup = do 
   putStrLn $ "set up a working directory" 
   let tempdir = scriptbase ssetup ++ "working/"
@@ -75,7 +75,7 @@ createWorkDir ssetup psetup = do
   renameDirectory (mg5base ssetup ++ workname psetup) (workbase ssetup ++ workname psetup) 
   return ()
 
-cardPrepare :: WorkIO () 
+cardPrepare :: (Model a) => WorkIO a () 
 cardPrepare = do 
   WS ssetup psetup rsetup _ <- ask 
   liftIO $ do 
@@ -130,7 +130,7 @@ cardPrepare = do
         UserCutDef _  -> writeFile (carddir ++ "pgs_card.dat.user") str
 
 
-generateEvents :: WorkIO () 
+generateEvents :: (Model a) => WorkIO a () 
 generateEvents = do 
   WS ssetup psetup rsetup csetup <- ask
   liftIO $ do 
@@ -145,7 +145,7 @@ generateEvents = do
       Cluster cname -> readProcess ("bin/generate_events") ["1", cname, taskname] "" 
     return ()
 
-runHEP2LHE :: WorkIO () 
+runHEP2LHE :: (Model a) => WorkIO a () 
 runHEP2LHE = do
   WS ssetup psetup rsetup _ <- ask 
   liftIO $ do
@@ -164,7 +164,7 @@ runHEP2LHE = do
       else error "ERROR pythia result does not exist"  
     return () 
 
-runHEPEVT2STDHEP :: WorkIO () 
+runHEPEVT2STDHEP :: (Model a) => WorkIO a () 
 runHEPEVT2STDHEP = do
   WS ssetup psetup _ _ <- ask 
   liftIO $ do 
@@ -183,7 +183,7 @@ runHEPEVT2STDHEP = do
       else error "ERROR pythia result does not exist"  
     return () 
 
-runPGS :: WorkIO () 
+runPGS :: (Model a) => WorkIO a () 
 runPGS = do
   WS ssetup psetup _ _ <- ask 
   liftIO $ do
@@ -204,7 +204,7 @@ runPGS = do
       else error "ERROR pythia result does not exist"  
     return () 
 
-runClean :: WorkIO () 
+runClean :: (Model a) => WorkIO a () 
 runClean = do
   WS ssetup psetup rsetup _ <- ask
   liftIO $ do
@@ -228,7 +228,7 @@ runClean = do
       else error "ERROR pythia result does not exist"  
     return () 
 
-updateBanner :: WorkIO () 
+updateBanner :: (Model a) => WorkIO a () 
 updateBanner = do
   WS ssetup psetup rsetup _ <- ask 
   liftIO $ do 
@@ -247,7 +247,7 @@ updateBanner = do
         let newbannerstr = bannerstr ++ usercutcontent ++ pgscardstr
         writeFile (eventdir ++ newbannerfilename) newbannerstr 
 
-cleanHepFiles :: WorkIO () 
+cleanHepFiles :: (Model a) => WorkIO a () 
 cleanHepFiles = do 
   WS ssetup psetup rsetup _ <- ask 
 
