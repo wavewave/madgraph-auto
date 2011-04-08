@@ -3,6 +3,7 @@ module HEP.Automation.MadGraph.Machine where
 import Text.StringTemplate
 import Text.StringTemplate.Helpers
 
+import System.FilePath ((</>))
 
 data MachineType = TeVatron | LHC7 | LHC14 | TeVatronParton
                  deriving Show
@@ -68,16 +69,16 @@ runCardSetup tpath machine ctype mtype rgtype scale numevt = do
 pythiaCardSetup :: FilePath -> MatchType -> PYTHIAType -> IO (Maybe String)
 pythiaCardSetup tpath mtype ptype = do  
   case mtype of 
-    MLM -> do str <- readFile (tpath ++ pythiaCardMatch MLM)
+    MLM -> do str <- readFile (tpath </> pythiaCardMatch MLM)
               return (Just str)
     NoMatch -> case ptype of
       NoPYTHIA -> return Nothing 
-      RunPYTHIA -> do str <- readFile (tpath ++ pythiaCardMatch NoMatch)
+      RunPYTHIA -> do str <- readFile (tpath </> pythiaCardMatch NoMatch)
                       return (Just (str++"\n\n\n"))
                       
 pgsCardSetup :: FilePath -> MachineType -> PGSType -> IO (Maybe String) 
 pgsCardSetup tpath machine pgstype = do 
   case pgstype of 
     NoPGS -> return Nothing
-    RunPGS -> do str <- readFile (tpath ++ pgsCardMachine machine)
+    RunPGS -> do str <- readFile (tpath </> pgsCardMachine machine)
                  return (Just (str++"\n\n\n"))

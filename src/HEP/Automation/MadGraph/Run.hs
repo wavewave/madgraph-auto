@@ -19,6 +19,19 @@ import HEP.Automation.MadGraph.Cluster
 import HEP.Automation.MadGraph.UserCut
 import HEP.Automation.MadGraph.SetupType
 
+import Text.StringTemplate
+import Text.StringTemplate.Helpers
+
+
+compileshSetup :: ScriptSetup -> IO String 
+compileshSetup ssetup = do
+  let mg4base = mg5base ssetup </> ".."
+  templates <- directoryGroup (templatedir ssetup)      
+  return $ (renderTemplateGroup 
+              templates 
+              [ ("mgfourbase", mg4base) ]
+              "compile.sh") ++ "\n\n\n"
+
 
 compileFortran :: (Model a) => WorkIO a ()
 compileFortran = do 
@@ -37,7 +50,6 @@ compileFortran = do
                                     , "pythia.f"
                                     , "stdhep_print.f"
                                     , "pgs.inc" 
-                                    , "compile.sh" 
                                     , "ktclusdble.f"
                                     , "ME2pythia.f" ]
         -- erase previous run 
@@ -47,10 +59,14 @@ compileFortran = do
         hep2lhe    <- hep2lheSetup (templatedir ssetup) uc
         writeFile (workingdir ssetup </> "hep2lhe.f") hep2lhe
 
+       -- setup new compile.sh according to system configuration.
+        compilesh  <- compileshSetup ssetup 
+        writeFile (workingdir ssetup </> "compile.sh") compilesh
+
         -- copy files and compile
         mapM_ cpFrmTmpl2Working filelistNoTemplate 
         setCurrentDirectory (workingdir ssetup)
-        readProcess ("./compile.sh") [] "" 
+        readProcess "sh" ["./compile.sh"] "" 
 
         return ()
 
@@ -59,7 +75,7 @@ createWorkDir :: (Model a) => ScriptSetup -> ProcessSetup a -> IO ()
 createWorkDir ssetup psetup = do 
   putStrLn $ "set up a working directory" 
   let processfilecontent = makeProcessFile (model psetup) (mversion psetup) (process psetup) (workname psetup)
-  writeFile (workingdir ssetup ++ "proc_card_mg5.dat") processfilecontent
+  writeFile (workingdir ssetup </> "proc_card_mg5.dat") processfilecontent
   sleep 1
 
   setCurrentDirectory (mg5base ssetup)
@@ -71,7 +87,7 @@ createWorkDir ssetup psetup = do
              ++ " to " 
              ++ (workbase ssetup </> workname psetup) 
   renameDirectory (mg5base ssetup </> workname psetup) (workbase ssetup </> workname psetup) 
-  return ()
+  return () 
 
 cardPrepare :: (Model a) => WorkIO a () 
 cardPrepare = do 
@@ -81,13 +97,13 @@ cardPrepare = do
     putStrLn $ "prepare for cards for " ++ taskname
   
   
-    let carddir = workbase ssetup ++ workname psetup ++ "/Cards/"
+    let carddir = workbase ssetup </> workname psetup </> "Cards"
   
     -- erase previous run 
-    existThenRemove (carddir ++ "param_card.dat") 
-    existThenRemove (carddir ++ "run_card.dat") 
-    existThenRemove (carddir ++ "pythia_card.dat") 
-    existThenRemove (carddir ++ "pgs_card.dat")
+    existThenRemove (carddir </> "param_card.dat") 
+    existThenRemove (carddir </> "run_card.dat") 
+    existThenRemove (carddir </> "pythia_card.dat") 
+    existThenRemove (carddir </> "pgs_card.dat")
   
     paramcard  <- paramCardSetup 
                     (templatedir ssetup)
@@ -186,7 +202,7 @@ runPGS = do
   liftIO $ do
     let eventdir = workbase ssetup </> workname psetup </> "Events" 
         pgsdir = workbase ssetup </> workname psetup </> "../pythia-pgs/src"
-        carddir = workbase ssetup </> workname psetup </> "/Cards/"
+        carddir = workbase ssetup </> workname psetup </> "Cards"
         stdhepfilename = "afterusercut.stdhep" 
         uncleanedfilename = "pgs_uncleaned.lhco"
     setCurrentDirectory eventdir
@@ -249,7 +265,7 @@ cleanHepFiles = do
   WS ssetup psetup rsetup _ <- ask 
 
   let taskname = makeRunName psetup rsetup 
-      eventdir = workbase ssetup </> workname psetup </> "/Events/" 
+      eventdir = workbase ssetup </> workname psetup </> "Events" 
       existThenRemoveForAny x = existThenRemove (eventdir </> x)
       clean = mapM_ existThenRemoveForAny  
       hepfilename = taskname++"_pythia_events.hep"
