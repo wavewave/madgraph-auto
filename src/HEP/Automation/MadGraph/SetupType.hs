@@ -10,7 +10,8 @@ import HEP.Automation.MadGraph.Cluster
 import HEP.Automation.MadGraph.UserCut
 
 data ScriptSetup = SS { 
-    scriptbase :: String
+    templatedir :: String
+  , workingdir  :: String 
   , mg5base    :: String
   , workbase   :: String
 } deriving Show

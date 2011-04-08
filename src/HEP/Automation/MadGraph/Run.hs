@@ -10,6 +10,8 @@ import System.Posix.Env
 
 import "mtl" Control.Monad.Reader
 
+import System.FilePath ((</>))
+
 import HEP.Automation.MadGraph.Util
 import HEP.Automation.MadGraph.Model 
 import HEP.Automation.MadGraph.Machine
@@ -26,12 +28,9 @@ compileFortran = do
       NoUserCutDef -> return () 
       UserCutDef uc -> do 
         putStrLn $ "set up fortran program" 
-        let workingdir  = scriptbase ssetup ++ "working/"
-            templatedir = scriptbase ssetup ++ "template/"
-
-        let existThenRemoveForAny x = existThenRemove (workingdir ++ x)
-            cpFrmTmpl2Working x = copyFile (templatedir ++ x) (workingdir ++ x)
-	
+        let existThenRemoveForAny x = existThenRemove (workingdir ssetup </> x)
+            cpFrmTmpl2Working x = copyFile (templatedir ssetup </> x) 
+                                           (workingdir ssetup </> x)
         let filelistNoTemplate   =  [ "getjet.f" 
                                     , "hepevt2stdhep.f"
                                     , "pgs_ranmar.f" 
@@ -45,12 +44,12 @@ compileFortran = do
         mapM_ existThenRemoveForAny  (("hep2lhe.f") : filelistNoTemplate)
 
         -- setup new hep2lhe.f with a given user cut 
-        hep2lhe    <- hep2lheSetup templatedir uc
-        writeFile (workingdir ++ "hep2lhe.f") hep2lhe
+        hep2lhe    <- hep2lheSetup (templatedir ssetup) uc
+        writeFile (workingdir ssetup </> "hep2lhe.f") hep2lhe
 
         -- copy files and compile
         mapM_ cpFrmTmpl2Working filelistNoTemplate 
-        setCurrentDirectory workingdir
+        setCurrentDirectory (workingdir ssetup)
         readProcess ("./compile.sh") [] "" 
 
         return ()
@@ -59,20 +58,19 @@ compileFortran = do
 createWorkDir :: (Model a) => ScriptSetup -> ProcessSetup a -> IO ()
 createWorkDir ssetup psetup = do 
   putStrLn $ "set up a working directory" 
-  let tempdir = scriptbase ssetup ++ "working/"
-      processfilecontent = makeProcessFile (model psetup) (mversion psetup) (process psetup) (workname psetup)
-  writeFile (tempdir ++ "proc_card_mg5.dat") processfilecontent
+  let processfilecontent = makeProcessFile (model psetup) (mversion psetup) (process psetup) (workname psetup)
+  writeFile (workingdir ssetup ++ "proc_card_mg5.dat") processfilecontent
   sleep 1
 
   setCurrentDirectory (mg5base ssetup)
-  readProcess ("bin/mg5") [tempdir ++ "proc_card_mg5.dat"] ""
+  readProcess ("bin/mg5") [workingdir ssetup </> "proc_card_mg5.dat"] ""
   putStrLn "Wait Two Seconds"  
   sleep 2
   putStrLn $ "moving directory" 
-             ++ (mg5base ssetup ++ workname psetup) 
+             ++ (mg5base ssetup </> workname psetup) 
              ++ " to " 
-             ++ (workbase ssetup ++ workname psetup) 
-  renameDirectory (mg5base ssetup ++ workname psetup) (workbase ssetup ++ workname psetup) 
+             ++ (workbase ssetup </> workname psetup) 
+  renameDirectory (mg5base ssetup </> workname psetup) (workbase ssetup </> workname psetup) 
   return ()
 
 cardPrepare :: (Model a) => WorkIO a () 
@@ -84,7 +82,6 @@ cardPrepare = do
   
   
     let carddir = workbase ssetup ++ workname psetup ++ "/Cards/"
-        tpath   = scriptbase ssetup ++ "template/"
   
     -- erase previous run 
     existThenRemove (carddir ++ "param_card.dat") 
@@ -93,12 +90,12 @@ cardPrepare = do
     existThenRemove (carddir ++ "pgs_card.dat")
   
     paramcard  <- paramCardSetup 
-                    tpath
+                    (templatedir ssetup)
                     (model psetup)
                     (param rsetup)
   
     runcard    <- runCardSetup 
-                    tpath
+                    (templatedir ssetup)
                     (machine rsetup) 
                     (cut     rsetup) 
                     (match   rsetup) 
@@ -107,27 +104,27 @@ cardPrepare = do
 		    (numevent rsetup) 
                   
     pythiacard <- pythiaCardSetup 
-                    tpath
+                    (templatedir ssetup)
                     (match   rsetup)
                     (pythia  rsetup) 
                   
     pgscard    <- pgsCardSetup
-                    tpath
+                    (templatedir ssetup)
                     (machine rsetup)
                     (pgs     rsetup) 
                   
-    writeFile (carddir ++ "param_card.dat") paramcard
-    writeFile (carddir ++ "run_card.dat")   runcard
+    writeFile (carddir </> "param_card.dat") paramcard
+    writeFile (carddir </> "run_card.dat")   runcard
 
     case pythiacard of 
       Nothing -> return () 
-      Just str -> writeFile (carddir ++ "pythia_card.dat") str
+      Just str -> writeFile (carddir </> "pythia_card.dat") str
     
     case pgscard  of 
       Nothing -> return () 
       Just str -> case usercut rsetup of 
-        NoUserCutDef  -> writeFile (carddir ++ "pgs_card.dat") str
-        UserCutDef _  -> writeFile (carddir ++ "pgs_card.dat.user") str
+        NoUserCutDef  -> writeFile (carddir </> "pgs_card.dat") str
+        UserCutDef _  -> writeFile (carddir </> "pgs_card.dat.user") str
 
 
 generateEvents :: (Model a) => WorkIO a () 
@@ -138,7 +135,7 @@ generateEvents = do
   
     putStrLn $ "generating event for " ++ taskname
   
-    setCurrentDirectory (workbase ssetup ++ workname psetup)
+    setCurrentDirectory (workbase ssetup </> workname psetup)
     case cluster csetup of
       NoParallel -> readProcess ("bin/generate_events") ["0", taskname] ""
       Parallel ncore -> readProcess ("bin/generate_events") ["2", show ncore, taskname] ""
@@ -149,8 +146,7 @@ runHEP2LHE :: (Model a) => WorkIO a ()
 runHEP2LHE = do
   WS ssetup psetup rsetup _ <- ask 
   liftIO $ do
-    let eventdir = workbase ssetup ++ workname psetup ++ "/Events/" 
-        workingdir = scriptbase ssetup ++ "working/"
+    let eventdir = workbase ssetup </> workname psetup </> "Events" 
         taskname = makeRunName psetup rsetup 
         hepfilename = taskname++"_pythia_events.hep"
         hepevtfilename = "afterusercut.hepevt"  
@@ -160,7 +156,8 @@ runHEP2LHE = do
     if b 
       then do 
         putStrLn "Start hep2lhe"
-        readProcess (workingdir++"hep2lhe.iw") [hepfilename,hepevtfilename] "" 
+        readProcess (workingdir ssetup </> "hep2lhe.iw") 
+                    [hepfilename,hepevtfilename] "" 
       else error "ERROR pythia result does not exist"  
     return () 
 
@@ -168,8 +165,7 @@ runHEPEVT2STDHEP :: (Model a) => WorkIO a ()
 runHEPEVT2STDHEP = do
   WS ssetup psetup _ _ <- ask 
   liftIO $ do 
-    let eventdir = workbase ssetup ++ workname psetup ++ "/Events/" 
-        workingdir = scriptbase ssetup ++ "working/"
+    let eventdir = workbase ssetup </> workname psetup </> "Events" 
         hepevtfilename = "afterusercut.hepevt"  
         stdhepfilename = "afterusercut.stdhep" 
   
@@ -179,7 +175,8 @@ runHEPEVT2STDHEP = do
     if b 
       then do 
         putStrLn "Start hepevt2stdhep"
-        readProcess (workingdir++"hepevt2stdhep.iw") [hepevtfilename,stdhepfilename] "" 
+        readProcess (workingdir ssetup </> "hepevt2stdhep.iw") 
+                    [hepevtfilename,stdhepfilename] "" 
       else error "ERROR pythia result does not exist"  
     return () 
 
@@ -187,20 +184,20 @@ runPGS :: (Model a) => WorkIO a ()
 runPGS = do
   WS ssetup psetup _ _ <- ask 
   liftIO $ do
-    let eventdir = workbase ssetup ++ workname psetup ++ "/Events/" 
-        pgsdir = workbase ssetup ++ workname psetup ++ "/../pythia-pgs/src/"
-        carddir = workbase ssetup ++ workname psetup ++ "/Cards/"
+    let eventdir = workbase ssetup </> workname psetup </> "Events" 
+        pgsdir = workbase ssetup </> workname psetup </> "../pythia-pgs/src"
+        carddir = workbase ssetup </> workname psetup </> "/Cards/"
         stdhepfilename = "afterusercut.stdhep" 
         uncleanedfilename = "pgs_uncleaned.lhco"
     setCurrentDirectory eventdir
-    renameFile (carddir++"pgs_card.dat.user") (carddir++"pgs_card.dat")
+    renameFile (carddir </> "pgs_card.dat.user") (carddir </> "pgs_card.dat")
     sleep 1
     b <- doesFileExist stdhepfilename 
     if b 
       then do 
         putStrLn "Start pgs"
-        putEnv  $ "PDG_MASS_TBL=" ++ pgsdir ++ "mass_width_2004.mc "
-        readProcess (pgsdir++"pgs") ["--stdhep",stdhepfilename,"--nev","0","--detector","../Cards/pgs_card.dat",uncleanedfilename] "" 
+        putEnv  $ "PDG_MASS_TBL=" ++ pgsdir </> "mass_width_2004.mc "
+        readProcess (pgsdir </> "pgs") ["--stdhep",stdhepfilename,"--nev","0","--detector","../Cards/pgs_card.dat",uncleanedfilename] "" 
       else error "ERROR pythia result does not exist"  
     return () 
 
@@ -208,8 +205,8 @@ runClean :: (Model a) => WorkIO a ()
 runClean = do
   WS ssetup psetup rsetup _ <- ask
   liftIO $ do
-    let eventdir = workbase ssetup ++ workname psetup ++ "/Events/" 
-        pgsdir = workbase ssetup ++ workname psetup ++ "/../pythia-pgs/src/"
+    let eventdir = workbase ssetup </> workname psetup </> "Events" 
+        pgsdir = workbase ssetup </> workname psetup </> "../pythia-pgs/src"
         taskname = makeRunName psetup rsetup 
         hepfilename = taskname++"_pythia_events.hep"
         hepevtfilename = "afterusercut.hepevt"  
@@ -223,8 +220,8 @@ runClean = do
     if b 
       then do 
         putStrLn "Start clean_output"
-        readProcess (pgsdir++"clean_output") [ "-muon", uncleanedfilename, cleanedfilename ] "" 
-        renameFile (eventdir++cleanedfilename) (eventdir++finallhco)
+        readProcess (pgsdir </> "clean_output") [ "-muon", uncleanedfilename, cleanedfilename ] "" 
+        renameFile (eventdir </> cleanedfilename) (eventdir </> finallhco)
       else error "ERROR pythia result does not exist"  
     return () 
 
@@ -235,25 +232,25 @@ updateBanner = do
     case (usercut rsetup) of 
       NoUserCutDef -> return () 
       UserCutDef uc -> do  
-        let eventdir = workbase ssetup ++ workname psetup ++ "/Events/" 
+        let eventdir = workbase ssetup </> workname psetup </> "Events" 
             taskname = makeRunName psetup rsetup 
-            carddir = workbase ssetup ++ workname psetup ++ "/Cards/"
+            carddir = workbase ssetup </> workname psetup </> "Cards"
             bannerfilename = taskname ++ "_banner.txt"
             newbannerfilename = taskname ++ "_newbanner.txt"
             usercutcontent = prettyprintUserCut uc
         setCurrentDirectory eventdir
-        bannerstr  <- readFile (eventdir ++ bannerfilename)
-        pgscardstr <- readFile (carddir ++ "pgs_card.dat")  
+        bannerstr  <- readFile (eventdir </> bannerfilename)
+        pgscardstr <- readFile (carddir </> "pgs_card.dat")  
         let newbannerstr = bannerstr ++ usercutcontent ++ pgscardstr
-        writeFile (eventdir ++ newbannerfilename) newbannerstr 
+        writeFile (eventdir </> newbannerfilename) newbannerstr 
 
 cleanHepFiles :: (Model a) => WorkIO a () 
 cleanHepFiles = do 
   WS ssetup psetup rsetup _ <- ask 
 
   let taskname = makeRunName psetup rsetup 
-      eventdir = workbase ssetup ++ workname psetup ++ "/Events/" 
-      existThenRemoveForAny x = existThenRemove (eventdir ++ x)
+      eventdir = workbase ssetup </> workname psetup </> "/Events/" 
+      existThenRemoveForAny x = existThenRemove (eventdir </> x)
       clean = mapM_ existThenRemoveForAny  
       hepfilename = taskname++"_pythia_events.hep"
       hepevtfilename = "afterusercut.hepevt"  
