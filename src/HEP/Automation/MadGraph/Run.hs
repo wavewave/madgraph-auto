@@ -7,6 +7,7 @@ import System.Directory
 import System.Posix.Unistd (sleep)
 import System.Posix.Env 
 
+import Control.Concurrent
 
 import "mtl" Control.Monad.Reader
 
@@ -21,6 +22,27 @@ import HEP.Automation.MadGraph.SetupType
 
 import Text.StringTemplate
 import Text.StringTemplate.Helpers
+
+
+checkFile :: FilePath -> Int -> IO () 
+checkFile fp n = do 
+  if n < 0 
+    then error $ "no " ++ fp ++ " ever created." 
+    else do 
+      b <- doesFileExist fp 
+      if b  
+         then do { putStrLn $ fp ++ " checked" ; return () } 
+         else do { threadDelay 5000000 ; checkFile fp (n-1) }  
+
+checkDirectory :: FilePath -> Int -> IO () 
+checkDirectory fp n = do 
+  if n < 0 
+    then error $ "no " ++ fp ++ " ever created." 
+    else do 
+      b <- doesDirectoryExist fp 
+      if b  
+         then do { putStrLn $ fp ++ " checked" ; return () } 
+         else do { threadDelay 5000000 ; checkDirectory fp (n-1) }  
 
 
 compileshSetup :: ScriptSetup -> IO String 
@@ -76,12 +98,10 @@ createWorkDir ssetup psetup = do
   putStrLn $ "set up a working directory" 
   let processfilecontent = makeProcessFile (model psetup) (mversion psetup) (process psetup) (workname psetup)
   writeFile (workingdir ssetup </> "proc_card_mg5.dat") processfilecontent
-  sleep 1
-
+  checkFile (workingdir ssetup </> "proc_card_mg5.dat") 10 
   setCurrentDirectory (mg5base ssetup)
   readProcess ("bin/mg5") [workingdir ssetup </> "proc_card_mg5.dat"] ""
-  putStrLn "Wait Two Seconds"  
-  sleep 2
+  checkDirectory (mg5base ssetup </> workname psetup) 10
   putStrLn $ "moving directory" 
              ++ (mg5base ssetup </> workname psetup) 
              ++ " to " 
@@ -98,7 +118,7 @@ cardPrepare = do
   
   
     let carddir = workbase ssetup </> workname psetup </> "Cards"
-  
+    checkDirectory carddir 10   
     -- erase previous run 
     existThenRemove (carddir </> "param_card.dat") 
     existThenRemove (carddir </> "run_card.dat") 
@@ -150,8 +170,10 @@ generateEvents = do
     let taskname = makeRunName psetup rsetup 
   
     putStrLn $ "generating event for " ++ taskname
-  
     setCurrentDirectory (workbase ssetup </> workname psetup)
+    checkFile (workbase ssetup </> workname psetup </> "Cards/run_card.dat") 10
+    checkFile (workbase ssetup </> workname psetup </> "Cards/param_card.dat") 10
+    
     case cluster csetup of
       NoParallel -> readProcess ("bin/generate_events") ["0", taskname] ""
       Parallel ncore -> readProcess ("bin/generate_events") ["2", show ncore, taskname] ""
@@ -167,7 +189,7 @@ runHEP2LHE = do
         hepfilename = taskname++"_pythia_events.hep"
         hepevtfilename = "afterusercut.hepevt"  
     setCurrentDirectory eventdir
-  
+    checkFile (eventdir </> hepfilename) 10 
     b <- doesFileExist hepfilename 
     if b 
       then do 
@@ -186,7 +208,7 @@ runHEPEVT2STDHEP = do
         stdhepfilename = "afterusercut.stdhep" 
   
     setCurrentDirectory eventdir
-  
+    checkFile (eventdir </> hepevtfilename) 10 
     b <- doesFileExist hepevtfilename 
     if b 
       then do 
@@ -206,8 +228,9 @@ runPGS = do
         stdhepfilename = "afterusercut.stdhep" 
         uncleanedfilename = "pgs_uncleaned.lhco"
     setCurrentDirectory eventdir
+    checkFile (carddir </> "pgs_card.dat.user") 10 
     renameFile (carddir </> "pgs_card.dat.user") (carddir </> "pgs_card.dat")
-    sleep 1
+    checkFile (eventdir </> stdhepfilename) 10
     b <- doesFileExist stdhepfilename 
     if b 
       then do 
@@ -232,6 +255,7 @@ runClean = do
         finallhco = taskname ++ "_pgs_events.lhco"
 
     setCurrentDirectory eventdir
+    checkFile (eventdir </> stdhepfilename) 10
     b <- doesFileExist stdhepfilename 
     if b 
       then do 
@@ -255,6 +279,7 @@ updateBanner = do
             newbannerfilename = taskname ++ "_newbanner.txt"
             usercutcontent = prettyprintUserCut uc
         setCurrentDirectory eventdir
+        checkFile (eventdir </> bannerfilename) 10
         bannerstr  <- readFile (eventdir </> bannerfilename)
         pgscardstr <- readFile (carddir </> "pgs_card.dat")  
         let newbannerstr = bannerstr ++ usercutcontent ++ pgscardstr
