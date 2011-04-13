@@ -57,7 +57,7 @@ compileshSetup ssetup = do
 
 compileFortran :: (Model a) => WorkIO a ()
 compileFortran = do 
-  WS ssetup _ rsetup _ <- ask   
+  WS ssetup _ rsetup _ _ <- ask   
   liftIO $ 
     case (usercut rsetup) of 
       NoUserCutDef -> return () 
@@ -111,7 +111,7 @@ createWorkDir ssetup psetup = do
 
 cardPrepare :: (Model a) => WorkIO a () 
 cardPrepare = do 
-  WS ssetup psetup rsetup _ <- ask 
+  WS ssetup psetup rsetup _ _ <- ask 
   liftIO $ do 
     let taskname = makeRunName psetup rsetup 
     putStrLn $ "prepare for cards for " ++ taskname
@@ -165,7 +165,7 @@ cardPrepare = do
 
 generateEvents :: (Model a) => WorkIO a () 
 generateEvents = do 
-  WS ssetup psetup rsetup csetup <- ask
+  WS ssetup psetup rsetup csetup _ <- ask
   liftIO $ do 
     let taskname = makeRunName psetup rsetup 
   
@@ -182,7 +182,7 @@ generateEvents = do
 
 runHEP2LHE :: (Model a) => WorkIO a () 
 runHEP2LHE = do
-  WS ssetup psetup rsetup _ <- ask 
+  WS ssetup psetup rsetup _ _ <- ask 
   liftIO $ do
     let eventdir = workbase ssetup </> workname psetup </> "Events" 
         taskname = makeRunName psetup rsetup 
@@ -201,7 +201,7 @@ runHEP2LHE = do
 
 runHEPEVT2STDHEP :: (Model a) => WorkIO a () 
 runHEPEVT2STDHEP = do
-  WS ssetup psetup _ _ <- ask 
+  WS ssetup psetup _ _ _ <- ask 
   liftIO $ do 
     let eventdir = workbase ssetup </> workname psetup </> "Events" 
         hepevtfilename = "afterusercut.hepevt"  
@@ -220,7 +220,7 @@ runHEPEVT2STDHEP = do
 
 runPGS :: (Model a) => WorkIO a () 
 runPGS = do
-  WS ssetup psetup _ _ <- ask 
+  WS ssetup psetup _ _ _ <- ask 
   liftIO $ do
     let eventdir = workbase ssetup </> workname psetup </> "Events" 
         pgsdir = workbase ssetup </> workname psetup </> "../pythia-pgs/src"
@@ -242,7 +242,7 @@ runPGS = do
 
 runClean :: (Model a) => WorkIO a () 
 runClean = do
-  WS ssetup psetup rsetup _ <- ask
+  WS ssetup psetup rsetup _ _ <- ask
   liftIO $ do
     let eventdir = workbase ssetup </> workname psetup </> "Events" 
         pgsdir = workbase ssetup </> workname psetup </> "../pythia-pgs/src"
@@ -267,7 +267,7 @@ runClean = do
 
 updateBanner :: (Model a) => WorkIO a () 
 updateBanner = do
-  WS ssetup psetup rsetup _ <- ask 
+  WS ssetup psetup rsetup _ _ <- ask 
   liftIO $ do 
     case (usercut rsetup) of 
       NoUserCutDef -> return () 
@@ -287,7 +287,7 @@ updateBanner = do
 
 cleanHepFiles :: (Model a) => WorkIO a () 
 cleanHepFiles = do 
-  WS ssetup psetup rsetup _ <- ask 
+  WS ssetup psetup rsetup _ _ <- ask 
 
   let taskname = makeRunName psetup rsetup 
       eventdir = workbase ssetup </> workname psetup </> "Events" 

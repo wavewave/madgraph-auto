@@ -9,6 +9,8 @@ import HEP.Automation.MadGraph.Machine
 import HEP.Automation.MadGraph.Cluster
 import HEP.Automation.MadGraph.UserCut
 
+import HEP.Storage.WebDAV.Type
+
 data ScriptSetup = SS { 
     templatedir :: String
   , workingdir  :: String 
@@ -42,11 +44,13 @@ data ClusterSetup = CS {
   cluster :: ClusterRunType
 } deriving Show
 
+
 data (Model a) => WorkSetup a = WS { 
   ws_ssetup :: ScriptSetup, 
   ws_psetup :: ProcessSetup a, 
   ws_rsetup :: RunSetup a, 
-  ws_csetup :: ClusterSetup
+  ws_csetup :: ClusterSetup, 
+  ws_storage :: WebDAVRemoteDir
 } -- deriving Show
 
 type WorkIO b a = ReaderT (WorkSetup b) IO a 
