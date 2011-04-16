@@ -9,7 +9,7 @@ import System.Posix.Env
 
 import Control.Concurrent
 
-import "mtl" Control.Monad.Reader
+import Control.Monad.Reader
 
 import System.FilePath ((</>))
 
@@ -173,6 +173,16 @@ generateEvents = do
     setCurrentDirectory (workbase ssetup </> workname psetup)
     checkFile (workbase ssetup </> workname psetup </> "Cards/run_card.dat") 10
     checkFile (workbase ssetup </> workname psetup </> "Cards/param_card.dat") 10
+
+    case pythia rsetup of 
+      RunPYTHIA -> checkFile (workbase ssetup </> workname psetup </> "Cards/pythia_card.dat") 10
+      NoPYTHIA -> return () 
+
+    case pgs rsetup of 
+      RunPGS -> checkFile (workbase ssetup </> workname psetup </> "Cards/pgs_card.dat") 10
+      NoPGS  -> return () 
+
+
     
     case cluster csetup of
       NoParallel -> readProcess ("bin/generate_events") ["0", taskname] ""
