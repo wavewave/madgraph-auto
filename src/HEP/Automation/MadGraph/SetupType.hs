@@ -2,7 +2,7 @@
 
 module HEP.Automation.MadGraph.SetupType where
 
-import "mtl" Control.Monad.Reader
+import Control.Monad.Reader
 
 import HEP.Automation.MadGraph.Model
 import HEP.Automation.MadGraph.Machine
@@ -18,7 +18,7 @@ data ScriptSetup = SS {
   , workbase   :: String
 } deriving Show
 
-data (Model a) => ProcessSetup a = PS { 
+data ProcessSetup a = PS { 
     mversion :: MadGraphVersion
   , model   :: a
   , process :: String
@@ -26,7 +26,7 @@ data (Model a) => ProcessSetup a = PS {
   , workname :: String 
   } deriving Show
 
-data (Model a) => RunSetup a = RS { 
+data RunSetup a = RS { 
     param   :: ModelParam a
   , numevent :: Int
   , machine :: MachineType
@@ -38,19 +38,27 @@ data (Model a) => RunSetup a = RS {
   , usercut :: UserCutSet
   , pgs     :: PGSType 
   , setnum  :: Int 
-} -- deriving Show
+} --  deriving Show
+
+instance (Model a) => Show (RunSetup a) where
+  show (RS pa nu ma rgr rgs mat cu py us pg es) = 
+    show "RS " ++ show pa ++ ":" ++ show nu ++ ":" ++ show ma ++ ":" 
+         ++ show rgr ++ ":" ++ show rgs ++ ":" ++ show mat ++ ":"
+         ++ show cu ++ ":" ++ show py ++ ":" ++ show us ++ ":" 
+         ++ show pg ++ ":" ++ show es
+
 
 data ClusterSetup = CS { 
   cluster :: ClusterRunType
 } deriving Show
 
 
-data (Model a) => WorkSetup a = WS { 
+data WorkSetup a = WS { 
   ws_ssetup :: ScriptSetup, 
   ws_psetup :: ProcessSetup a, 
   ws_rsetup :: RunSetup a, 
   ws_csetup :: ClusterSetup, 
   ws_storage :: WebDAVRemoteDir
-} -- deriving Show
+} deriving Show
 
 type WorkIO b a = ReaderT (WorkSetup b) IO a 
