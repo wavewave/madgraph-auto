@@ -1,5 +1,5 @@
 Name:		madgraph-auto
-Version:	0.3.7.2
+Version:	0.3.7.3
 Synopsis:	automated program library for madgraph run
 Description: 	automated program library for madgraph run  
 License: 	GPL-3
@@ -15,7 +15,7 @@ Library
   ghc-options: 	-Wall -O2 -threaded -funbox-strict-fields -fno-warn-unused-do-bind
   ghc-prof-options: -caf-all -auto-all
   Build-Depends: base>4, process, unix, directory, mtl>2, HStringTemplate > 0.6, 
-                 HStringTemplateHelpersIW, filepath, webdav-manager
+                 HStringTemplateHelpersIW, filepath, webdav-manager > 0.0.2
   Exposed-Modules: 
                    HEP.Automation.MadGraph.Cluster
                    HEP.Automation.MadGraph.Machine
