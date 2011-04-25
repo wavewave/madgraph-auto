@@ -43,6 +43,8 @@ pgsCardMachine :: MachineType -> String
 pgsCardMachine TeVatron = "pgs_card_TEV.dat"
 pgsCardMachine LHC7     = "pgs_card_LHC.dat"
 pgsCardMachine LHC14    = "pgs_card_LHC.dat"
+pgsCardMachine _        = undefined 
+
 
 runCardSetup :: FilePath -> MachineType -> CutType -> MatchType -> RGRunType -> Double -> Int -> IO String 
 runCardSetup tpath machine ctype mtype rgtype scale numevt = do 

@@ -16,7 +16,6 @@ import System.FilePath ((</>))
 import HEP.Automation.MadGraph.Util
 import HEP.Automation.MadGraph.Model 
 import HEP.Automation.MadGraph.Machine
-import HEP.Automation.MadGraph.Cluster
 import HEP.Automation.MadGraph.UserCut
 import HEP.Automation.MadGraph.SetupType
 
@@ -109,6 +108,10 @@ createWorkDir ssetup psetup = do
   renameDirectory (mg5base ssetup </> workname psetup) (workbase ssetup </> workname psetup) 
   return () 
 
+replicateWorkDir :: (Model a) => ScriptSetup -> ProcessSetup a -> IO () 
+replicateWorkDir _ssetup _psetup = do 
+  putStrLn $ "make copies of working directory"
+
 cardPrepare :: (Model a) => WorkIO a () 
 cardPrepare = do 
   WS ssetup psetup rsetup _ _ <- ask 
@@ -187,7 +190,8 @@ generateEvents = do
     case cluster csetup of
       NoParallel -> readProcess ("bin/generate_events") ["0", taskname] ""
       Parallel ncore -> readProcess ("bin/generate_events") ["2", show ncore, taskname] ""
-      Cluster cname -> readProcess ("bin/generate_events") ["1", cname, taskname] "" 
+--      Cluster cname -> readProcess ("bin/generate_events") ["1", cname, taskname] "" 
+      Cluster _ -> undefined 
     return ()
 
 runHEP2LHE :: (Model a) => WorkIO a () 
@@ -257,8 +261,8 @@ runClean = do
     let eventdir = workbase ssetup </> workname psetup </> "Events" 
         pgsdir = workbase ssetup </> workname psetup </> "../pythia-pgs/src"
         taskname = makeRunName psetup rsetup 
-        hepfilename = taskname++"_pythia_events.hep"
-        hepevtfilename = "afterusercut.hepevt"  
+        -- hepfilename = taskname++"_pythia_events.hep"
+        -- hepevtfilename = "afterusercut.hepevt"  
         stdhepfilename = "afterusercut.stdhep" 
         uncleanedfilename = "pgs_uncleaned.lhco"
         cleanedfilename = "pgs_cleaned.lhco"

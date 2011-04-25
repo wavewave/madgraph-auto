@@ -6,7 +6,6 @@ import Control.Monad.Reader
 
 import HEP.Automation.MadGraph.Model
 import HEP.Automation.MadGraph.Machine
-import HEP.Automation.MadGraph.Cluster
 import HEP.Automation.MadGraph.UserCut
 
 import HEP.Storage.WebDAV.Type
@@ -48,8 +47,8 @@ instance (Model a) => Show (RunSetup a) where
          ++ show pg ++ ":" ++ show es
 
 
-data ClusterSetup = CS { 
-  cluster :: ClusterRunType
+data ClusterSetup a = CS { 
+  cluster :: ClusterRunType a
 } deriving Show
 
 
@@ -57,8 +56,19 @@ data WorkSetup a = WS {
   ws_ssetup :: ScriptSetup, 
   ws_psetup :: ProcessSetup a, 
   ws_rsetup :: RunSetup a, 
-  ws_csetup :: ClusterSetup, 
+  ws_csetup :: ClusterSetup a, 
   ws_storage :: WebDAVRemoteDir
 } deriving Show
 
 type WorkIO b a = ReaderT (WorkSetup b) IO a 
+
+data ClusterRunType a = NoParallel 
+                      | Parallel Int 
+                      | Cluster (WorkSetup a -> String) -- ^ cluster directory naming function
+
+instance Show (ClusterRunType a) where
+  show NoParallel = "NoParallel"
+  show (Parallel i) = "Parallel " ++ show i 
+  show (Cluster _f) = "Cluster"
+  
+  

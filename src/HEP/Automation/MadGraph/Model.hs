@@ -2,10 +2,6 @@
 
 module HEP.Automation.MadGraph.Model where
 
-import Text.Printf
-
-import Text.StringTemplate
-import Text.StringTemplate.Helpers
 
 class (Show a, Show (ModelParam a)) => Model a where
   data ModelParam a :: * 

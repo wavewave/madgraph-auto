@@ -17,7 +17,6 @@ Library
   Build-Depends: base>4, process, unix, directory, mtl>2, HStringTemplate > 0.6, 
                  HStringTemplateHelpersIW, filepath, webdav-manager > 0.0.2
   Exposed-Modules: 
-                   HEP.Automation.MadGraph.Cluster
                    HEP.Automation.MadGraph.Machine
                    HEP.Automation.MadGraph.Mathematica
                    HEP.Automation.MadGraph.Model
