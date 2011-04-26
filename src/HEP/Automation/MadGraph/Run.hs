@@ -108,19 +108,32 @@ createWorkDir ssetup psetup = do
   renameDirectory (mg5base ssetup </> workname psetup) (workbase ssetup </> workname psetup) 
   return () 
 
-replicateWorkDir :: (Model a) => ScriptSetup -> ProcessSetup a -> IO () 
-replicateWorkDir _ssetup _psetup = do 
-  putStrLn $ "make copies of working directory"
+replicateWorkDir :: (Model a) => String -> ScriptSetup -> ClusterSetup a -> IO () 
+replicateWorkDir masterworkname ssetup csetup = do 
+  let slaveworkname = cluster_workname . cluster $ csetup 
+  putStrLn $ "make copies of " ++ masterworkname ++ " to " ++ slaveworkname 
+  setCurrentDirectory (workbase ssetup) 
+  readProcess ("cp") ["-a", masterworkname, slaveworkname ] "" 
+  return () 
+  
+getWorkDir :: (Model a) => WorkIO a FilePath   
+getWorkDir = do 
+  WS ssetup psetup rsetup csetup _ <- ask   
+  case cluster csetup of 
+    Cluster master cluname -> workbase ssetup </> cluname 
+    _           -> return $ workbase ssetup </> workname psetup
+
 
 cardPrepare :: (Model a) => WorkIO a () 
 cardPrepare = do 
   WS ssetup psetup rsetup _ _ <- ask 
+  wdir <- getWorkDir 
   liftIO $ do 
     let taskname = makeRunName psetup rsetup 
     putStrLn $ "prepare for cards for " ++ taskname
   
   
-    let carddir = workbase ssetup </> workname psetup </> "Cards"
+    let carddir = wdir </> "Cards"
     checkDirectory carddir 10   
     -- erase previous run 
     existThenRemove (carddir </> "param_card.dat") 
@@ -169,20 +182,21 @@ cardPrepare = do
 generateEvents :: (Model a) => WorkIO a () 
 generateEvents = do 
   WS ssetup psetup rsetup csetup _ <- ask
+  wdir <- getWorkDir
   liftIO $ do 
     let taskname = makeRunName psetup rsetup 
   
     putStrLn $ "generating event for " ++ taskname
-    setCurrentDirectory (workbase ssetup </> workname psetup)
-    checkFile (workbase ssetup </> workname psetup </> "Cards/run_card.dat") 10
-    checkFile (workbase ssetup </> workname psetup </> "Cards/param_card.dat") 10
+    setCurrentDirectory wdir 
+    checkFile (wdir </> "Cards/run_card.dat") 10
+    checkFile (wdir </> "Cards/param_card.dat") 10
 
     case pythia rsetup of 
-      RunPYTHIA -> checkFile (workbase ssetup </> workname psetup </> "Cards/pythia_card.dat") 10
+      RunPYTHIA -> checkFile (wdir </> "Cards/pythia_card.dat") 10
       NoPYTHIA -> return () 
 
     case pgs rsetup of 
-      RunPGS -> checkFile (workbase ssetup </> workname psetup </> "Cards/pgs_card.dat") 10
+      RunPGS -> checkFile (wdir </> "Cards/pgs_card.dat") 10
       NoPGS  -> return () 
 
 
@@ -191,14 +205,15 @@ generateEvents = do
       NoParallel -> readProcess ("bin/generate_events") ["0", taskname] ""
       Parallel ncore -> readProcess ("bin/generate_events") ["2", show ncore, taskname] ""
 --      Cluster cname -> readProcess ("bin/generate_events") ["1", cname, taskname] "" 
-      Cluster _ -> undefined 
+      Cluster _ _ -> undefined 
     return ()
 
 runHEP2LHE :: (Model a) => WorkIO a () 
 runHEP2LHE = do
   WS ssetup psetup rsetup _ _ <- ask 
+  wdir <- getWorkDir 
   liftIO $ do
-    let eventdir = workbase ssetup </> workname psetup </> "Events" 
+    let eventdir = wdir </> "Events" 
         taskname = makeRunName psetup rsetup 
         hepfilename = taskname++"_pythia_events.hep"
         hepevtfilename = "afterusercut.hepevt"  
@@ -216,8 +231,9 @@ runHEP2LHE = do
 runHEPEVT2STDHEP :: (Model a) => WorkIO a () 
 runHEPEVT2STDHEP = do
   WS ssetup psetup _ _ _ <- ask 
+  wdir <- getWorkDir 
   liftIO $ do 
-    let eventdir = workbase ssetup </> workname psetup </> "Events" 
+    let eventdir = wdir </> "Events" 
         hepevtfilename = "afterusercut.hepevt"  
         stdhepfilename = "afterusercut.stdhep" 
   
@@ -235,10 +251,11 @@ runHEPEVT2STDHEP = do
 runPGS :: (Model a) => WorkIO a () 
 runPGS = do
   WS ssetup psetup _ _ _ <- ask 
+  wdir <- getWorkDir 
   liftIO $ do
-    let eventdir = workbase ssetup </> workname psetup </> "Events" 
-        pgsdir = workbase ssetup </> workname psetup </> "../pythia-pgs/src"
-        carddir = workbase ssetup </> workname psetup </> "Cards"
+    let eventdir = wdir </> "Events" 
+        pgsdir   = wdir </> "../pythia-pgs/src"
+        carddir  = wdir </> "Cards"
         stdhepfilename = "afterusercut.stdhep" 
         uncleanedfilename = "pgs_uncleaned.lhco"
     setCurrentDirectory eventdir
@@ -257,9 +274,10 @@ runPGS = do
 runClean :: (Model a) => WorkIO a () 
 runClean = do
   WS ssetup psetup rsetup _ _ <- ask
+  wdir <- getWorkDir 
   liftIO $ do
-    let eventdir = workbase ssetup </> workname psetup </> "Events" 
-        pgsdir = workbase ssetup </> workname psetup </> "../pythia-pgs/src"
+    let eventdir = wdir </> "Events" 
+        pgsdir   = wdir </> "../pythia-pgs/src"
         taskname = makeRunName psetup rsetup 
         -- hepfilename = taskname++"_pythia_events.hep"
         -- hepevtfilename = "afterusercut.hepevt"  
@@ -282,13 +300,14 @@ runClean = do
 updateBanner :: (Model a) => WorkIO a () 
 updateBanner = do
   WS ssetup psetup rsetup _ _ <- ask 
+  wdir <- getWorkDir 
   liftIO $ do 
     case (usercut rsetup) of 
       NoUserCutDef -> return () 
       UserCutDef uc -> do  
-        let eventdir = workbase ssetup </> workname psetup </> "Events" 
+        let eventdir = wdir </> "Events" 
             taskname = makeRunName psetup rsetup 
-            carddir = workbase ssetup </> workname psetup </> "Cards"
+            carddir  = wdir </> "Cards"
             bannerfilename = taskname ++ "_banner.txt"
             newbannerfilename = taskname ++ "_newbanner.txt"
             usercutcontent = prettyprintUserCut uc
@@ -302,9 +321,9 @@ updateBanner = do
 cleanHepFiles :: (Model a) => WorkIO a () 
 cleanHepFiles = do 
   WS ssetup psetup rsetup _ _ <- ask 
-
+  wdir <- getWorkDir 
   let taskname = makeRunName psetup rsetup 
-      eventdir = workbase ssetup </> workname psetup </> "Events" 
+      eventdir = wdir </> "Events" 
       existThenRemoveForAny x = existThenRemove (eventdir </> x)
       clean = mapM_ existThenRemoveForAny  
       hepfilename = taskname++"_pythia_events.hep"

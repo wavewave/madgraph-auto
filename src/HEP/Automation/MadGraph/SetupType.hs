@@ -64,19 +64,25 @@ type WorkIO b a = ReaderT (WorkSetup b) IO a
 
 data ClusterRunType a = NoParallel 
                       | Parallel Int 
-                      | Cluster (WorkSetup a -> FilePath) -- ^ cluster directory names
+                      | Cluster { 
+                          cluster_masterwork :: WorkSetup a, 
+                          cluster_workname   :: FilePath
+                          }
 
 instance Show (ClusterRunType a) where
   show NoParallel = "NoParallel"
   show (Parallel i) = "Parallel " ++ show i 
-  show (Cluster _f) = "Cluster"
+  show (Cluster _ _f) = "Cluster"
   
   
-defaultClusterNamingFunction :: WorkSetup a -> FilePath
-defaultClusterNamingFunction ws =
-  let wn = workname . ws_psetup $ ws 
+defaultClusterNamingFunction :: WorkSetup a -> WorkSetup a -> FilePath
+defaultClusterNamingFunction masterws ws =
+  let wn = workname . ws_psetup $ masterws  
       snum = setnum .  ws_rsetup $ ws
   in  wn ++ "Cluster" ++ show snum
       
       
- 
+data ClusterWork a = ClusterWork { 
+  master :: WorkSetup a, 
+  slaves :: [WorkSetup a] 
+  }
