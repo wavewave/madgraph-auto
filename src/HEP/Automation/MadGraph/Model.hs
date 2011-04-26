@@ -22,3 +22,14 @@ makeProcessFile model mgver process dirname =
         MadGraph5 -> "import model " ++ modelName model
   in importline ++ "\n" ++ process ++ "\n" ++ "output " ++ dirname ++ "\n\n" 
 
+data DummyModel = DummyModel 
+                deriving Show 
+                        
+instance Model DummyModel where
+  data ModelParam DummyModel = DummyParam deriving Show 
+  briefShow _ = "" 
+  modelName _ = "" 
+  paramCard4Model _ = "" 
+  paramCardSetup _ _ _ = return "" 
+  briefParamShow _ = "" 
+  

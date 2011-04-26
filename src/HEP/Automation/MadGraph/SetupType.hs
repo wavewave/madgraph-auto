@@ -64,7 +64,7 @@ type WorkIO b a = ReaderT (WorkSetup b) IO a
 
 data ClusterRunType a = NoParallel 
                       | Parallel Int 
-                      | Cluster (WorkSetup a -> String) -- ^ cluster directory naming function
+                      | Cluster (WorkSetup a -> FilePath) -- ^ cluster directory names
 
 instance Show (ClusterRunType a) where
   show NoParallel = "NoParallel"
@@ -72,3 +72,11 @@ instance Show (ClusterRunType a) where
   show (Cluster _f) = "Cluster"
   
   
+defaultClusterNamingFunction :: WorkSetup a -> FilePath
+defaultClusterNamingFunction ws =
+  let wn = workname . ws_psetup $ ws 
+      snum = setnum .  ws_rsetup $ ws
+  in  wn ++ "Cluster" ++ show snum
+      
+      
+ 
