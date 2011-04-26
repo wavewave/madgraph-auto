@@ -10,6 +10,8 @@ import HEP.Automation.MadGraph.UserCut
 
 import HEP.Storage.WebDAV.Type
 
+
+
 data ScriptSetup = SS { 
     templatedir :: String
   , workingdir  :: String 
@@ -81,8 +83,10 @@ defaultClusterNamingFunction masterws ws =
       snum = setnum .  ws_rsetup $ ws
   in  wn ++ "Cluster" ++ show snum
       
+
       
 data ClusterWork a = ClusterWork { 
   master :: WorkSetup a, 
   slaves :: [WorkSetup a] 
   }
+

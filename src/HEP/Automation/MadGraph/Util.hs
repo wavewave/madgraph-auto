@@ -1,3 +1,5 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 module HEP.Automation.MadGraph.Util where
 
 import System.Directory
@@ -5,6 +7,12 @@ import System.Directory
 import HEP.Automation.MadGraph.Model 
 import HEP.Automation.MadGraph.Machine
 import HEP.Automation.MadGraph.SetupType
+
+import qualified Data.ByteString.Char8  as B
+import Crypto.Classes
+import Data.Digest.Pure.MD5 
+
+import Control.Applicative
 
 existThenRemove :: FilePath -> IO () 
 existThenRemove fp = do 
@@ -31,3 +39,9 @@ makeRunName psetup rsetup =
         KCut -> "KCut"
   in  mprefix++masscoup++"_"++processBrief psetup++"_"++machineName++"_"++matchName++"_"++cutName++"_Set" ++ show (setnum rsetup)  
 
+naming :: (Model a) => WorkSetup a -> String 
+naming = makeRunName <$> ws_psetup <*>  ws_rsetup 
+
+md5naming :: (Model a) => WorkSetup a -> String
+md5naming ws = let md5 :: MD5Digest = hash' . B.pack . naming $ ws   
+               in  "temp" ++ show md5 

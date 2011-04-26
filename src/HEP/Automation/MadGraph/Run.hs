@@ -120,8 +120,8 @@ getWorkDir :: (Model a) => WorkIO a FilePath
 getWorkDir = do 
   WS ssetup psetup rsetup csetup _ <- ask   
   case cluster csetup of 
-    Cluster master cluname -> workbase ssetup </> cluname 
-    _           -> return $ workbase ssetup </> workname psetup
+    Cluster master cluname -> return $ workbase ssetup </> cluname 
+    _                      -> return $ workbase ssetup </> workname psetup
 
 
 cardPrepare :: (Model a) => WorkIO a () 
