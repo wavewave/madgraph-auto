@@ -23,9 +23,8 @@ data MatchType = NoMatch | MLM
 data PYTHIAType = NoPYTHIA | RunPYTHIA
                 deriving Show
 
-data PGSType = NoPGS | RunPGS
+data PGSType = NoPGS | RunPGS | RunPGSNoTau
              deriving Show
-
 
 runCard4CutMatch :: CutType -> MatchType -> String
 runCard4CutMatch NoCut  NoMatch = "run_card_NoCut_NoMatch.dat"
@@ -87,3 +86,5 @@ pgsCardSetup tpath machine pgstype = do
     NoPGS -> return Nothing
     RunPGS -> do str <- readFile (tpath </> pgsCardMachine machine)
                  return (Just (str++"\n\n\n"))
+    RunPGSNoTau -> do str <- readFile (tpath </> pgsCardMachine machine)
+                      return (Just (str++"\n\n\n"))
