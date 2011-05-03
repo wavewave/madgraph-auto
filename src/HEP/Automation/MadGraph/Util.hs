@@ -38,9 +38,9 @@ makeRunName psetup rsetup =
         DefCut -> "DefCut"
         KCut -> "KCut"
       pgsName = case (pgs rsetup) of
-        RunPGSNoTau -> "NoTau"
+        RunPGSNoTau -> "_NoTau"
         _           -> "" 
-  in  mprefix++masscoup++"_"++processBrief psetup++"_"++machineName++"_"++matchName++"_"++cutName++"_"++pgsName++"_Set" ++ show (setnum rsetup)  
+  in  mprefix++masscoup++"_"++processBrief psetup++"_"++machineName++"_"++matchName++"_"++cutName++pgsName++"_Set" ++ show (setnum rsetup)  
 
 naming :: (Model a) => WorkSetup a -> String 
 naming = makeRunName <$> ws_psetup <*>  ws_rsetup 
