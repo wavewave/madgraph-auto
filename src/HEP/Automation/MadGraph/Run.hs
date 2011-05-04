@@ -5,6 +5,7 @@ module HEP.Automation.MadGraph.Run where
 import System.Process
 import System.Directory
 import System.Posix.Unistd (sleep)
+import System.Posix.Files
 import System.Posix.Env 
 
 import Control.Concurrent
@@ -180,7 +181,10 @@ cardPrepare = do
         UserCutDef _  -> writeFile (carddir </> "pgs_card.dat.user") str
 
     case pgs rsetup of 
-      RunPGSNoTau -> copyFile (workingdir ssetup </> "run_pgs_notau" ) (workbase ssetup </> workname psetup </> "bin" </> "run_pgs" )
+      RunPGSNoTau -> do 
+        copyFile (templatedir ssetup </> "run_pgs_notau" ) (workbase ssetup </> workname psetup </> "bin" </> "run_pgs" )
+        setFileMode (workbase ssetup </> workname psetup </> "bin" </> "run_pgs") 0o755 
+        
       _ -> return () 
     return () 
 
@@ -204,6 +208,7 @@ generateEvents = do
 
     case pgs rsetup of 
       RunPGS -> checkFile (wdir </> "Cards/pgs_card.dat") 10
+      RunPGSNoTau -> checkFile (wdir </> "Cards/pgs_card.dat") 10      
       NoPGS  -> return () 
 
 
