@@ -8,7 +8,7 @@ import System.Posix.Unistd (sleep)
 import System.Posix.Env 
 
 import Control.Concurrent
-
+import Control.Monad
 import Control.Monad.Reader
 
 import System.FilePath ((</>))
@@ -106,6 +106,7 @@ createWorkDir ssetup psetup = do
              ++ " to " 
              ++ (workbase ssetup </> workname psetup) 
   renameDirectory (mg5base ssetup </> workname psetup) (workbase ssetup </> workname psetup) 
+  
   return () 
 
 replicateWorkDir :: (Model a) => String -> ScriptSetup -> ClusterSetup a -> IO () 
@@ -177,6 +178,12 @@ cardPrepare = do
       Just str -> case usercut rsetup of 
         NoUserCutDef  -> writeFile (carddir </> "pgs_card.dat") str
         UserCutDef _  -> writeFile (carddir </> "pgs_card.dat.user") str
+
+    case pgs rsetup of 
+      RunPGSNoTau -> copyFile (workingdir ssetup </> "run_pgs_notau" ) (workbase ssetup </> workname psetup </> "bin" </> "run_pgs" )
+      _ -> return () 
+    return () 
+
 
 
 generateEvents :: (Model a) => WorkIO a () 
