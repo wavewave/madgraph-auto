@@ -1,4 +1,6 @@
-{-# LANGUAGE PackageImports, TypeFamilies, FlexibleInstances, FlexibleContexts #-}
+{-# LANGUAGE PackageImports, TypeFamilies, FlexibleInstances #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE ExistentialQuantification #-}
 
 module HEP.Automation.MadGraph.SetupType where
 
@@ -48,6 +50,12 @@ instance (Model a) => Show (RunSetup a) where
          ++ show cu ++ ":" ++ show py ++ ":" ++ show us ++ ":" 
          ++ show pg ++ ":" ++ show es
 
+
+-- data PhysicsSetup = forall a. (Model a) => 
+--  PhysicsSetup { 
+--    physics_psetup :: ProcessSetup a, 
+--    physics_rsetup :: RunSetup a  
+--    }
 
 data ClusterSetup a = CS { 
   cluster :: ClusterRunType a

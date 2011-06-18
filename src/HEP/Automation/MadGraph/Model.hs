@@ -10,6 +10,7 @@ class (Show a, Show (ModelParam a)) => Model a where
   paramCard4Model :: a -> String 
   paramCardSetup  :: FilePath -> a -> ModelParam a -> IO String 
   briefParamShow  :: ModelParam a -> String 
+  interpreteParam :: String -> ModelParam a
 
 data MadGraphVersion = MadGraph4 | MadGraph5
                   deriving Show
@@ -32,4 +33,4 @@ instance Model DummyModel where
   paramCard4Model _ = "" 
   paramCardSetup _ _ _ = return "" 
   briefParamShow _ = "" 
-  
+  interpreteParam _ = DummyParam
