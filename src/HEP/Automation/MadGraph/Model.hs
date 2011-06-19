@@ -7,6 +7,7 @@ class (Show a, Show (ModelParam a)) => Model a where
   data ModelParam a :: * 
   briefShow       :: a -> String 
   modelName       :: a -> String 
+  modelFromString :: String -> Maybe a
   paramCard4Model :: a -> String 
   paramCardSetup  :: FilePath -> a -> ModelParam a -> IO String 
   briefParamShow  :: ModelParam a -> String 
@@ -30,6 +31,9 @@ instance Model DummyModel where
   data ModelParam DummyModel = DummyParam deriving Show 
   briefShow _ = "" 
   modelName _ = "" 
+  modelFromString str = case str of 
+                          "DummyModel" -> Just DummyModel 
+                          _ -> Nothing 
   paramCard4Model _ = "" 
   paramCardSetup _ _ _ = return "" 
   briefParamShow _ = "" 
