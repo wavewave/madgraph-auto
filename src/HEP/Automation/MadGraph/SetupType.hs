@@ -27,7 +27,7 @@ data ProcessSetup a = PS {
   , process :: String
   , processBrief :: String  
   , workname :: String 
-  } deriving Show
+  }
 
 data RunSetup a = RS { 
     param   :: ModelParam a
@@ -43,12 +43,17 @@ data RunSetup a = RS {
   , setnum  :: Int 
 } --  deriving Show
 
+instance (Model a) => Show (ProcessSetup a) where
+  show (PS mv mdl pr prb wk ) = 
+    "Process:" ++ show mv ++ ":" ++ modelName mdl ++ ":"
+               ++ pr ++ ":" ++ prb ++ ":" ++ wk ++ "|"
+
 instance (Model a) => Show (RunSetup a) where
   show (RS pa nu ma rgr rgs mat cu py us pg es) = 
-    show "RS " ++ show pa ++ ":" ++ show nu ++ ":" ++ show ma ++ ":" 
-         ++ show rgr ++ ":" ++ show rgs ++ ":" ++ show mat ++ ":"
-         ++ show cu ++ ":" ++ show py ++ ":" ++ show us ++ ":" 
-         ++ show pg ++ ":" ++ show es
+    "Run:" ++ show pa ++ ":" ++ show nu ++ ":" ++ show ma ++ ":" 
+          ++ show rgr ++ ":" ++ show rgs ++ ":" ++ show mat ++ ":"
+          ++ show cu ++ ":" ++ show py ++ ":" ++ show us ++ ":" 
+          ++ show pg ++ ":" ++ show es ++ "|"
 
 
 -- data PhysicsSetup = forall a. (Model a) => 

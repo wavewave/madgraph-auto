@@ -30,7 +30,7 @@ data DummyModel = DummyModel
 instance Model DummyModel where
   data ModelParam DummyModel = DummyParam deriving Show 
   briefShow _ = "" 
-  modelName _ = "" 
+  modelName _ = "DummyModel" 
   modelFromString str = case str of 
                           "DummyModel" -> Just DummyModel 
                           _ -> Nothing 
