@@ -43,6 +43,8 @@ data RunSetup a = RS {
   , setnum  :: Int 
 } --  deriving Show
 
+data SMPConfiguration = SingleCPU | MultiCPU Int
+
 instance (Model a) => Show (ProcessSetup a) where
   show (PS mv mdl pr prb wk ) = 
     "Process:" ++ show mv ++ ":" ++ modelName mdl ++ ":"
@@ -55,12 +57,6 @@ instance (Model a) => Show (RunSetup a) where
           ++ show cu ++ ":" ++ show py ++ ":" ++ show us ++ ":" 
           ++ show pg ++ ":" ++ show es ++ "|"
 
-
--- data PhysicsSetup = forall a. (Model a) => 
---  PhysicsSetup { 
---    physics_psetup :: ProcessSetup a, 
---    physics_rsetup :: RunSetup a  
---    }
 
 data ClusterSetup a = CS { 
   cluster :: ClusterRunType a
