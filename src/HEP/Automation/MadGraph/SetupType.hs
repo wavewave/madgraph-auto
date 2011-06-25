@@ -44,6 +44,7 @@ data RunSetup a = RS {
 } --  deriving Show
 
 data SMPConfiguration = SingleCPU | MultiCPU Int
+  deriving Show 
 
 instance (Model a) => Show (ProcessSetup a) where
   show (PS mv mdl pr prb wk ) = 
