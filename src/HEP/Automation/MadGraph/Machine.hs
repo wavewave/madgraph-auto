@@ -1,6 +1,11 @@
+{-# LANGUAGE DeriveDataTypeable #-}
+
 module HEP.Automation.MadGraph.Machine where
 
 import Control.Applicative
+
+import Data.Typeable
+import Data.Data
 
 import Text.StringTemplate
 import Text.StringTemplate.Helpers
@@ -29,7 +34,7 @@ data PGSType = NoPGS | RunPGS | RunPGSNoTau
              deriving Show
 
 data PGSJetAlgorithm = Cone | KTJet
-                       deriving Show
+                       deriving (Show, Typeable, Data)
 
 runCard4CutMatch :: CutType -> MatchType -> String
 runCard4CutMatch NoCut  NoMatch = "run_card_NoCut_NoMatch.dat"
