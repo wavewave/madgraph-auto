@@ -166,6 +166,7 @@ cardPrepare = do
                     (templatedir ssetup)
                     (machine rsetup)
                     (pgs     rsetup) 
+                    (jetalgo rsetup)
                   
     writeFile (carddir </> "param_card.dat") paramcard
     writeFile (carddir </> "run_card.dat")   runcard

@@ -12,8 +12,6 @@ import HEP.Automation.MadGraph.UserCut
 
 import HEP.Storage.WebDAV.Type
 
-
-
 data ScriptSetup = SS { 
     templatedir :: String
   , workingdir  :: String 
@@ -40,6 +38,7 @@ data RunSetup a = RS {
   , pythia  :: PYTHIAType
   , usercut :: UserCutSet
   , pgs     :: PGSType 
+  , jetalgo :: PGSJetAlgorithm
   , setnum  :: Int 
 } --  deriving Show
 
@@ -52,11 +51,11 @@ instance (Model a) => Show (ProcessSetup a) where
                ++ pr ++ ":" ++ prb ++ ":" ++ wk ++ "|"
 
 instance (Model a) => Show (RunSetup a) where
-  show (RS pa nu ma rgr rgs mat cu py us pg es) = 
+  show (RS pa nu ma rgr rgs mat cu py us pg ja es) = 
     "Run:" ++ show pa ++ ":" ++ show nu ++ ":" ++ show ma ++ ":" 
           ++ show rgr ++ ":" ++ show rgs ++ ":" ++ show mat ++ ":"
           ++ show cu ++ ":" ++ show py ++ ":" ++ show us ++ ":" 
-          ++ show pg ++ ":" ++ show es ++ "|"
+          ++ show pg ++ ":" ++ show ja ++ ":" ++ show es ++ "|"
 
 
 data ClusterSetup a = CS { 

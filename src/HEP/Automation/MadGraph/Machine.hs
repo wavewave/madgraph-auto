@@ -1,5 +1,7 @@
 module HEP.Automation.MadGraph.Machine where
 
+import Control.Applicative
+
 import Text.StringTemplate
 import Text.StringTemplate.Helpers
 
@@ -26,6 +28,9 @@ data PYTHIAType = NoPYTHIA | RunPYTHIA
 data PGSType = NoPGS | RunPGS | RunPGSNoTau
              deriving Show
 
+data PGSJetAlgorithm = Cone | KTJet
+                       deriving Show
+
 runCard4CutMatch :: CutType -> MatchType -> String
 runCard4CutMatch NoCut  NoMatch = "run_card_NoCut_NoMatch.dat"
 runCard4CutMatch DefCut NoMatch = "run_card_DefCut_NoMatch.dat"
@@ -39,10 +44,10 @@ pythiaCardMatch NoMatch = "pythia_card_default.dat"
 pythiaCardMatch MLM     = "pythia_card_MLM.dat"
 
 pgsCardMachine :: MachineType -> String 
-pgsCardMachine TeVatron = "pgs_card_TEV.dat"
-pgsCardMachine LHC7     = "pgs_card_LHC.dat"
-pgsCardMachine LHC14    = "pgs_card_LHC.dat"
-pgsCardMachine _        = "pgs_card_TEV.dat"
+pgsCardMachine TeVatron = "pgs_card_TEV.dat.st"
+pgsCardMachine LHC7     = "pgs_card_LHC.dat.st"
+pgsCardMachine LHC14    = "pgs_card_LHC.dat.st"
+pgsCardMachine _        = "pgs_card_TEV.dat.st"
 
 
 runCardSetup :: FilePath -> MachineType -> CutType -> MatchType -> RGRunType -> Double -> Int -> IO String 
@@ -80,11 +85,14 @@ pythiaCardSetup tpath mtype ptype = do
       RunPYTHIA -> do str <- readFile (tpath </> pythiaCardMatch NoMatch)
                       return (Just (str++"\n\n\n"))
                       
-pgsCardSetup :: FilePath -> MachineType -> PGSType -> IO (Maybe String) 
-pgsCardSetup tpath machine pgstype = do 
-  case pgstype of 
-    NoPGS -> return Nothing
-    RunPGS -> do str <- readFile (tpath </> pgsCardMachine machine)
-                 return (Just (str++"\n\n\n"))
-    RunPGSNoTau -> do str <- readFile (tpath </> pgsCardMachine machine)
-                      return (Just (str++"\n\n\n"))
+pgsCardSetup :: FilePath -> MachineType -> PGSType -> PGSJetAlgorithm -> IO (Maybe String) 
+pgsCardSetup tpath machine pgstype jetalgo = do 
+  pgscardstr <- case pgstype of 
+                  NoPGS -> return Nothing
+                  RunPGS -> do str <- readFile (tpath </> pgsCardMachine machine)
+                               return (Just (str++"\n\n\n"))
+                  RunPGSNoTau -> do str <- readFile (tpath </> pgsCardMachine machine)
+                                    return (Just (str++"\n\n\n"))
+  case jetalgo of 
+    Cone ->  return $ render1 [ ("jetalgo", "cone") ] <$> pgscardstr
+    KTJet -> return $ render1 [ ("jetalgo", "ktjet") ] <$> pgscardstr
