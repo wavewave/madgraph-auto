@@ -88,6 +88,7 @@ compileFortran = do
         -- copy files and compile
         mapM_ cpFrmTmpl2Working filelistNoTemplate 
         setCurrentDirectory (workingdir ssetup)
+        checkFile (workingdir ssetup </> "compile.sh") 10 
         readProcess "sh" ["./compile.sh"] "" 
 
         return ()
