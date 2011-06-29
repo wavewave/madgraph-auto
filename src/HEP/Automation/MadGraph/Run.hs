@@ -73,7 +73,8 @@ compileFortran = do
                                     , "stdhep_print.f"
                                     , "pgs.inc" 
                                     , "ktclusdble.f"
-                                    , "ME2pythia.f" ]
+                                    , "ME2pythia.f"
+                                    , "compile.sh" ]
         -- erase previous run 
         mapM_ existThenRemoveForAny  (("hep2lhe.f") : filelistNoTemplate)
 
