@@ -297,7 +297,7 @@ runClean = do
         uncleanedfilename = "pgs_uncleaned.lhco"
         cleanedfilename = "pgs_cleaned.lhco"
         finallhco = taskname ++ "_pgs_events.lhco"
-
+        -- finallhcogz = taskname ++ "_pgs_events.lhco.gz"
     setCurrentDirectory eventdir
     checkFile (eventdir </> stdhepfilename) 10
     b <- doesFileExist stdhepfilename 
@@ -306,6 +306,7 @@ runClean = do
         putStrLn "Start clean_output"
         readProcess (pgsdir </> "clean_output") [ "-muon", uncleanedfilename, cleanedfilename ] "" 
         renameFile (eventdir </> cleanedfilename) (eventdir </> finallhco)
+        system ("gzip " ++ finallhco) 
       else error "ERROR pythia result does not exist"  
     return () 
 
