@@ -107,7 +107,6 @@ createWorkDir ssetup psetup = do
              ++ " to " 
              ++ (workbase ssetup </> workname psetup) 
   renameDirectory (mg5base ssetup </> workname psetup) (workbase ssetup </> workname psetup) 
-  
   return () 
 
 replicateWorkDir :: (Model a) => String -> ScriptSetup -> ClusterSetup a -> IO () 
@@ -207,13 +206,13 @@ generateEvents = do
       RunPYTHIA -> checkFile (wdir </> "Cards/pythia_card.dat") 10
       NoPYTHIA -> return () 
 
-    case pgs rsetup of 
-      RunPGS -> checkFile (wdir </> "Cards/pgs_card.dat") 10
-      RunPGSNoTau -> checkFile (wdir </> "Cards/pgs_card.dat") 10      
-      NoPGS  -> return () 
+    case (pgs rsetup, usercut rsetup)  of 
+      (RunPGS,NoUserCutDef) -> checkFile (wdir </> "Cards/pgs_card.dat") 10
+      (RunPGSNoTau,NoUserCutDef) -> checkFile (wdir </> "Cards/pgs_card.dat") 10      
+      (RunPGS,UserCutDef _) -> checkFile (wdir </> "Cards/pgs_card.dat.user") 10
+      (RunPGSNoTau,UserCutDef _) -> checkFile (wdir </> "Cards/pgs_card.dat.user") 10
+      (NoPGS,_)  -> return () 
 
-
-    
     case cluster csetup of
       NoParallel -> readProcess ("bin/generate_events") ["0", taskname] ""
       Parallel ncore -> readProcess ("bin/generate_events") ["2", show ncore, taskname] ""
