@@ -74,9 +74,9 @@ compileFortran = do
                                     , "pgs.inc" 
                                     , "ktclusdble.f"
                                     , "ME2pythia.f"
-                                    , "compile.sh" ]
+                                    ]
         -- erase previous run 
-        mapM_ existThenRemoveForAny  (("hep2lhe.f") : filelistNoTemplate)
+        mapM_ existThenRemoveForAny  ("compile.sh" : "hep2lhe.f" : filelistNoTemplate)
 
         -- setup new hep2lhe.f with a given user cut 
         hep2lhe    <- hep2lheSetup (templatedir ssetup) uc
