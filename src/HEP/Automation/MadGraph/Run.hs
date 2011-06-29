@@ -90,7 +90,7 @@ compileFortran = do
         mapM_ cpFrmTmpl2Working filelistNoTemplate 
         setCurrentDirectory (workingdir ssetup)
         checkFile (workingdir ssetup </> "compile.sh") 10 
-        readProcess "sh" ["./compile.sh"] "" 
+        readProcessWithExitCode "sh" ["./compile.sh"] "" 
 
         return ()
 
@@ -102,7 +102,7 @@ createWorkDir ssetup psetup = do
   writeFile (workingdir ssetup </> "proc_card_mg5.dat") processfilecontent
   checkFile (workingdir ssetup </> "proc_card_mg5.dat") 10 
   setCurrentDirectory (mg5base ssetup)
-  readProcess ("bin/mg5") [workingdir ssetup </> "proc_card_mg5.dat"] ""
+  readProcessWithExitCode ("bin/mg5") [workingdir ssetup </> "proc_card_mg5.dat"] ""
   checkDirectory (mg5base ssetup </> workname psetup) 10
   putStrLn $ "moving directory" 
              ++ (mg5base ssetup </> workname psetup) 
@@ -116,7 +116,7 @@ replicateWorkDir masterworkname ssetup csetup = do
   let slaveworkname = cluster_workname . cluster $ csetup 
   putStrLn $ "make copies of " ++ masterworkname ++ " to " ++ slaveworkname 
   setCurrentDirectory (workbase ssetup) 
-  readProcess ("cp") ["-a", masterworkname, slaveworkname ] "" 
+  readProcessWithExitCode ("cp") ["-a", masterworkname, slaveworkname ] "" 
   return () 
   
 getWorkDir :: (Model a) => WorkIO a FilePath   
@@ -216,8 +216,8 @@ generateEvents = do
       (NoPGS,_)  -> return () 
 
     case cluster csetup of
-      NoParallel -> readProcess ("bin/generate_events") ["0", taskname] ""
-      Parallel ncore -> readProcess ("bin/generate_events") ["2", show ncore, taskname] ""
+      NoParallel     -> readProcessWithExitCode ("bin/generate_events") ["0", taskname] ""
+      Parallel ncore -> readProcessWithExitCode ("bin/generate_events") ["2", show ncore, taskname] ""
 --      Cluster cname -> readProcess ("bin/generate_events") ["1", cname, taskname] "" 
       Cluster _ _ -> undefined 
     return ()
@@ -237,8 +237,8 @@ runHEP2LHE = do
     if b 
       then do 
         putStrLn "Start hep2lhe"
-        readProcess (workingdir ssetup </> "hep2lhe.iw") 
-                    [hepfilename,hepevtfilename] "" 
+        readProcessWithExitCode  (workingdir ssetup </> "hep2lhe.iw") 
+                                 [hepfilename,hepevtfilename] "" 
       else error "ERROR pythia result does not exist"  
     return () 
 
@@ -257,8 +257,8 @@ runHEPEVT2STDHEP = do
     if b 
       then do 
         putStrLn "Start hepevt2stdhep"
-        readProcess (workingdir ssetup </> "hepevt2stdhep.iw") 
-                    [hepevtfilename,stdhepfilename] "" 
+        readProcessWithExitCode (workingdir ssetup </> "hepevt2stdhep.iw") 
+                                [hepevtfilename,stdhepfilename] "" 
       else error "ERROR pythia result does not exist"  
     return () 
 
@@ -281,7 +281,7 @@ runPGS = do
       then do 
         putStrLn "Start pgs"
         putEnv  $ "PDG_MASS_TBL=" ++ pgsdir </> "mass_width_2004.mc "
-        readProcess (pgsdir </> "pgs") ["--stdhep",stdhepfilename,"--nev","0","--detector","../Cards/pgs_card.dat",uncleanedfilename] "" 
+        readProcessWithExitCode (pgsdir </> "pgs") ["--stdhep",stdhepfilename,"--nev","0","--detector","../Cards/pgs_card.dat",uncleanedfilename] "" 
       else error "ERROR pythia result does not exist"  
     return () 
 
@@ -306,7 +306,7 @@ runClean = do
     if b 
       then do 
         putStrLn "Start clean_output"
-        readProcess (pgsdir </> "clean_output") [ "-muon", uncleanedfilename, cleanedfilename ] "" 
+        readProcessWithExitCode (pgsdir </> "clean_output") [ "-muon", uncleanedfilename, cleanedfilename ] "" 
         renameFile (eventdir </> cleanedfilename) (eventdir </> finallhco)
         system ("gzip " ++ finallhco) 
       else error "ERROR pythia result does not exist"  
