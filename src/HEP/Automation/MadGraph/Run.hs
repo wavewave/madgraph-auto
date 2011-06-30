@@ -38,8 +38,11 @@ checkFile fp n = do
     else do 
       b <- liftIO $ doesFileExist fp 
       if b  
-         then liftIO $ do { putStrLn $ fp ++ " checked" ; return () } 
-         else do { liftIO $ threadDelay 5000000 ; checkFile fp (n-1) }  
+        then do 
+          b2 <- liftIO $ getFileStatus fp >>= return.(>0).fromIntegral.fileSize
+          if b2 then liftIO $ do { putStrLn $ fp ++ " checked" ; return () } 
+                else do { liftIO (threadDelay 5000000); checkFile fp (n-1) } 
+          else do { liftIO $ threadDelay 5000000 ; checkFile fp (n-1) }  
 
 checkDirectory :: (Model a) => FilePath -> Int -> WorkIO a () 
 checkDirectory fp n = do 
@@ -82,7 +85,7 @@ compileFortran = do
                                   , "ME2pythia.f"
                                   ]
       -- erase previous run 
-      liftIO $ mapM_ existThenRemoveForAny  ("compile.sh" : "hep2lhe.f" : filelistNoTemplate)
+      liftIO $ mapM_ existThenRemoveForAny  ("compile.sh" :"hep2lhe.f" : filelistNoTemplate)
 
       -- setup new hep2lhe.f with a given user cut 
       hep2lhe <- liftIO $ hep2lheSetup (templatedir ssetup) uc
@@ -96,6 +99,7 @@ compileFortran = do
       liftIO $ mapM_ cpFrmTmpl2Working filelistNoTemplate 
       liftIO $ setCurrentDirectory (workingdir ssetup)
       checkFile (workingdir ssetup </> "compile.sh") 10 
+      liftIO $ threadDelay 1000000
       workIOReadProcessWithExitCode "sh" ["./compile.sh"] "" 
 
       return ()
