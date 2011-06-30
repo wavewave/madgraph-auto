@@ -44,6 +44,23 @@ checkFile fp n = do
                 else do { liftIO (threadDelay 5000000); checkFile fp (n-1) } 
           else do { liftIO $ threadDelay 5000000 ; checkFile fp (n-1) }  
 
+checkVetoFile :: (Model a) => FilePath -> Int -> WorkIO a () 
+checkVetoFile fp n = do 
+  if n < 0 
+    then throwError $ fp ++ " still exists "
+    else do 
+      b <- liftIO $ doesFileExist fp 
+      if not b 
+        then liftIO $ do { putStrLn $ fp ++ " is not exist. good"; return ()}
+        else do { liftIO $ threadDelay 5000000; checkVetoFile fp (n-1) }
+
+existThenRemove :: (Model a) => FilePath -> WorkIO a () 
+existThenRemove fp = do 
+  b <- liftIO $ doesFileExist fp 
+  if b 
+    then do { liftIO $ removeFile fp; checkVetoFile fp 3 }  
+    else return () 
+
 checkDirectory :: (Model a) => FilePath -> Int -> WorkIO a () 
 checkDirectory fp n = do 
   if n < 0 
@@ -85,7 +102,7 @@ compileFortran = do
                                   , "ME2pythia.f"
                                   ]
       -- erase previous run 
-      liftIO $ mapM_ existThenRemoveForAny  ("compile.sh" :"hep2lhe.f" : filelistNoTemplate)
+      mapM_ existThenRemoveForAny  ("compile.sh" :"hep2lhe.f" : filelistNoTemplate)
 
       -- setup new hep2lhe.f with a given user cut 
       hep2lhe <- liftIO $ hep2lheSetup (templatedir ssetup) uc
@@ -149,10 +166,10 @@ cardPrepare = do
   checkDirectory carddir 10   
 
   -- erase previous run 
-  liftIO $ existThenRemove (carddir </> "param_card.dat") 
-  liftIO $ existThenRemove (carddir </> "run_card.dat") 
-  liftIO $ existThenRemove (carddir </> "pythia_card.dat") 
-  liftIO $ existThenRemove (carddir </> "pgs_card.dat")
+  existThenRemove (carddir </> "param_card.dat") 
+  existThenRemove (carddir </> "run_card.dat") 
+  existThenRemove (carddir </> "pythia_card.dat") 
+  existThenRemove (carddir </> "pgs_card.dat")
   
   paramcard  <- liftIO $ paramCardSetup 
                            (templatedir ssetup)
@@ -358,6 +375,5 @@ cleanHepFiles = do
                  (_,MLM,UserCutDef _) -> allhep
                  (RunPYTHIA,_,NoUserCutDef) -> onlyhep
                  (RunPYTHIA,_,UserCutDef _) -> allhep
-  liftIO $ do 
-    sleep 5
-    clean dellst
+  liftIO $ sleep 5
+  clean dellst

@@ -14,13 +14,6 @@ import Data.Digest.Pure.MD5
 
 import Control.Applicative
 
-existThenRemove :: FilePath -> IO () 
-existThenRemove fp = do 
-  b <- doesFileExist fp 
-  if b 
-    then removeFile fp
-    else return () 
-
 makeRunName :: (Model a) => ProcessSetup a -> RunSetup a -> String 
 makeRunName psetup rsetup = 
   let mprefix = briefShow (model psetup)  

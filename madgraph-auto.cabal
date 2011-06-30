@@ -19,7 +19,7 @@ Library
                  pureMD5, crypto-api, bytestring
   Exposed-Modules: 
                    HEP.Automation.MadGraph.Machine
-                   HEP.Automation.MadGraph.Mathematica
+--                   HEP.Automation.MadGraph.Mathematica
                    HEP.Automation.MadGraph.Model
                    HEP.Automation.MadGraph.Run
                    HEP.Automation.MadGraph.SetupType
