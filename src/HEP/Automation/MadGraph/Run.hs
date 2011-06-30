@@ -12,6 +12,7 @@ import Control.Concurrent
 import Control.Monad.Reader
 import Control.Monad.Error
 
+import System.Exit
 import System.FilePath ((</>))
 
 import HEP.Automation.MadGraph.Util
@@ -23,6 +24,12 @@ import HEP.Automation.MadGraph.SetupType
 import Text.StringTemplate
 import Text.StringTemplate.Helpers
 
+workIOReadProcessWithExitCode :: FilePath -> [String] -> String -> WorkIO a ()
+workIOReadProcessWithExitCode cmd args input = do 
+  (ex, _out, _err) <- liftIO $ readProcessWithExitCode cmd args input
+  case ex of 
+    ExitSuccess -> return () 
+    ExitFailure c -> throwError $ "error exit code = " ++ show c ++ " while running " ++ cmd ++ show args 
 
 checkFile :: (Model a) => FilePath -> Int -> WorkIO a () 
 checkFile fp n = do 
@@ -89,9 +96,10 @@ compileFortran = do
       liftIO $ mapM_ cpFrmTmpl2Working filelistNoTemplate 
       liftIO $ setCurrentDirectory (workingdir ssetup)
       checkFile (workingdir ssetup </> "compile.sh") 10 
-      liftIO $ readProcessWithExitCode "sh" ["./compile.sh"] "" 
+      workIOReadProcessWithExitCode "sh" ["./compile.sh"] "" 
 
       return ()
+
 
 
 createWorkDir :: (Model a) => ScriptSetup -> ProcessSetup a -> WorkIO a ()
@@ -101,7 +109,7 @@ createWorkDir ssetup psetup = do
   liftIO $ writeFile (workingdir ssetup </> "proc_card_mg5.dat") processfilecontent
   checkFile (workingdir ssetup </> "proc_card_mg5.dat") 10 
   liftIO $ setCurrentDirectory (mg5base ssetup)
-  liftIO $ readProcessWithExitCode ("bin/mg5") [workingdir ssetup </> "proc_card_mg5.dat"] ""
+  workIOReadProcessWithExitCode ("bin/mg5") [workingdir ssetup </> "proc_card_mg5.dat"] ""
   checkDirectory (mg5base ssetup </> workname psetup) 10
   liftIO $ putStrLn $ "moving directory" 
                       ++ (mg5base ssetup </> workname psetup) 
@@ -210,8 +218,8 @@ generateEvents = do
     (NoPGS,_)  -> return () 
 
   case cluster csetup of
-    NoParallel     -> liftIO $ readProcessWithExitCode ("bin/generate_events") ["0", taskname] ""
-    Parallel ncore -> liftIO $ readProcessWithExitCode ("bin/generate_events") ["2", show ncore, taskname] ""
+    NoParallel     -> workIOReadProcessWithExitCode ("bin/generate_events") ["0", taskname] ""
+    Parallel ncore -> workIOReadProcessWithExitCode ("bin/generate_events") ["2", show ncore, taskname] ""
 --      Cluster cname -> readProcess ("bin/generate_events") ["1", cname, taskname] "" 
     Cluster _ _ -> undefined 
   return ()
@@ -231,7 +239,7 @@ runHEP2LHE = do
   if b 
     then do 
       liftIO $ putStrLn "Start hep2lhe"
-      liftIO $ readProcessWithExitCode  (workingdir ssetup </> "hep2lhe.iw") 
+      workIOReadProcessWithExitCode  (workingdir ssetup </> "hep2lhe.iw") 
                                         [hepfilename,hepevtfilename] "" 
     else throwError "ERROR pythia result does not exist"  
   return () 
@@ -249,7 +257,7 @@ runHEPEVT2STDHEP = do
   if b 
     then do 
       liftIO $ putStrLn "Start hepevt2stdhep"
-      liftIO $ readProcessWithExitCode (workingdir ssetup </> "hepevt2stdhep.iw") 
+      workIOReadProcessWithExitCode (workingdir ssetup </> "hepevt2stdhep.iw") 
                                        [hepevtfilename,stdhepfilename] "" 
     else throwError "ERROR pythia result does not exist"  
   return () 
@@ -269,10 +277,9 @@ runPGS = do
   checkFile (eventdir </> stdhepfilename) 10
   b <- liftIO $ doesFileExist stdhepfilename 
   if b 
-    then liftIO $ do 
-      putStrLn "Start pgs"
-      putEnv  $ "PDG_MASS_TBL=" ++ pgsdir </> "mass_width_2004.mc "
-      readProcessWithExitCode (pgsdir </> "pgs") ["--stdhep",stdhepfilename,"--nev","0","--detector","../Cards/pgs_card.dat",uncleanedfilename] "" 
+    then liftIO $ do putStrLn "Start pgs"
+                     putEnv  $ "PDG_MASS_TBL=" ++ pgsdir </> "mass_width_2004.mc "
+                     readProcessWithExitCode (pgsdir </> "pgs") ["--stdhep",stdhepfilename,"--nev","0","--detector","../Cards/pgs_card.dat",uncleanedfilename] "" 
     else throwError "ERROR pythia result does not exist"  
   return () 
 
@@ -294,11 +301,11 @@ runClean = do
   checkFile (eventdir </> stdhepfilename) 10
   b <- liftIO $ doesFileExist stdhepfilename 
   if b 
-    then liftIO $ do 
-      putStrLn "Start clean_output"
-      readProcessWithExitCode (pgsdir </> "clean_output") [ "-muon", uncleanedfilename, cleanedfilename ] "" 
-      renameFile (eventdir </> cleanedfilename) (eventdir </> finallhco)
-      system ("gzip " ++ finallhco) 
+    then do 
+      liftIO $ putStrLn "Start clean_output"
+      workIOReadProcessWithExitCode (pgsdir </> "clean_output") [ "-muon", uncleanedfilename, cleanedfilename ] "" 
+      liftIO $ renameFile (eventdir </> cleanedfilename) (eventdir </> finallhco)
+      liftIO $ system ("gzip " ++ finallhco) 
     else throwError "ERROR pythia result does not exist"  
   return () 
 
