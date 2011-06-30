@@ -5,6 +5,7 @@
 module HEP.Automation.MadGraph.SetupType where
 
 import Control.Monad.Reader
+import Control.Monad.Error
 
 import HEP.Automation.MadGraph.Model
 import HEP.Automation.MadGraph.Machine
@@ -71,7 +72,7 @@ data WorkSetup a = WS {
   ws_storage :: WebDAVRemoteDir
 } deriving Show
 
-type WorkIO b a = ReaderT (WorkSetup b) IO a 
+type WorkIO b a = ErrorT String (ReaderT (WorkSetup b) IO) a 
 
 data ClusterRunType a = NoParallel 
                       | Parallel Int 
