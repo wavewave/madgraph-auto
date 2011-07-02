@@ -12,11 +12,14 @@ import Text.StringTemplate.Helpers
 
 import System.FilePath ((</>))
 
+data Detector = Tevatron | LHC | CMS | ATLAS
+              deriving (Show,Typeable,Data)
+
 data MachineType = TeVatron 
                  | LHC7 
                  | LHC14 
-                 | Parton Double 
-                 deriving Show
+                 | Parton Double Detector
+                 deriving (Show,Typeable,Data)
 
 data RGRunType = Fixed | Auto 
                deriving Show 
@@ -55,8 +58,10 @@ pgsCardMachine :: MachineType -> String
 pgsCardMachine TeVatron = "pgs_card_TEV.dat.st"
 pgsCardMachine LHC7     = "pgs_card_LHC.dat.st"
 pgsCardMachine LHC14    = "pgs_card_LHC.dat.st"
-pgsCardMachine _        = "pgs_card_TEV.dat.st"
-
+pgsCardMachine (Parton _ LHC) = "pgs_card_LHC.dat.st"
+pgsCardMachine (Parton _ Tevatron) = "pgs_card_TEV.dat.st"
+pgsCardMachine (Parton _ ATLAS) = "pgs_card_ATLAS.dat.st"
+pgsCardMachine (Parton _ CMS) = "pgs_card_CMS.dat.st"
 
 runCardSetup :: FilePath -> MachineType -> CutType -> MatchType -> RGRunType -> Double -> Int -> IO String 
 runCardSetup tpath machine ctype mtype rgtype scale numevt = do 
@@ -64,7 +69,7 @@ runCardSetup tpath machine ctype mtype rgtype scale numevt = do
         TeVatron -> ("1","-1","980")
         LHC7     -> ("1","1","3500")
         LHC14    -> ("1","1","7000")
-        Parton be -> ("0","0", show be)
+        Parton be _ -> ("0","0", show be)
       isFixedRG = case rgtype of 
         Fixed -> "T"
         Auto  -> "F"
