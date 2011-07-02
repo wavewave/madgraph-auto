@@ -377,3 +377,24 @@ cleanHepFiles = do
                  (RunPYTHIA,_,UserCutDef _) -> allhep
   liftIO $ sleep 5
   clean dellst
+
+makeHepGz :: (Model a) => WorkIO a () 
+makeHepGz = do 
+  WS _ssetup psetup rsetup _ _ <- ask 
+  wdir <- getWorkDir 
+  let taskname = makeRunName psetup rsetup 
+      eventdir = wdir </> "Events" 
+      hepfilename = taskname++"_pythia_events.hep"
+  liftIO $ setCurrentDirectory eventdir
+  case (pythia rsetup, match rsetup, usercut rsetup, uploadhep rsetup) of 
+    (_,MLM,UserCutDef _,UploadHEP) -> do 
+      checkFile hepfilename 10 
+      liftIO $ system $ "gzip " ++ hepfilename 
+      return ()
+    (RunPYTHIA,_,UserCutDef _,UploadHEP) -> do 
+      checkFile hepfilename 10 
+      liftIO $ system $ "gzip " ++ hepfilename
+      return () 
+    _ -> return () 
+  liftIO $ threadDelay 5000000
+  return ()

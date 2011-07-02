@@ -40,6 +40,7 @@ data RunSetup a = RS {
   , usercut :: UserCutSet
   , pgs     :: PGSType 
   , jetalgo :: PGSJetAlgorithm
+  , uploadhep :: HEPFileType
   , setnum  :: Int 
 } --  deriving Show
 
@@ -52,11 +53,12 @@ instance (Model a) => Show (ProcessSetup a) where
                ++ pr ++ ":" ++ prb ++ ":" ++ wk ++ "|"
 
 instance (Model a) => Show (RunSetup a) where
-  show (RS pa nu ma rgr rgs mat cu py us pg ja es) = 
+  show (RS pa nu ma rgr rgs mat cu py us pg ja hu es) = 
     "Run:" ++ show pa ++ ":" ++ show nu ++ ":" ++ show ma ++ ":" 
           ++ show rgr ++ ":" ++ show rgs ++ ":" ++ show mat ++ ":"
           ++ show cu ++ ":" ++ show py ++ ":" ++ show us ++ ":" 
-          ++ show pg ++ ":" ++ show ja ++ ":" ++ show es ++ "|"
+          ++ show pg ++ ":" ++ show ja ++ ":" ++ show hu ++ ":" 
+          ++  show es ++ "|"
 
 
 data ClusterSetup a = CS { 

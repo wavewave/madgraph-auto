@@ -36,6 +36,9 @@ data PGSType = NoPGS | RunPGS | RunPGSNoTau
 data PGSJetAlgorithm = Cone | KTJet
                        deriving (Show, Typeable, Data)
 
+data HEPFileType = NoUploadHEP | UploadHEP
+                   deriving (Show, Typeable, Data)
+
 runCard4CutMatch :: CutType -> MatchType -> String
 runCard4CutMatch NoCut  NoMatch = "run_card_NoCut_NoMatch.dat"
 runCard4CutMatch DefCut NoMatch = "run_card_DefCut_NoMatch.dat"
