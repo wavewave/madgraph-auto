@@ -387,11 +387,11 @@ makeHepGz = do
       hepfilename = taskname++"_pythia_events.hep"
   liftIO $ setCurrentDirectory eventdir
   case (pythia rsetup, match rsetup, usercut rsetup, uploadhep rsetup) of 
-    (_,MLM,UserCutDef _,UploadHEP) -> do 
+    (_,MLM,_,UploadHEP) -> do 
       checkFile hepfilename 10 
       liftIO $ system $ "gzip " ++ hepfilename 
       return ()
-    (RunPYTHIA,_,UserCutDef _,UploadHEP) -> do 
+    (RunPYTHIA,_,_,UploadHEP) -> do 
       checkFile hepfilename 10 
       liftIO $ system $ "gzip " ++ hepfilename
       return () 
