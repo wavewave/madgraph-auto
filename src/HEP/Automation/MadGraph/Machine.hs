@@ -36,7 +36,7 @@ data PYTHIAType = NoPYTHIA | RunPYTHIA
 data PGSType = NoPGS | RunPGS | RunPGSNoTau
              deriving Show
 
-data PGSJetAlgorithm = Cone | KTJet
+data PGSJetAlgorithm = Cone | KTJet | AntiKTJet
                        deriving (Show, Typeable, Data)
 
 data HEPFileType = NoUploadHEP | UploadHEP
@@ -109,3 +109,4 @@ pgsCardSetup tpath machine pgstype jetalgo = do
   case jetalgo of 
     Cone ->  return $ render1 [ ("jetalgo", "cone") ] <$> pgscardstr
     KTJet -> return $ render1 [ ("jetalgo", "ktjet") ] <$> pgscardstr
+    AntiKTJet -> return $ render1 [ ("jetalgo", "antikt") ] <$> pgscardstr
