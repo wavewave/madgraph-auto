@@ -34,9 +34,9 @@ makeRunName psetup rsetup =
         RunPGSNoTau -> "_NoTau"
         _           -> "" 
       jetalgoName = case (jetalgo rsetup) of
-        Cone -> "Cone"
-        KTJet -> "KT"
-        AntiKTJet -> "AntiKT"
+        Cone conesize -> "Cone" ++ show conesize
+        KTJet conesize -> "KT" ++ show conesize
+        AntiKTJet conesize -> "AntiKT" ++ show conesize
   in  mprefix++masscoup++"_"++processBrief psetup
         ++"_"++machineName++"_"++matchName++"_"++cutName++pgsName
         ++"_"++jetalgoName ++"_Set" ++ show (setnum rsetup)  
