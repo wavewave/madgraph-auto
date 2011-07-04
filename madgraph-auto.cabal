@@ -25,5 +25,7 @@ Library
                    HEP.Automation.MadGraph.SetupType
                    HEP.Automation.MadGraph.UserCut
                    HEP.Automation.MadGraph.Util
+                   HEP.Automation.MadGraph.Util.V1
+
 
 		 

@@ -1,6 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module HEP.Automation.MadGraph.Util where
+module HEP.Automation.MadGraph.Util.V1 where
 
 import System.Directory
 
@@ -33,13 +33,7 @@ makeRunName psetup rsetup =
       pgsName = case (pgs rsetup) of
         RunPGSNoTau -> "_NoTau"
         _           -> "" 
-      jetalgoName = case (jetalgo rsetup) of
-        Cone -> "Cone"
-        KTJet -> "KT"
-        AntiKTJet -> "AntiKT"
-  in  mprefix++masscoup++"_"++processBrief psetup
-        ++"_"++machineName++"_"++matchName++"_"++cutName++pgsName
-        ++"_"++jetalgoName ++"_Set" ++ show (setnum rsetup)  
+  in  mprefix++masscoup++"_"++processBrief psetup++"_"++machineName++"_"++matchName++"_"++cutName++pgsName++"_Set" ++ show (setnum rsetup)  
 
 naming :: (Model a) => WorkSetup a -> String 
 naming = makeRunName <$> ws_psetup <*>  ws_rsetup 
