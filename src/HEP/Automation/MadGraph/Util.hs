@@ -1,5 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
+-- This is V3
 module HEP.Automation.MadGraph.Util where
 
 import System.Directory
@@ -20,8 +21,8 @@ makeRunName psetup rsetup =
       masscoup = briefParamShow (param rsetup) 
       machineName = case (machine rsetup) of 
         TeVatron -> "TeVa" 
-        LHC7 -> "LHC7"
-        LHC14 -> "LHC14"
+        LHC7 detector -> "LHC7" ++ show detector
+        LHC14 detector -> "LHC14"
         Parton be detector -> "Ptn" ++ (show be) ++ (show detector)
       matchName = case (match rsetup) of 
         MLM -> "MLM"

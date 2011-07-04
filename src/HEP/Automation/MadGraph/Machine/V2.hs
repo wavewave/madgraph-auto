@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 
-module HEP.Automation.MadGraph.Machine where
+module HEP.Automation.MadGraph.Machine.V2 where
 
 import Control.Applicative
 
@@ -16,8 +16,8 @@ data Detector = Tevatron | LHC | CMS | ATLAS
               deriving (Show,Typeable,Data)
 
 data MachineType = TeVatron 
-                 | LHC7 Detector
-                 | LHC14 Detector 
+                 | LHC7 
+                 | LHC14 
                  | Parton Double Detector
                  deriving (Show,Typeable,Data)
 
@@ -56,14 +56,8 @@ pythiaCardMatch MLM     = "pythia_card_MLM.dat"
 
 pgsCardMachine :: MachineType -> String 
 pgsCardMachine TeVatron = "pgs_card_TEV.dat.st"
-pgsCardMachine (LHC7 LHC)    = "pgs_card_LHC.dat.st"
-pgsCardMachine (LHC7 ATLAS)  = "pgs_card_ATLAS.dat.st"
-pgsCardMachine (LHC7 CMS)    = "pgs_card_CMS.dat.st"
-pgsCardMachine (LHC7 _)      = undefined
-pgsCardMachine (LHC14 LHC)   = "pgs_card_LHC.dat.st"
-pgsCardMachine (LHC14 ATLAS) = "pgs_card_ATLAS.dat.st"
-pgsCardMachine (LHC14 CMS)   = "pgs_card_CMS.dat.st"
-pgsCardMachine (LHC14 _)     = undefined
+pgsCardMachine LHC7     = "pgs_card_LHC.dat.st"
+pgsCardMachine LHC14    = "pgs_card_LHC.dat.st"
 pgsCardMachine (Parton _ LHC) = "pgs_card_LHC.dat.st"
 pgsCardMachine (Parton _ Tevatron) = "pgs_card_TEV.dat.st"
 pgsCardMachine (Parton _ ATLAS) = "pgs_card_ATLAS.dat.st"
@@ -73,8 +67,8 @@ runCardSetup :: FilePath -> MachineType -> CutType -> MatchType -> RGRunType -> 
 runCardSetup tpath machine ctype mtype rgtype scale numevt = do 
   let (beamtyp1,beamtyp2,beamenergy) = case machine of 
         TeVatron -> ("1","-1","980")
-        LHC7 _    -> ("1","1","3500")
-        LHC14 _   -> ("1","1","7000")
+        LHC7     -> ("1","1","3500")
+        LHC14    -> ("1","1","7000")
         Parton be _ -> ("0","0", show be)
       isFixedRG = case rgtype of 
         Fixed -> "T"

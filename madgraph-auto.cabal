@@ -1,5 +1,5 @@
 Name:		madgraph-auto
-Version:	0.5.6.0
+Version:	0.5.7.0
 Synopsis:	automated program library for madgraph run
 Description: 	automated program library for madgraph run  
 License: 	GPL-3
@@ -19,13 +19,18 @@ Library
                  pureMD5, crypto-api, bytestring
   Exposed-Modules: 
                    HEP.Automation.MadGraph.Machine
+                   HEP.Automation.MadGraph.Machine.V1
+                   HEP.Automation.MadGraph.Machine.V2
 --                   HEP.Automation.MadGraph.Mathematica
                    HEP.Automation.MadGraph.Model
                    HEP.Automation.MadGraph.Run
                    HEP.Automation.MadGraph.SetupType
+                   HEP.Automation.MadGraph.SetupType.V1
+                   HEP.Automation.MadGraph.SetupType.V2
                    HEP.Automation.MadGraph.UserCut
                    HEP.Automation.MadGraph.Util
                    HEP.Automation.MadGraph.Util.V1
+                   HEP.Automation.MadGraph.Util.V2
 
 
 		 
