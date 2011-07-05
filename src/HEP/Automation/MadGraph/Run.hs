@@ -132,6 +132,7 @@ createWorkDir ssetup psetup = do
   liftIO $ setCurrentDirectory (mg5base ssetup)
   workIOReadProcessWithExitCode ("bin/mg5") [workingdir ssetup </> "proc_card_mg5.dat"] ""
   checkDirectory (mg5base ssetup </> workname psetup) 10
+  checkDirectory (mg5base ssetup </> workname psetup </> "SubProcesses") 10
   liftIO $ putStrLn $ "moving directory" 
                       ++ (mg5base ssetup </> workname psetup) 
                       ++ " to " 
@@ -163,6 +164,8 @@ cardPrepare = do
   let taskname = makeRunName psetup rsetup 
   let carddir = wdir </> "Cards"
   liftIO $ putStrLn $ "prepare for cards for " ++ taskname
+  checkDirectory wdir 10
+  checkDirectory (wdir </> "SubProcesses") 10
   checkDirectory carddir 10   
 
   -- erase previous run 
