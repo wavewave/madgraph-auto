@@ -26,10 +26,11 @@ import Text.StringTemplate.Helpers
 
 workIOReadProcessWithExitCode :: FilePath -> [String] -> String -> WorkIO a ()
 workIOReadProcessWithExitCode cmd args input = do 
-  (ex, _out, _err) <- liftIO $ readProcessWithExitCode cmd args input
+  (ex, out, _err) <- liftIO $ readProcessWithExitCode cmd args input
   case ex of 
     ExitSuccess -> return () 
-    ExitFailure c -> throwError $ "error exit code = " ++ show c ++ " while running " ++ cmd ++ show args 
+    ExitFailure c -> throwError $ "error exit code = " ++ show c ++ " while running " ++ cmd ++ " " ++ show args 
+                                  ++ "\n stdout = " ++ out 
 
 checkFile :: (Model a) => FilePath -> Int -> WorkIO a () 
 checkFile fp n = do 
