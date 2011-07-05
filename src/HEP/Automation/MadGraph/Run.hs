@@ -330,7 +330,7 @@ runClean = do
       liftIO $ putStrLn "Start clean_output"
       workIOReadProcessWithExitCode (pgsdir </> "clean_output") [ "-muon", uncleanedfilename, cleanedfilename ] "" 
       liftIO $ renameFile (eventdir </> cleanedfilename) (eventdir </> finallhco)
-      liftIO $ system ("gzip " ++ finallhco) 
+      liftIO $ system ("gzip -f " ++ finallhco) 
     else throwError "ERROR pythia result does not exist"  
   return () 
 
@@ -393,11 +393,11 @@ makeHepGz = do
   case (pythia rsetup, match rsetup, usercut rsetup, uploadhep rsetup) of 
     (_,MLM,_,UploadHEP) -> do 
       checkFile hepfilename 10 
-      liftIO $ system $ "gzip " ++ hepfilename 
+      liftIO $ system $ "gzip -f " ++ hepfilename 
       return ()
     (RunPYTHIA,_,_,UploadHEP) -> do 
       checkFile hepfilename 10 
-      liftIO $ system $ "gzip " ++ hepfilename
+      liftIO $ system $ "gzip -f " ++ hepfilename
       return () 
     _ -> return () 
   liftIO $ threadDelay 5000000
