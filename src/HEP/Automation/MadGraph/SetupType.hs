@@ -21,8 +21,7 @@ data ScriptSetup = SS {
 } deriving Show
 
 data ProcessSetup a = PS { 
-    mversion :: MadGraphVersion
-  , model   :: a
+    model   :: a
   , process :: String
   , processBrief :: String  
   , workname :: String 
@@ -48,8 +47,8 @@ data SMPConfiguration = SingleCPU | MultiCPU Int
   deriving Show 
 
 instance (Model a) => Show (ProcessSetup a) where
-  show (PS mv mdl pr prb wk ) = 
-    "Process:" ++ show mv ++ ":" ++ modelName mdl ++ ":"
+  show (PS mdl pr prb wk ) = 
+    "Process:" ++ modelName mdl ++ ":"
                ++ pr ++ ":" ++ prb ++ ":" ++ wk ++ "|"
 
 instance (Model a) => Show (RunSetup a) where

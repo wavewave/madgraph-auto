@@ -6,6 +6,7 @@ module HEP.Automation.MadGraph.Model where
 class (Show a, Show (ModelParam a)) => Model a where
   data ModelParam a :: * 
   briefShow       :: a -> String 
+  madgraphVersion :: a -> MadGraphVersion
   modelName       :: a -> String 
   modelFromString :: String -> Maybe a
   paramCard4Model :: a -> String 
@@ -16,10 +17,9 @@ class (Show a, Show (ModelParam a)) => Model a where
 data MadGraphVersion = MadGraph4 | MadGraph5
                   deriving Show
 
-
-makeProcessFile :: Model a => a  -> MadGraphVersion -> String -> String -> String
-makeProcessFile model mgver process dirname = 
-  let importline = case mgver of
+makeProcessFile :: Model a => a -> String -> String -> String
+makeProcessFile model process dirname = 
+  let importline = case madgraphVersion model of
         MadGraph4 -> "import model_v4 " ++ modelName model
         MadGraph5 -> "import model " ++ modelName model
   in importline ++ "\n" ++ process ++ "\n" ++ "output " ++ dirname ++ "\n\n" 
@@ -30,6 +30,7 @@ data DummyModel = DummyModel
 instance Model DummyModel where
   data ModelParam DummyModel = DummyParam deriving Show 
   briefShow _ = "" 
+  madgraphVersion _ = MadGraph4
   modelName _ = "DummyModel" 
   modelFromString str = case str of 
                           "DummyModel" -> Just DummyModel 

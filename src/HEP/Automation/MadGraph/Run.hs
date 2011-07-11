@@ -40,7 +40,7 @@ checkFile fp n = do
       b <- liftIO $ doesFileExist fp 
       if b  
         then do 
-          b2 <- liftIO $ getFileStatus fp >>= return.(>0).fromIntegral.fileSize
+          b2 <- liftIO $ getFileStatus fp >>= return.(> (0 :: Int)).fromIntegral.fileSize
           if b2 then liftIO $ do { putStrLn $ fp ++ " checked" ; return () } 
                 else do { liftIO (threadDelay 5000000); checkFile fp (n-1) } 
           else do { liftIO $ threadDelay 5000000 ; checkFile fp (n-1) }  
@@ -127,7 +127,7 @@ compileFortran = do
 createWorkDir :: (Model a) => ScriptSetup -> ProcessSetup a -> WorkIO a ()
 createWorkDir ssetup psetup = do 
   liftIO $ putStrLn $ "set up a working directory" 
-  let processfilecontent = makeProcessFile (model psetup) (mversion psetup) (process psetup) (workname psetup)
+  let processfilecontent = makeProcessFile (model psetup) (process psetup) (workname psetup)
   liftIO $ writeFile (workingdir ssetup </> "proc_card_mg5.dat") processfilecontent
   checkFile (workingdir ssetup </> "proc_card_mg5.dat") 10 
   liftIO $ setCurrentDirectory (mg5base ssetup)

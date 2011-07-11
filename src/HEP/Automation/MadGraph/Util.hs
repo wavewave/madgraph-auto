@@ -3,8 +3,6 @@
 -- This is V3
 module HEP.Automation.MadGraph.Util where
 
-import System.Directory
-
 import HEP.Automation.MadGraph.Model 
 import HEP.Automation.MadGraph.Machine
 import HEP.Automation.MadGraph.SetupType
@@ -22,7 +20,7 @@ makeRunName psetup rsetup =
       machineName = case (machine rsetup) of 
         TeVatron -> "TeVa" 
         LHC7 detector -> "LHC7" ++ show detector
-        LHC14 detector -> "LHC14"
+        LHC14 detector -> "LHC14" ++ show detector
         Parton be detector -> "Ptn" ++ (show be) ++ (show detector)
       matchName = case (match rsetup) of 
         MLM -> "MLM"
@@ -46,5 +44,5 @@ naming :: (Model a) => WorkSetup a -> String
 naming = makeRunName <$> ws_psetup <*>  ws_rsetup 
 
 md5naming :: (Model a) => WorkSetup a -> String
-md5naming ws = let md5 :: MD5Digest = hash' . B.pack . naming $ ws   
-               in  "temp" ++ show md5 
+md5naming ws = let md5str :: MD5Digest = hash' . B.pack . naming $ ws   
+               in  "temp" ++ show md5str 

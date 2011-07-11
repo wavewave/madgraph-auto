@@ -2,8 +2,6 @@
 
 module HEP.Automation.MadGraph.Util.V2 where
 
-import System.Directory
-
 import HEP.Automation.MadGraph.Model 
 import HEP.Automation.MadGraph.Machine.V2
 import HEP.Automation.MadGraph.SetupType.V2
@@ -45,5 +43,5 @@ naming :: (Model a) => WorkSetup a -> String
 naming = makeRunName <$> ws_psetup <*>  ws_rsetup 
 
 md5naming :: (Model a) => WorkSetup a -> String
-md5naming ws = let md5 :: MD5Digest = hash' . B.pack . naming $ ws   
-               in  "temp" ++ show md5 
+md5naming ws = let md5str :: MD5Digest = hash' . B.pack . naming $ ws   
+               in  "temp" ++ show md5str 
