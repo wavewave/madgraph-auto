@@ -69,8 +69,8 @@ pgsCardMachine (Parton _ Tevatron) = "pgs_card_TEV.dat.st"
 pgsCardMachine (Parton _ ATLAS) = "pgs_card_ATLAS.dat.st"
 pgsCardMachine (Parton _ CMS) = "pgs_card_CMS.dat.st"
 
-runCardSetup :: FilePath -> MachineType -> CutType -> MatchType -> RGRunType -> Double -> Int -> IO String 
-runCardSetup tpath machine ctype mtype rgtype scale numevt = do 
+runCardSetup :: FilePath -> MachineType -> CutType -> MatchType -> RGRunType -> Double -> Int -> Int -> IO String 
+runCardSetup tpath machine ctype mtype rgtype scale numevt setnum = do 
   let (beamtyp1,beamtyp2,beamenergy) = case machine of 
         TeVatron -> ("1","-1","980")
         LHC7 _    -> ("1","1","3500")
@@ -85,6 +85,7 @@ runCardSetup tpath machine ctype mtype rgtype scale numevt = do
   return $ (renderTemplateGroup
               templates
               [ ("numevt"       , show numevtfinal ) 
+              , ("iseed"        , show setnum )
 	      , ("beamTypeOne"  , beamtyp1   )
               , ("beamTypeTwo"  , beamtyp2   )
               , ("beamEnergy" , beamenergy )

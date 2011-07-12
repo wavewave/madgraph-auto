@@ -26,7 +26,9 @@ import Text.StringTemplate.Helpers
 
 workIOReadProcessWithExitCode :: FilePath -> [String] -> String -> WorkIO a ()
 workIOReadProcessWithExitCode cmd args input = do 
-  (ex, out, _err) <- liftIO $ readProcessWithExitCode cmd args input
+  (ex, out, err) <- liftIO $ readProcessWithExitCode cmd args input
+  liftIO $ putStrLn out
+  liftIO $ putStrLn err
   case ex of 
     ExitSuccess -> return () 
     ExitFailure c -> throwError $ "error exit code = " ++ show c ++ " while running " ++ cmd ++ " " ++ show args 
@@ -188,6 +190,7 @@ cardPrepare = do
                            (rgrun   rsetup) 
                            (rgscale rsetup) 
 		           (numevent rsetup) 
+                           (setnum rsetup)
                   
   pythiacard <- liftIO $ pythiaCardSetup 
                            (templatedir ssetup)
