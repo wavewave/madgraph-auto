@@ -12,6 +12,65 @@ import Crypto.Classes
 import Data.Digest.Pure.MD5 
 
 import Control.Applicative
+import Control.Concurrent
+import Control.Monad.Reader 
+import Control.Monad.Error
+
+import System.Directory
+import System.Process
+import System.Exit
+import System.Posix.Files
+
+
+workIOReadProcessWithExitCode :: FilePath -> [String] -> String -> WorkIO a ()
+workIOReadProcessWithExitCode cmd args input = do 
+  (ex, out, err) <- liftIO $ readProcessWithExitCode cmd args input
+  liftIO $ putStrLn out
+  liftIO $ putStrLn err
+  case ex of 
+    ExitSuccess -> return () 
+    ExitFailure c -> throwError $ "error exit code = " ++ show c ++ " while running " ++ cmd ++ " " ++ show args 
+                                  ++ "\n stdout = " ++ out 
+
+checkFile :: (Model a) => FilePath -> Int -> WorkIO a () 
+checkFile fp n = do 
+  if n < 0 
+    then throwError $ "no " ++ fp ++ " ever created." 
+    else do 
+      b <- liftIO $ doesFileExist fp 
+      if b  
+        then do 
+          b2 <- liftIO $ getFileStatus fp >>= return.(> (0 :: Int)).fromIntegral.fileSize
+          if b2 then liftIO $ do { putStrLn $ fp ++ " checked" ; return () } 
+                else do { liftIO (threadDelay 5000000); checkFile fp (n-1) } 
+          else do { liftIO $ threadDelay 5000000 ; checkFile fp (n-1) }  
+
+checkVetoFile :: (Model a) => FilePath -> Int -> WorkIO a () 
+checkVetoFile fp n = do 
+  if n < 0 
+    then throwError $ fp ++ " still exists "
+    else do 
+      b <- liftIO $ doesFileExist fp 
+      if not b 
+        then liftIO $ do { putStrLn $ fp ++ " is not exist. good"; return ()}
+        else do { liftIO $ threadDelay 5000000; checkVetoFile fp (n-1) }
+
+existThenRemove :: (Model a) => FilePath -> WorkIO a () 
+existThenRemove fp = do 
+  b <- liftIO $ doesFileExist fp 
+  if b 
+    then do { liftIO $ removeFile fp; checkVetoFile fp 3 }  
+    else return () 
+
+checkDirectory :: (Model a) => FilePath -> Int -> WorkIO a () 
+checkDirectory fp n = do 
+  if n < 0 
+    then throwError $ "no " ++ fp ++ " ever created." 
+    else do 
+      b <- liftIO $ doesDirectoryExist fp 
+      if b  
+         then liftIO $ do { putStrLn $ fp ++ " checked" ; return () } 
+         else do { liftIO $ threadDelay 5000000 ; checkDirectory fp (n-1) }  
 
 makeRunName :: (Model a) => ProcessSetup a -> RunSetup a -> String 
 makeRunName psetup rsetup = 
@@ -46,3 +105,5 @@ naming = makeRunName <$> ws_psetup <*>  ws_rsetup
 md5naming :: (Model a) => WorkSetup a -> String
 md5naming ws = let md5str :: MD5Digest = hash' . B.pack . naming $ ws   
                in  "temp" ++ show md5str 
+
+

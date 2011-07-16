@@ -12,7 +12,6 @@ import Control.Concurrent
 import Control.Monad.Reader
 import Control.Monad.Error
 
-import System.Exit
 import System.FilePath ((</>))
 
 import HEP.Automation.MadGraph.Util
@@ -23,57 +22,6 @@ import HEP.Automation.MadGraph.SetupType
 
 import Text.StringTemplate
 import Text.StringTemplate.Helpers
-
-workIOReadProcessWithExitCode :: FilePath -> [String] -> String -> WorkIO a ()
-workIOReadProcessWithExitCode cmd args input = do 
-  (ex, out, err) <- liftIO $ readProcessWithExitCode cmd args input
-  liftIO $ putStrLn out
-  liftIO $ putStrLn err
-  case ex of 
-    ExitSuccess -> return () 
-    ExitFailure c -> throwError $ "error exit code = " ++ show c ++ " while running " ++ cmd ++ " " ++ show args 
-                                  ++ "\n stdout = " ++ out 
-
-checkFile :: (Model a) => FilePath -> Int -> WorkIO a () 
-checkFile fp n = do 
-  if n < 0 
-    then throwError $ "no " ++ fp ++ " ever created." 
-    else do 
-      b <- liftIO $ doesFileExist fp 
-      if b  
-        then do 
-          b2 <- liftIO $ getFileStatus fp >>= return.(> (0 :: Int)).fromIntegral.fileSize
-          if b2 then liftIO $ do { putStrLn $ fp ++ " checked" ; return () } 
-                else do { liftIO (threadDelay 5000000); checkFile fp (n-1) } 
-          else do { liftIO $ threadDelay 5000000 ; checkFile fp (n-1) }  
-
-checkVetoFile :: (Model a) => FilePath -> Int -> WorkIO a () 
-checkVetoFile fp n = do 
-  if n < 0 
-    then throwError $ fp ++ " still exists "
-    else do 
-      b <- liftIO $ doesFileExist fp 
-      if not b 
-        then liftIO $ do { putStrLn $ fp ++ " is not exist. good"; return ()}
-        else do { liftIO $ threadDelay 5000000; checkVetoFile fp (n-1) }
-
-existThenRemove :: (Model a) => FilePath -> WorkIO a () 
-existThenRemove fp = do 
-  b <- liftIO $ doesFileExist fp 
-  if b 
-    then do { liftIO $ removeFile fp; checkVetoFile fp 3 }  
-    else return () 
-
-checkDirectory :: (Model a) => FilePath -> Int -> WorkIO a () 
-checkDirectory fp n = do 
-  if n < 0 
-    then throwError $ "no " ++ fp ++ " ever created." 
-    else do 
-      b <- liftIO $ doesDirectoryExist fp 
-      if b  
-         then liftIO $ do { putStrLn $ fp ++ " checked" ; return () } 
-         else do { liftIO $ threadDelay 5000000 ; checkDirectory fp (n-1) }  
-
 
 compileshSetup :: ScriptSetup -> IO String 
 compileshSetup ssetup = do
@@ -385,6 +333,62 @@ cleanHepFiles = do
   liftIO $ sleep 5
   clean dellst
 
+cleanAll :: (Model a) => WorkIO a () 
+cleanAll = do 
+  WS _ssetup psetup rsetup _ _ <- ask 
+  wdir <- getWorkDir 
+  let taskname = makeRunName psetup rsetup 
+      eventdir = wdir </> "Events" 
+      existThenRemoveForAny x = existThenRemove (eventdir </> x)
+      clean = mapM_ existThenRemoveForAny  
+      hepfilename = taskname++"_pythia_events.hep"
+      hepevtfilename = "afterusercut.hepevt"  
+      stdhepfilename = "afterusercut.stdhep"      
+      uncleanedfilename = "pgs_uncleaned.lhco"
+      cleanedfilename = "pgs_cleaned.lhco"
+      bannerfile    = taskname++ "_banner.txt"
+      treefile1     = taskname++ "_beforeveto.tree.gz"
+      lheeventfile1 = taskname ++ "_events.lhe.gz"
+      treefile2     = taskname ++ "_events.tree.gz"
+      newbannerfile = taskname ++ "_newbanner.txt"
+      pgseventfile  = taskname ++ "_pgs_events.lhco.gz"
+      plotpythiafile = taskname ++ "_plots_pythia.html"
+      pythiadir      = taskname ++ "_pythia"
+      pythialog      = taskname ++ "_pythia.log"
+      pythiaroot     = taskname ++ "_pythia.root"
+      pythialhe      = taskname ++ "_pythia_events.lhe.gz"
+      unweightedevts = taskname ++ "_unweighted_events.lhe.gz"
+      xsecstree      = taskname ++ "_xsecs.tree"
+
+      allfiles  = [ hepfilename
+                  , hepevtfilename
+                  , stdhepfilename
+                  , uncleanedfilename
+                  , cleanedfilename 
+                  , bannerfile
+                  , treefile1
+                  , lheeventfile1
+                  , treefile2
+                  , newbannerfile
+                  , pgseventfile
+                  , plotpythiafile
+                  , pythiadir
+                  , pythialog
+                  , pythiaroot
+                  , pythialhe
+                  , unweightedevts
+                  , xsecstree ]
+  liftIO $ sleep 5
+  clean allfiles
+  b <- liftIO $ doesDirectoryExist ( eventdir </> pythiadir)
+  if b 
+    then do
+      liftIO $ setCurrentDirectory ( eventdir </> pythiadir ) 
+      liftIO $ system "rm *"
+      liftIO $ setCurrentDirectory eventdir 
+      liftIO $ removeDirectory (eventdir </> pythiadir )
+    else return () 
+     
 makeHepGz :: (Model a) => WorkIO a () 
 makeHepGz = do 
   WS _ssetup psetup rsetup _ _ <- ask 
