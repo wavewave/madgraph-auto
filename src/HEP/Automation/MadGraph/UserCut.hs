@@ -1,12 +1,15 @@
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE DeriveDataTypeable, ScopedTypeVariables #-}
 
 module HEP.Automation.MadGraph.UserCut where
+
+import Data.Typeable
+import Data.Data
 
 import Text.StringTemplate
 import Text.StringTemplate.Helpers
 
 data UserCutSet = NoUserCutDef | UserCutDef UserCut
-                deriving Show
+                deriving (Show, Typeable, Data)
 
 data UserCut = UserCut {
     uc_metcut    :: Double 
@@ -14,7 +17,7 @@ data UserCut = UserCut {
   , uc_etcutlep  :: Double
   , uc_etacutjet :: Double
   , uc_etcutjet  :: Double  
-} deriving Show
+} deriving (Show, Typeable, Data)
 
 prettyprintUserCut :: UserCut -> String 
 prettyprintUserCut uc = 

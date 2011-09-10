@@ -1,9 +1,12 @@
-{-# LANGUAGE TypeFamilies, FlexibleInstances, FlexibleContexts #-}
+{-# LANGUAGE TypeFamilies, FlexibleInstances, FlexibleContexts, DeriveDataTypeable, StandaloneDeriving #-}
 
 module HEP.Automation.MadGraph.Model where
 
+import Data.Typeable
+import Data.Data
 
-class (Show a, Show (ModelParam a)) => Model a where
+
+class (Show a, Typeable a, Data a, Show (ModelParam a),Typeable (ModelParam a),Data (ModelParam a)) => Model a where
   data ModelParam a :: * 
   briefShow       :: a -> String 
   madgraphVersion :: a -> MadGraphVersion
@@ -25,10 +28,10 @@ makeProcessFile model process dirname =
   in importline ++ "\n" ++ process ++ "\n" ++ "output " ++ dirname ++ "\n\n" 
 
 data DummyModel = DummyModel 
-                deriving Show 
+                deriving (Show,Typeable,Data) 
                         
 instance Model DummyModel where
-  data ModelParam DummyModel = DummyParam deriving Show 
+  data ModelParam DummyModel = DummyParam deriving Show
   briefShow _ = "" 
   madgraphVersion _ = MadGraph4
   modelName _ = "DummyModel" 
@@ -39,3 +42,15 @@ instance Model DummyModel where
   paramCardSetup _ _ _ = return "" 
   briefParamShow _ = "" 
   interpreteParam _ = DummyParam
+
+modelParamTc :: TyCon
+modelParamTc = mkTyCon "HEP.Automation.MadGraph.Model.ModelParam"
+
+
+dummyModelTr :: TypeRep
+dummyModelTr = mkTyConApp (mkTyCon "HEP.Automation.MadGraph.Model.DummyModel") []
+
+instance Typeable (ModelParam DummyModel) where
+  typeOf _ = mkTyConApp modelParamTc [dummyModelTr]
+
+deriving instance Data (ModelParam DummyModel)

@@ -1,6 +1,8 @@
 {-# LANGUAGE PackageImports, TypeFamilies, FlexibleInstances #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE StandaloneDeriving #-}
 
 module HEP.Automation.MadGraph.SetupType where
 
@@ -13,19 +15,27 @@ import HEP.Automation.MadGraph.UserCut
 
 import HEP.Storage.WebDAV.Type
 
+import Data.Typeable
+import Data.Data
+
 data ScriptSetup = SS { 
     templatedir :: String
   , workingdir  :: String 
   , mg5base    :: String
   , workbase   :: String
-} deriving Show
+} deriving (Show,Typeable,Data)
 
 data ProcessSetup a = PS { 
     model   :: a
   , process :: String
   , processBrief :: String  
   , workname :: String 
-  }
+  } 
+
+deriving instance Typeable1 ProcessSetup  
+deriving instance (Model a) => Data (ProcessSetup a)
+
+-- deriving (Typeable,Data)
 
 data RunSetup a = RS { 
     param   :: ModelParam a
@@ -41,10 +51,14 @@ data RunSetup a = RS {
   , jetalgo :: PGSJetAlgorithm
   , uploadhep :: HEPFileType
   , setnum  :: Int 
-} --  deriving Show
+} 
+
+deriving instance Typeable1 RunSetup  
+deriving instance (Model a) => Data (RunSetup a)
+
 
 data SMPConfiguration = SingleCPU | MultiCPU Int
-  deriving Show 
+  deriving (Show,Typeable,Data)
 
 instance (Model a) => Show (ProcessSetup a) where
   show (PS mdl pr prb wk ) = 
@@ -62,7 +76,7 @@ instance (Model a) => Show (RunSetup a) where
 
 data ClusterSetup a = CS { 
   cluster :: ClusterRunType a
-} deriving Show
+} deriving (Show,Typeable,Data)
 
 
 data WorkSetup a = WS { 
@@ -71,7 +85,7 @@ data WorkSetup a = WS {
   ws_rsetup :: RunSetup a, 
   ws_csetup :: ClusterSetup a, 
   ws_storage :: WebDAVRemoteDir
-} deriving Show
+} deriving (Show,Typeable,Data)
 
 type WorkIO b a = ErrorT String (ReaderT (WorkSetup b) IO) a 
 
@@ -80,7 +94,7 @@ data ClusterRunType a = NoParallel
                       | Cluster { 
                           cluster_masterwork :: WorkSetup a, 
                           cluster_workname   :: FilePath
-                          }
+                          } deriving (Typeable,Data)
 
 instance Show (ClusterRunType a) where
   show NoParallel = "NoParallel"

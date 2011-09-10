@@ -22,19 +22,19 @@ data MachineType = TeVatron
                  deriving (Show,Typeable,Data)
 
 data RGRunType = Fixed | Auto 
-               deriving Show 
+               deriving (Show,Typeable,Data) 
 
 data CutType = NoCut | DefCut | KCut 
-             deriving Show
+             deriving (Show,Typeable,Data)
 
 data MatchType = NoMatch | MLM
-               deriving Show
+               deriving (Show,Typeable,Data)
 
 data PYTHIAType = NoPYTHIA | RunPYTHIA
-                deriving Show
+                deriving (Show,Typeable,Data)
 
 data PGSType = NoPGS | RunPGS | RunPGSNoTau
-             deriving Show
+             deriving (Show,Typeable,Data)
 
 data PGSJetAlgorithm = Cone Double | KTJet Double | AntiKTJet Double
                        deriving (Show, Typeable, Data)
