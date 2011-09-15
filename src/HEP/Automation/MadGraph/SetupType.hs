@@ -37,6 +37,10 @@ deriving instance (Model a) => Data (ProcessSetup a)
 
 -- deriving (Typeable,Data)
 
+data LHESanitizerType = NoLHESanitize 
+                      | LHESanitize Int  
+                      deriving (Show,Typeable,Data)
+
 data RunSetup a = RS { 
     param   :: ModelParam a
   , numevent :: Int
@@ -47,6 +51,7 @@ data RunSetup a = RS {
   , cut     :: CutType
   , pythia  :: PYTHIAType
   , usercut :: UserCutSet
+  , lhesanitizer :: LHESanitizerType
   , pgs     :: PGSType 
   , jetalgo :: PGSJetAlgorithm
   , uploadhep :: HEPFileType
@@ -66,10 +71,10 @@ instance (Model a) => Show (ProcessSetup a) where
                ++ pr ++ ":" ++ prb ++ ":" ++ wk ++ "|"
 
 instance (Model a) => Show (RunSetup a) where
-  show (RS pa nu ma rgr rgs mat cu py us pg ja hu es) = 
+  show (RS pa nu ma rgr rgs mat cu py us ls pg ja hu es) = 
     "Run:" ++ show pa ++ ":" ++ show nu ++ ":" ++ show ma ++ ":" 
           ++ show rgr ++ ":" ++ show rgs ++ ":" ++ show mat ++ ":"
-          ++ show cu ++ ":" ++ show py ++ ":" ++ show us ++ ":" 
+          ++ show cu ++ ":" ++ show py ++ ":" ++ show us ++ ":" ++ show ls ++ ":" 
           ++ show pg ++ ":" ++ show ja ++ ":" ++ show hu ++ ":" 
           ++  show es ++ "|"
 

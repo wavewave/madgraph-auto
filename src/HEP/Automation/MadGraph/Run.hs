@@ -182,23 +182,54 @@ generateEvents = do
   checkFile (wdir </> "Cards/run_card.dat") 10
   checkFile (wdir </> "Cards/param_card.dat") 10
 
-  case pythia rsetup of 
-    RunPYTHIA -> checkFile (wdir </> "Cards/pythia_card.dat") 10
-    NoPYTHIA -> return () 
-
-  case (pgs rsetup, usercut rsetup)  of 
-    (RunPGS,NoUserCutDef) -> checkFile (wdir </> "Cards/pgs_card.dat") 10
-    (RunPGSNoTau,NoUserCutDef) -> checkFile (wdir </> "Cards/pgs_card.dat") 10      
-    (RunPGS,UserCutDef _) -> checkFile (wdir </> "Cards/pgs_card.dat.user") 10
-    (RunPGSNoTau,UserCutDef _) -> checkFile (wdir </> "Cards/pgs_card.dat.user") 10
-    (NoPGS,_)  -> return () 
+  case (pythia rsetup,lhesanitizer rsetup) of 
+    (RunPYTHIA,NoLHESanitize) -> checkFile (wdir </> "Cards/pythia_card.dat") 10
+    (RunPYTHIA,LHESanitize _) -> checkFile (wdir </> "Cards/pythia_card.dat.sanitize") 10
+    (NoPYTHIA,_) -> return () 
+  
+  case lhesanitizer rsetup of 
+    NoLHESanitize -> 
+      case (pgs rsetup, usercut rsetup)  of 
+        (RunPGS,NoUserCutDef)      -> checkFile (wdir </> "Cards/pgs_card.dat") 10
+        (RunPGSNoTau,NoUserCutDef) -> checkFile (wdir </> "Cards/pgs_card.dat") 10      
+        (RunPGS,UserCutDef _)      -> checkFile (wdir </> "Cards/pgs_card.dat.user") 10
+        (RunPGSNoTau,UserCutDef _) -> checkFile (wdir </> "Cards/pgs_card.dat.user") 10
+        (NoPGS,_)  -> return () 
+    LHESanitize _ -> 
+      case pgs rsetup of 
+        NoPGS -> return ()
+        _ -> checkFile (wdir </> "Cards/pgs_card.dat.user") 10
+   
+{-
+  case lhesanitizer rsetup of 
+    NoLHESanitize -> liftIO $ putStrLn "no LHE sanitize"
+    LHESanitize pdgid -> liftIO $ putStrLn $ "sanitizer with pdg id = " ++ show pdgid 
+-}
 
   case cluster csetup of
     NoParallel     -> workIOReadProcessWithExitCode ("bin/generate_events") ["0", taskname] ""
     Parallel ncore -> workIOReadProcessWithExitCode ("bin/generate_events") ["2", show ncore, taskname] ""
---      Cluster cname -> readProcess ("bin/generate_events") ["1", cname, taskname] "" 
     Cluster _ _ -> undefined 
   return ()
+
+runPYTHIA :: (Model a) => WorkIO a () 
+runPYTHIA = do
+  WS _ssetup _psetup _ _ _ <- ask 
+  wdir <- getWorkDir 
+  let bindir = wdir </> "bin"
+      eventdir = wdir </> "Events" 
+      carddir  = wdir </> "Cards"
+      unweightedevts = "unweighted_events.lhe"
+  liftIO $ setCurrentDirectory eventdir
+  liftIO $ renameFile (carddir </> "pythia_card.dat.sanitize") (carddir </> "pythia_card.dat")
+
+  b <- liftIO $ doesFileExist unweightedevts
+  if b 
+    then liftIO $ do putStrLn "Start PYTHIA"
+                     readProcessWithExitCode (bindir </> "run_pythia") [] ""
+    else throwError "ERROR: No unweighted events" 
+  return ()
+
 
 runHEP2LHE :: (Model a) => WorkIO a () 
 runHEP2LHE = do
