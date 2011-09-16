@@ -12,13 +12,15 @@ import Control.Concurrent
 import Control.Monad.Reader
 import Control.Monad.Error
 
-import System.FilePath ((</>))
+import System.FilePath 
 
 import HEP.Automation.MadGraph.Util
 import HEP.Automation.MadGraph.Model 
 import HEP.Automation.MadGraph.Machine
 import HEP.Automation.MadGraph.UserCut
 import HEP.Automation.MadGraph.SetupType
+
+import HEP.Automation.MadGraph.LHESanitizer.Parse 
 
 import Text.StringTemplate
 import Text.StringTemplate.Helpers
@@ -214,9 +216,35 @@ generateEvents = do
     Cluster _ _ -> undefined 
   return ()
 
+sanitizeLHE :: (Model a) => WorkIO a () 
+sanitizeLHE = do 
+  WS _ssetup psetup rsetup _csetup _storage <- ask 
+  liftIO $ putStrLn "Start sanitizeLHE"
+  case lhesanitizer rsetup of 
+    NoLHESanitize -> throwError "ERROR: why did you call me? I am in sanitizeLHEFile." 
+    LHESanitize pid -> do 
+      wdir <- getWorkDir
+      let eventdir = wdir </> "Events" 
+          taskname = makeRunName psetup rsetup 
+          unweightedevtfilename = taskname ++ "_unweighted_events.lhe" 
+          rawunweightedevtfilename = "unweighted_events.lhe"
+      liftIO $ setCurrentDirectory eventdir
+      checkFile (eventdir </> unweightedevtfilename <.> "gz") 10 
+
+      liftIO $ system ("gunzip -f " ++ unweightedevtfilename <.> "gz") 
+--      liftIO $ renameFile (eventdir </> unweightedevtfilename) (eventdir </> rawunweightedevtfilename)
+--      checkFile (evnentdir </> rawunweightedevtfilename)
+      liftIO $ sanitizeLHEFile pid unweightedevtfilename rawunweightedevtfilename
+  return () 
+
+
+
+
+-- | run PYTHIA as a user-defined process.
+
 runPYTHIA :: (Model a) => WorkIO a () 
 runPYTHIA = do
-  WS _ssetup _psetup _ _ _ <- ask 
+--   WS _ssetup _psetup _ _ _ <- ask 
   wdir <- getWorkDir 
   let bindir = wdir </> "bin"
       eventdir = wdir </> "Events" 
