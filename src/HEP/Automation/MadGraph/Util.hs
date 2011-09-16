@@ -43,7 +43,10 @@ checkFile fp n = do
           b2 <- liftIO $ getFileStatus fp >>= return.(> (0 :: Int)).fromIntegral.fileSize
           if b2 then liftIO $ do { putStrLn $ fp ++ " checked" ; return () } 
                 else do { liftIO (threadDelay 5000000); checkFile fp (n-1) } 
-          else do { liftIO $ threadDelay 5000000 ; checkFile fp (n-1) }  
+          else do  
+            liftIO $ putStrLn $ fp ++ " not exist : " ++ show (n-1) ++ " chances left" 
+            liftIO $ threadDelay 5000000 
+            checkFile fp (n-1)  
 
 checkVetoFile :: (Model a) => FilePath -> Int -> WorkIO a () 
 checkVetoFile fp n = do 

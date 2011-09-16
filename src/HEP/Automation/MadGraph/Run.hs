@@ -228,6 +228,7 @@ sanitizeLHE = do
           taskname = makeRunName psetup rsetup 
           unweightedevtfilename = taskname ++ "_unweighted_events.lhe" 
           rawunweightedevtfilename = "unweighted_events.lhe"
+
       liftIO $ setCurrentDirectory eventdir
       checkFile (eventdir </> unweightedevtfilename <.> "gz") 10 
 
@@ -235,7 +236,8 @@ sanitizeLHE = do
 
       liftIO $ system ("gunzip -f " ++ unweightedevtfilename <.> "gz") 
 --      liftIO $ renameFile (eventdir </> unweightedevtfilename) (eventdir </> rawunweightedevtfilename)
---      checkFile (evnentdir </> rawunweightedevtfilename)
+      checkFile (eventdir </> unweightedevtfilename) 10
+
       liftIO $ sanitizeLHEFile pids unweightedevtfilename rawunweightedevtfilename
   return () 
 
@@ -251,20 +253,30 @@ runPYTHIA = do
   let bindir = wdir </> "bin"
       eventdir = wdir </> "Events" 
       carddir  = wdir </> "Cards"
+      pythiadir = wdir </> "../pythia-pgs/src"
       taskname = makeRunName psetup rsetup 
       unweightedevtfilename = taskname ++ "_unweighted_events.lhe" 
       rawunweightedevtfilename = "unweighted_events.lhe"
+      hepfilename = taskname++"_pythia_events.hep"
 
   liftIO $ setCurrentDirectory eventdir
   liftIO $ renameFile (carddir </> "pythia_card.dat.sanitize") (carddir </> "pythia_card.dat")
+  
+  checkFile (eventdir </> rawunweightedevtfilename) 10
 
   b <- liftIO $ doesFileExist rawunweightedevtfilename
   if b 
     then do 
       liftIO $ do putStrLn "Start PYTHIA"
+                  putEnv  $ "PDG_MASS_TBL=" ++ pythiadir </> "mass_width_2004.mc "
                   readProcessWithExitCode (bindir </> "run_pythia") [] ""
+      liftIO $ threadDelay ( 60 * 1000000 )
+      checkFile (eventdir </> "pythia_events.hep") 10
+--      liftIO $ renameFile "pythia_events.hep" hepfilename
+
       liftIO $ copyFile rawunweightedevtfilename unweightedevtfilename
       liftIO $ system $ "gzip -f " ++ unweightedevtfilename
+      checkFile (unweightedevtfilename <.> "gz") 10
     else throwError "ERROR: No unweighted events" 
   return ()
 
@@ -278,8 +290,9 @@ runHEP2LHE = do
   let eventdir = wdir </> "Events" 
       pythiadir = wdir </> "../pythia-pgs/src"
       taskname = makeRunName psetup rsetup 
-      hepfilename = taskname++"_pythia_events.hep"
- 
+      hepfilename = case lhesanitizer rsetup of 
+                      NoLHESanitize -> taskname++"_pythia_events.hep"
+                      LHESanitize _ -> "pythia_events.hep"
   
   let hep2lhe = case usercut rsetup of 
                   UserCutDef _ -> (workingdir ssetup) </> "hep2lhe.iw"
