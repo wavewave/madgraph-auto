@@ -73,6 +73,8 @@ compileFortran = do
       return ()
 
 
+-- | Creating working directory. 
+--   Working directory is an autonomous directory of a single madgraph setup
 
 createWorkDir :: (Model a) => ScriptSetup -> ProcessSetup a -> WorkIO a ()
 createWorkDir ssetup psetup = do 
@@ -91,14 +93,7 @@ createWorkDir ssetup psetup = do
   liftIO $ renameDirectory (mg5base ssetup </> workname psetup) (workbase ssetup </> workname psetup) 
   return () 
 
-{-
-replicateWorkDir :: (Model a) => String -> ScriptSetup -> ClusterSetup a -> IO () 
-replicateWorkDir masterworkname ssetup csetup = do 
-  let slaveworkname = cluster_workname . cluster $ csetup 
-  putStrLn $ "make copies of " ++ masterworkname ++ " to " ++ slaveworkname 
-  setCurrentDirectory (workbase ssetup) 
-  readProcessWithExitCode ("cp") ["-a", masterworkname, slaveworkname ] "" 
-  return ()  -}
+-- | Get a path for working directory
   
 getWorkDir :: (Model a) => WorkIO a FilePath   
 getWorkDir = do 
@@ -107,6 +102,10 @@ getWorkDir = do
     Cluster _ cluname -> return $ workbase ssetup </> cluname 
     _                 -> return $ workbase ssetup </> workname psetup
 
+
+-- | prepare for cards: param_card.dat, run_card.dat, pythia_card.dat 
+--   and pgs_card.dat. Depending on UserDefinedCut or LHESanitize, 
+--   pythia_card.dat.sanitize and/or pgs_card.dat.user is created. 
 
 cardPrepare :: (Model a) => WorkIO a () 
 cardPrepare = do 
@@ -123,7 +122,9 @@ cardPrepare = do
   existThenRemove (carddir </> "param_card.dat") 
   existThenRemove (carddir </> "run_card.dat") 
   existThenRemove (carddir </> "pythia_card.dat") 
+  existThenRemove (carddir </> "pythia_card.dat.sanitize") 
   existThenRemove (carddir </> "pgs_card.dat")
+  existThenRemove (carddir </> "pgs_card.dat.user")
   
   paramcard  <- liftIO $ paramCardSetup 
                            (templatedir ssetup)
@@ -156,13 +157,20 @@ cardPrepare = do
 
   case pythiacard of 
     Nothing  -> return () 
-    Just str -> liftIO $ writeFile (carddir </> "pythia_card.dat") str
+    Just str -> 
+      case lhesanitizer rsetup of 
+        NoLHESanitize -> liftIO $ writeFile (carddir </> "pythia_card.dat") str
+        LHESanitize _ -> liftIO $ writeFile (carddir </> "pythia_card.dat.sanitize") str 
     
   case pgscard  of 
     Nothing  -> return () 
-    Just str -> case usercut rsetup of 
-      NoUserCutDef  -> liftIO $ writeFile (carddir </> "pgs_card.dat") str
-      UserCutDef _  -> liftIO $ writeFile (carddir </> "pgs_card.dat.user") str
+    Just str -> case (usercut rsetup,lhesanitizer rsetup) of 
+      (NoUserCutDef,NoLHESanitize) -> 
+        liftIO $ writeFile (carddir </> "pgs_card.dat") str
+      (UserCutDef _,NoLHESanitize) -> 
+        liftIO $ writeFile (carddir </> "pgs_card.dat.user") str
+      (_,LHESanitize _) -> 
+        liftIO $ writeFile (carddir </> "pgs_card.dat.user") str 
 
   case pgs rsetup of 
     RunPGSNoTau -> do 
@@ -200,12 +208,6 @@ generateEvents = do
         NoPGS -> return ()
         _ -> checkFile (wdir </> "Cards/pgs_card.dat.user") 10
    
-{-
-  case lhesanitizer rsetup of 
-    NoLHESanitize -> liftIO $ putStrLn "no LHE sanitize"
-    LHESanitize pdgid -> liftIO $ putStrLn $ "sanitizer with pdg id = " ++ show pdgid 
--}
-
   case cluster csetup of
     NoParallel     -> workIOReadProcessWithExitCode ("bin/generate_events") ["0", taskname] ""
     Parallel ncore -> workIOReadProcessWithExitCode ("bin/generate_events") ["2", show ncore, taskname] ""
