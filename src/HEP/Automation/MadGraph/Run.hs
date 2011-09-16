@@ -222,7 +222,7 @@ sanitizeLHE = do
   liftIO $ putStrLn "Start sanitizeLHE"
   case lhesanitizer rsetup of 
     NoLHESanitize -> throwError "ERROR: why did you call me? I am in sanitizeLHEFile." 
-    LHESanitize pid -> do 
+    LHESanitize pids -> do 
       wdir <- getWorkDir
       let eventdir = wdir </> "Events" 
           taskname = makeRunName psetup rsetup 
@@ -236,7 +236,7 @@ sanitizeLHE = do
       liftIO $ system ("gunzip -f " ++ unweightedevtfilename <.> "gz") 
 --      liftIO $ renameFile (eventdir </> unweightedevtfilename) (eventdir </> rawunweightedevtfilename)
 --      checkFile (evnentdir </> rawunweightedevtfilename)
-      liftIO $ sanitizeLHEFile pid unweightedevtfilename rawunweightedevtfilename
+      liftIO $ sanitizeLHEFile pids unweightedevtfilename rawunweightedevtfilename
   return () 
 
 
