@@ -41,8 +41,28 @@ checkFile fp n = do
       if b  
         then do 
           b2 <- liftIO $ getFileStatus fp >>= return.(> (0 :: Int)).fromIntegral.fileSize
-          if b2 then liftIO $ do { putStrLn $ fp ++ " checked" ; return () } 
-                else do { liftIO (threadDelay 5000000); checkFile fp (n-1) } 
+          if b2 
+            then do 
+              liftIO $ putStrLn $ "nontrivial " ++ fp ++ " exists" 
+              (ex,str,err) <- liftIO $ readProcessWithExitCode "/usr/sbin/lsof" [fp] "" 
+              case ex of 
+                ExitSuccess -> do 
+                  liftIO $ putStrLn $ "some program is using the file " ++ fp  
+                  liftIO $ putStrLn str
+                  liftIO $ threadDelay 5000000 
+                  checkFile fp (n-1)
+                ExitFailure 1 -> do 
+                  liftIO $ putStrLn "okay. it's safe to use this file"
+                  return () 
+                _ -> do 
+                  liftIO $ putStrLn "mmm? what's going on here?"
+                  liftIO $ putStrLn $ show ex
+                  liftIO $ putStrLn str 
+                  liftIO $ putStrLn err
+                  liftIO $ threadDelay 5000000
+                  checkFile fp (n-1)
+
+            else do { liftIO (threadDelay 5000000); checkFile fp (n-1) } 
           else do  
             liftIO $ putStrLn $ fp ++ " not exist : " ++ show (n-1) ++ " chances left" 
             liftIO $ threadDelay 5000000 
