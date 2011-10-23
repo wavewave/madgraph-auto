@@ -1,5 +1,5 @@
 Name:		madgraph-auto
-Version:	0.6.2
+Version:	0.6.2.999
 Synopsis:	automated program library for madgraph run
 Description: 	automated program library for madgraph run  
 License: 	BSD3
@@ -16,7 +16,8 @@ Library
   ghc-prof-options: -caf-all -auto-all
   Build-Depends: base>4, process, unix, directory, mtl>2, HStringTemplate > 0.6, 
                  HStringTemplateHelpersIW, filepath, webdav-manager > 0.0.2, 
-                 pureMD5, crypto-api, bytestring, LHE-sanitizer>=0.0.999
+                 pureMD5, crypto-api, bytestring, LHE-sanitizer>=0.0.999, 
+                 hslogger >= 1.1.4, transformers
   Exposed-Modules: 
                    HEP.Automation.MadGraph.Machine
                    HEP.Automation.MadGraph.Model
@@ -24,6 +25,7 @@ Library
                    HEP.Automation.MadGraph.SetupType
                    HEP.Automation.MadGraph.UserCut
                    HEP.Automation.MadGraph.Util
+                   HEP.Automation.MadGraph.Log
 
 
 
