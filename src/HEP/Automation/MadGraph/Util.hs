@@ -6,6 +6,7 @@ module HEP.Automation.MadGraph.Util where
 import HEP.Automation.MadGraph.Model 
 import HEP.Automation.MadGraph.Machine
 import HEP.Automation.MadGraph.SetupType
+import HEP.Automation.MadGraph.Log
 
 import qualified Data.ByteString.Char8  as B
 import Crypto.Classes
@@ -25,8 +26,8 @@ import System.Posix.Files
 workIOReadProcessWithExitCode :: FilePath -> [String] -> String -> WorkIO a ()
 workIOReadProcessWithExitCode cmd args input = do 
   (ex, out, err) <- liftIO $ readProcessWithExitCode cmd args input
-  liftIO $ putStrLn out
-  liftIO $ putStrLn err
+  debugMsgDef out
+  debugMsgDef err
   case ex of 
     ExitSuccess -> return () 
     ExitFailure c -> throwError $ "error exit code = " ++ show c ++ " while running " ++ cmd ++ " " ++ show args 
@@ -43,28 +44,28 @@ checkFile fp n = do
           b2 <- liftIO $ getFileStatus fp >>= return.(> (0 :: Int)).fromIntegral.fileSize
           if b2 
             then do 
-              liftIO $ putStrLn $ "nontrivial " ++ fp ++ " exists" 
+              debugMsgDef $ "nontrivial " ++ fp ++ " exists" 
               (ex,str,err) <- liftIO $ readProcessWithExitCode "/usr/sbin/lsof" [fp] "" 
               case ex of 
                 ExitSuccess -> do 
-                  liftIO $ putStrLn $ "some program is using the file " ++ fp  
-                  liftIO $ putStrLn str
+                  debugMsgDef $ "some program is using the file " ++ fp  
+                  debugMsgDef str
                   liftIO $ threadDelay 5000000 
                   checkFile fp (n-1)
                 ExitFailure 1 -> do 
-                  liftIO $ putStrLn "okay. it's safe to use this file"
+                  debugMsgDef $ "okay. it's safe to use this file"
                   return () 
                 _ -> do 
-                  liftIO $ putStrLn "mmm? what's going on here?"
-                  liftIO $ putStrLn $ show ex
-                  liftIO $ putStrLn str 
-                  liftIO $ putStrLn err
+                  debugMsgDef "mmm? what's going on here?"
+                  debugMsgDef $ show ex
+                  debugMsgDef $ str 
+                  debugMsgDef $ err
                   liftIO $ threadDelay 5000000
                   checkFile fp (n-1)
 
             else do { liftIO (threadDelay 5000000); checkFile fp (n-1) } 
           else do  
-            liftIO $ putStrLn $ fp ++ " not exist : " ++ show (n-1) ++ " chances left" 
+            debugMsgDef $ fp ++ " not exist : " ++ show (n-1) ++ " chances left" 
             liftIO $ threadDelay 5000000 
             checkFile fp (n-1)  
 
@@ -75,7 +76,7 @@ checkVetoFile fp n = do
     else do 
       b <- liftIO $ doesFileExist fp 
       if not b 
-        then liftIO $ do { putStrLn $ fp ++ " is not exist. good"; return ()}
+        then do { debugMsgDef (fp ++ " is not exist. good"); return ()}
         else do { liftIO $ threadDelay 5000000; checkVetoFile fp (n-1) }
 
 existThenRemove :: (Model a) => FilePath -> WorkIO a () 
@@ -92,7 +93,7 @@ checkDirectory fp n = do
     else do 
       b <- liftIO $ doesDirectoryExist fp 
       if b  
-         then liftIO $ do { putStrLn $ fp ++ " checked" ; return () } 
+         then do { debugMsgDef (fp ++ " checked") ; return () } 
          else do { liftIO $ threadDelay 5000000 ; checkDirectory fp (n-1) }  
 
 makeRunName :: (Model a) => ProcessSetup a -> RunSetup a -> String 

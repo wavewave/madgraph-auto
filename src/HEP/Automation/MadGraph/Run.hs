@@ -19,6 +19,7 @@ import HEP.Automation.MadGraph.Model
 import HEP.Automation.MadGraph.Machine
 import HEP.Automation.MadGraph.UserCut
 import HEP.Automation.MadGraph.SetupType
+import HEP.Automation.MadGraph.Log
 
 import HEP.Automation.MadGraph.LHESanitizer.Parse 
 
@@ -41,7 +42,7 @@ compileFortran = do
   case (usercut rsetup) of 
     NoUserCutDef -> return () 
     UserCutDef uc -> do 
-      liftIO $ putStrLn $ "set up fortran program" 
+      debugMsgDef "set up fortran program" 
       let existThenRemoveForAny x = existThenRemove (workingdir ssetup </> x)
           cpFrmTmpl2Working x = copyFile (templatedir ssetup </> x) 
                                          (workingdir ssetup </> x)
@@ -80,7 +81,7 @@ compileFortran = do
 
 createWorkDir :: (Model a) => ScriptSetup -> ProcessSetup a -> WorkIO a ()
 createWorkDir ssetup psetup = do 
-  liftIO $ putStrLn $ "set up a working directory" 
+  debugMsgDef "set up a working directory" 
   let processfilecontent = makeProcessFile (model psetup) (process psetup) (workname psetup)
   liftIO $ writeFile (workingdir ssetup </> "proc_card_mg5.dat") processfilecontent
   checkFile (workingdir ssetup </> "proc_card_mg5.dat") 10 
@@ -88,10 +89,10 @@ createWorkDir ssetup psetup = do
   workIOReadProcessWithExitCode ("bin/mg5") [workingdir ssetup </> "proc_card_mg5.dat"] ""
   checkDirectory (mg5base ssetup </> workname psetup) 10
   checkDirectory (mg5base ssetup </> workname psetup </> "SubProcesses") 10
-  liftIO $ putStrLn $ "moving directory" 
-                      ++ (mg5base ssetup </> workname psetup) 
-                      ++ " to " 
-                      ++ (workbase ssetup </> workname psetup) 
+  debugMsgDef $ "moving directory" 
+                 ++ (mg5base ssetup </> workname psetup) 
+                 ++ " to " 
+                 ++ (workbase ssetup </> workname psetup) 
   liftIO $ renameDirectory (mg5base ssetup </> workname psetup) (workbase ssetup </> workname psetup) 
   return () 
 
@@ -115,7 +116,7 @@ cardPrepare = do
   wdir <- getWorkDir 
   let taskname = makeRunName psetup rsetup 
   let carddir = wdir </> "Cards"
-  liftIO $ putStrLn $ "prepare for cards for " ++ taskname
+  debugMsgDef $ "prepare for cards for " ++ taskname
   checkDirectory wdir 10
   checkDirectory (wdir </> "SubProcesses") 10
   checkDirectory carddir 10   
@@ -187,7 +188,7 @@ generateEvents = do
   WS _ssetup psetup rsetup csetup _ <- ask
   wdir <- getWorkDir
   let taskname = makeRunName psetup rsetup 
-  liftIO $ putStrLn $ "generating event for " ++ taskname
+  debugMsgDef $ "generating event for " ++ taskname
   liftIO $ setCurrentDirectory wdir 
   checkFile (wdir </> "Cards/run_card.dat") 10
   checkFile (wdir </> "Cards/param_card.dat") 10
@@ -219,7 +220,7 @@ generateEvents = do
 sanitizeLHE :: (Model a) => WorkIO a () 
 sanitizeLHE = do 
   WS _ssetup psetup rsetup _csetup _storage <- ask 
-  liftIO $ putStrLn "Start sanitizeLHE"
+  debugMsgDef "Start sanitizeLHE"
   case lhesanitizer rsetup of 
     NoLHESanitize -> throwError "ERROR: why did you call me? I am in sanitizeLHEFile." 
     LHESanitize pids -> do 
@@ -232,7 +233,7 @@ sanitizeLHE = do
       liftIO $ setCurrentDirectory eventdir
       checkFile (eventdir </> unweightedevtfilename <.> "gz") 10 
 
-      liftIO $ putStrLn (eventdir </> unweightedevtfilename <.> "gz")
+      debugMsgDef $ (eventdir </> unweightedevtfilename <.> "gz")
 
       liftIO $ system ("gunzip -f " ++ unweightedevtfilename <.> "gz") 
 --      liftIO $ renameFile (eventdir </> unweightedevtfilename) (eventdir </> rawunweightedevtfilename)
@@ -267,8 +268,8 @@ runPYTHIA = do
   b <- liftIO $ doesFileExist rawunweightedevtfilename
   if b 
     then do 
-      liftIO $ do putStrLn "Start PYTHIA"
-                  putEnv  $ "PDG_MASS_TBL=" ++ pythiadir </> "mass_width_2004.mc "
+      debugMsgDef "Start PYTHIA"
+      liftIO $ do putEnv  $ "PDG_MASS_TBL=" ++ pythiadir </> "mass_width_2004.mc "
                   readProcessWithExitCode (bindir </> "run_pythia") [] ""
       liftIO $ threadDelay ( 60 * 1000000 )
       checkFile (eventdir </> "pythia_events.hep") 10
@@ -307,7 +308,7 @@ runHEP2LHE = do
   b <- liftIO $ doesFileExist hepfilename 
   if b 
     then do 
-      liftIO $ putStrLn "Start hep2lhe"
+      debugMsgDef "Start hep2lhe"
       workIOReadProcessWithExitCode  hep2lhe [hepfilename,hep2lhe_result] "" 
       case usercut rsetup of
         UserCutDef _  -> return () 
@@ -330,7 +331,7 @@ runHEPEVT2STDHEP = do
   b <- liftIO $ doesFileExist hepevtfilename 
   if b 
     then do 
-      liftIO $ putStrLn "Start hepevt2stdhep"
+      debugMsgDef "Start hepevt2stdhep"
       workIOReadProcessWithExitCode (workingdir ssetup </> "hepevt2stdhep.iw") 
                                        [hepevtfilename,stdhepfilename] "" 
     else throwError "ERROR pythia result does not exist"  
@@ -358,9 +359,11 @@ runPGS = do
   checkFile (eventdir </> pythiaresult) 10
   b <- liftIO $ doesFileExist pythiaresult 
   if b 
-    then liftIO $ do putStrLn "Start pgs"
-                     putEnv  $ "PDG_MASS_TBL=" ++ pgsdir </> "mass_width_2004.mc "
-                     readProcessWithExitCode (pgsdir </> "pgs") ["--stdhep",pythiaresult,"--nev","0","--detector","../Cards/pgs_card.dat",uncleanedfilename] "" 
+    then do 
+      debugMsgDef "Start pgs"
+      liftIO $ do 
+        putEnv  $ "PDG_MASS_TBL=" ++ pgsdir </> "mass_width_2004.mc "
+        readProcessWithExitCode (pgsdir </> "pgs") ["--stdhep",pythiaresult,"--nev","0","--detector","../Cards/pgs_card.dat",uncleanedfilename] "" 
     else throwError "ERROR pythia result does not exist"  
   return () 
 
@@ -383,7 +386,7 @@ runClean = do
   b <- liftIO $ doesFileExist uncleanedfilename 
   if b 
     then do 
-      liftIO $ putStrLn "Start clean_output"
+      debugMsgDef "Start clean_output"
       workIOReadProcessWithExitCode (pgsdir </> "clean_output") [ "-muon", uncleanedfilename, cleanedfilename ] "" 
       liftIO $ renameFile (eventdir </> cleanedfilename) (eventdir </> finallhco)
       liftIO $ system ("gzip -f " ++ finallhco) 
