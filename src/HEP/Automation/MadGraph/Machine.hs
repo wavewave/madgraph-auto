@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveDataTypeable, GeneralizedNewtypeDeriving #-}
 
 module HEP.Automation.MadGraph.Machine where
 
@@ -12,6 +12,16 @@ import Text.StringTemplate.Helpers
 
 import System.FilePath ((</>))
 
+
+newtype Polarization = RH { rhpol_percent  :: Double }
+                     deriving (Show,Typeable,Data)
+
+data InitPolarization = InitPolarization 
+                        { particle1pol :: Polarization
+                        , particle2pol :: Polarization
+                        }  
+                        deriving (Show,Typeable,Data)
+
 data Detector = Tevatron | LHC | CMS | ATLAS
               deriving (Show,Typeable,Data)
 
@@ -19,6 +29,7 @@ data MachineType = TeVatron
                  | LHC7 Detector
                  | LHC14 Detector 
                  | Parton Double Detector
+                 | PolParton Double InitPolarization Detector
                  deriving (Show,Typeable,Data)
 
 data RGRunType = Fixed | Auto 
@@ -68,14 +79,22 @@ pgsCardMachine (Parton _ LHC) = "pgs_card_LHC.dat.st"
 pgsCardMachine (Parton _ Tevatron) = "pgs_card_TEV.dat.st"
 pgsCardMachine (Parton _ ATLAS) = "pgs_card_ATLAS.dat.st"
 pgsCardMachine (Parton _ CMS) = "pgs_card_CMS.dat.st"
+pgsCardMachine (PolParton _ _ LHC) = "pgs_card_LHC.dat.st"
+pgsCardMachine (PolParton _ _ Tevatron) = "pgs_card_TEV.dat.st"
+pgsCardMachine (PolParton _ _ ATLAS) = "pgs_card_ATLAS.dat.st"
+pgsCardMachine (PolParton _ _ CMS) = "pgs_card_CMS.dat.st"
+
 
 runCardSetup :: FilePath -> MachineType -> CutType -> MatchType -> RGRunType -> Double -> Int -> Int -> IO String 
 runCardSetup tpath machine ctype mtype rgtype scale numevt setnum = do 
-  let (beamtyp1,beamtyp2,beamenergy) = case machine of 
-        TeVatron -> ("1","-1","980")
-        LHC7 _    -> ("1","1","3500")
-        LHC14 _   -> ("1","1","7000")
-        Parton be _ -> ("0","0", show be)
+  let (beamtyp1,beamtyp2,beamenergy,beampol1,beampol2) = case machine of 
+        TeVatron -> ("1","-1","980","0","0")
+        LHC7 _    -> ("1","1","3500","0","0")
+        LHC14 _   -> ("1","1","7000","0","0")
+        Parton be _ -> ("0","0", show be,"0","0")
+        PolParton be ipol _ -> ( "0","0", show be
+                               , (show . rhpol_percent . particle1pol) ipol
+                               , (show . rhpol_percent . particle2pol) ipol ) 
       isFixedRG = case rgtype of 
         Fixed -> "T"
         Auto  -> "F"
@@ -88,10 +107,12 @@ runCardSetup tpath machine ctype mtype rgtype scale numevt setnum = do
               , ("iseed"        , show setnum )
 	      , ("beamTypeOne"  , beamtyp1   )
               , ("beamTypeTwo"  , beamtyp2   )
-              , ("beamEnergy" , beamenergy )
-              , ("isFixedRG"  , isFixedRG  )
-              , ("rgScale"    , show scale ) 
-              , ("facScale"   , show scale ) ]
+              , ("beamEnergy"   , beamenergy )
+              , ("beamPolOne"   , beampol1)
+              , ("beamPolTwo"   , beampol2)
+              , ("isFixedRG"    , isFixedRG  )
+              , ("rgScale"      , show scale ) 
+              , ("facScale"     , show scale ) ]
               (runCard4CutMatch ctype mtype)  ) ++ "\n\n\n"
 
 

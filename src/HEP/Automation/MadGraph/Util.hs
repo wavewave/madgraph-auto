@@ -105,6 +105,11 @@ makeRunName psetup rsetup =
         LHC7 detector -> "LHC7" ++ show detector
         LHC14 detector -> "LHC14" ++ show detector
         Parton be detector -> "Ptn" ++ (show be) ++ (show detector)
+        PolParton be ipol detector -> 
+          "PolPtn" ++ (show be) 
+          ++ "First"  ++ (show . rhpol_percent . particle1pol) ipol
+          ++ "Second" ++ (show . rhpol_percent . particle2pol) ipol  
+          ++ (show detector)
       matchName = case (match rsetup) of 
         MLM -> "MLM"
         NoMatch -> "NoMatch"
