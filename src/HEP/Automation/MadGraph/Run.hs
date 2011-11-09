@@ -258,13 +258,10 @@ runPYTHIA = do
       taskname = makeRunName psetup rsetup 
       unweightedevtfilename = taskname ++ "_unweighted_events.lhe" 
       rawunweightedevtfilename = "unweighted_events.lhe"
-      hepfilename = taskname++"_pythia_events.hep"
-
+      -- hepfilename = taskname++"_pythia_events.hep"
   liftIO $ setCurrentDirectory eventdir
   liftIO $ renameFile (carddir </> "pythia_card.dat.sanitize") (carddir </> "pythia_card.dat")
-  
   checkFile (eventdir </> rawunweightedevtfilename) 10
-
   b <- liftIO $ doesFileExist rawunweightedevtfilename
   if b 
     then do 
@@ -280,9 +277,6 @@ runPYTHIA = do
       checkFile (unweightedevtfilename <.> "gz") 10
     else throwError "ERROR: No unweighted events" 
   return ()
-
-  
-
 
 runHEP2LHE :: (Model a) => WorkIO a () 
 runHEP2LHE = do
@@ -505,15 +499,18 @@ makeHepGz = do
       eventdir = wdir </> "Events" 
       hepfilename = taskname++"_pythia_events.hep"
   liftIO $ setCurrentDirectory eventdir
-  case (pythia rsetup, match rsetup, usercut rsetup, uploadhep rsetup) of 
-    (_,MLM,_,UploadHEP) -> do 
-      checkFile hepfilename 10 
-      liftIO $ system $ "gzip -f " ++ hepfilename 
-      return ()
-    (RunPYTHIA,_,_,UploadHEP) -> do 
-      checkFile hepfilename 10 
-      liftIO $ system $ "gzip -f " ++ hepfilename
-      return () 
-    _ -> return () 
+  b <- liftIO $ doesFileExist (hepfilename <.> "gz")
+  if b 
+    then return () 
+    else case (pythia rsetup, match rsetup, usercut rsetup, uploadhep rsetup) of 
+           (_,MLM,_,UploadHEP) -> do 
+              checkFile hepfilename 10 
+              liftIO $ system $ "gzip -f " ++ hepfilename 
+              return ()
+           (RunPYTHIA,_,_,UploadHEP) -> do 
+              checkFile hepfilename 10 
+              liftIO $ system $ "gzip -f " ++ hepfilename
+              return () 
+           _ -> return () 
   liftIO $ threadDelay 5000000
   return ()
