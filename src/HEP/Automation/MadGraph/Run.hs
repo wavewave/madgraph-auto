@@ -1,5 +1,16 @@
 {-# LANGUAGE ScopedTypeVariables, PackageImports #-}
 
+-----------------------------------------------------------------------------
+-- |
+-- Module      : HEP.Automation.MadGraph.Run 
+-- Copyright   : (c) 2011, 2012 Ian-Woo Kim
+--
+-- License     : BSD3
+-- Maintainer  : Ian-Woo Kim <ianwookim@gmail.com>
+-- Stability   : experimental
+-- Portability : GHC
+--
+
 module HEP.Automation.MadGraph.Run where
 
 import System.Process

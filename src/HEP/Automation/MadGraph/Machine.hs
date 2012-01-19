@@ -1,5 +1,16 @@
 {-# LANGUAGE DeriveDataTypeable, GeneralizedNewtypeDeriving #-}
 
+-----------------------------------------------------------------------------
+-- |
+-- Module      : HEP.Automation.MadGraph.Machine 
+-- Copyright   : (c) 2011, 2012 Ian-Woo Kim
+--
+-- License     : BSD3
+-- Maintainer  : Ian-Woo Kim <ianwookim@gmail.com>
+-- Stability   : experimental
+-- Portability : GHC
+--
+
 module HEP.Automation.MadGraph.Machine where
 
 import Control.Applicative

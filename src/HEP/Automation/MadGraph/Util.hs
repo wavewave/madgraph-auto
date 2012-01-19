@@ -1,5 +1,16 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
+-----------------------------------------------------------------------------
+-- |
+-- Module      : HEP.Automation.MadGraph.Util 
+-- Copyright   : (c) 2011, 2012 Ian-Woo Kim
+--
+-- License     : BSD3
+-- Maintainer  : Ian-Woo Kim <ianwookim@gmail.com>
+-- Stability   : experimental
+-- Portability : GHC
+--
+
 -- This is V3
 module HEP.Automation.MadGraph.Util where
 

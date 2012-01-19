@@ -1,5 +1,16 @@
 {-# LANGUAGE TypeFamilies, FlexibleInstances, FlexibleContexts, DeriveDataTypeable, StandaloneDeriving #-}
 
+-----------------------------------------------------------------------------
+-- |
+-- Module      : HEP.Automation.MadGraph.Model 
+-- Copyright   : (c) 2011, 2012 Ian-Woo Kim
+--
+-- License     : BSD3
+-- Maintainer  : Ian-Woo Kim <ianwookim@gmail.com>
+-- Stability   : experimental
+-- Portability : GHC
+--
+
 module HEP.Automation.MadGraph.Model where
 
 import Data.Typeable
