@@ -10,29 +10,28 @@
 -- Stability   : experimental
 -- Portability : GHC
 --
+-----------------------------------------------------------------------------
 
--- This is V3
 module HEP.Automation.MadGraph.Util where
+
+import Control.Applicative
+import Control.Concurrent
+import Control.Monad.Reader 
+import Control.Monad.Error
+-- import Crypto.Classes
+-- import qualified Data.ByteString.Char8 as B
+-- import Data.Digest.Pure.MD5 
+import System.Directory
+import System.Process
+import System.Exit
+import System.Posix.Files
 
 import HEP.Automation.MadGraph.Model 
 import HEP.Automation.MadGraph.Machine
 import HEP.Automation.MadGraph.SetupType
 import HEP.Automation.MadGraph.Log
 
-import qualified Data.ByteString.Char8  as B
-import Crypto.Classes
-import Data.Digest.Pure.MD5 
-
-import Control.Applicative
-import Control.Concurrent
-import Control.Monad.Reader 
-import Control.Monad.Error
-
-import System.Directory
-import System.Process
-import System.Exit
-import System.Posix.Files
-
+-- | 
 
 workIOReadProcessWithExitCode :: FilePath -> [String] -> String -> WorkIO a ()
 workIOReadProcessWithExitCode cmd args input = do 
@@ -43,6 +42,8 @@ workIOReadProcessWithExitCode cmd args input = do
     ExitSuccess -> return () 
     ExitFailure c -> throwError $ "error exit code = " ++ show c ++ " while running " ++ cmd ++ " " ++ show args 
                                   ++ "\n stdout = " ++ out 
+
+-- | 
 
 checkFile :: (Model a) => FilePath -> Int -> WorkIO a () 
 checkFile fp n = do 
@@ -80,6 +81,8 @@ checkFile fp n = do
             liftIO $ threadDelay 5000000 
             checkFile fp (n-1)  
 
+-- | 
+
 checkVetoFile :: (Model a) => FilePath -> Int -> WorkIO a () 
 checkVetoFile fp n = do 
   if n < 0 
@@ -90,12 +93,16 @@ checkVetoFile fp n = do
         then do { debugMsgDef (fp ++ " is not exist. good"); return ()}
         else do { liftIO $ threadDelay 5000000; checkVetoFile fp (n-1) }
 
+-- | 
+
 existThenRemove :: (Model a) => FilePath -> WorkIO a () 
 existThenRemove fp = do 
   b <- liftIO $ doesFileExist fp 
   if b 
     then do { liftIO $ removeFile fp; checkVetoFile fp 3 }  
     else return () 
+
+-- | 
 
 checkDirectory :: (Model a) => FilePath -> Int -> WorkIO a () 
 checkDirectory fp n = do 
@@ -106,6 +113,8 @@ checkDirectory fp n = do
       if b  
          then do { debugMsgDef (fp ++ " checked") ; return () } 
          else do { liftIO $ threadDelay 5000000 ; checkDirectory fp (n-1) }  
+
+-- | 
 
 makeRunName :: (Model a) => ProcessSetup a -> RunSetup a -> String 
 makeRunName psetup rsetup = 
@@ -138,12 +147,16 @@ makeRunName psetup rsetup =
   in  mprefix++masscoup++"_"++processBrief psetup
         ++"_"++machineName++"_"++matchName++"_"++cutName++pgsName
         ++"_"++jetalgoName ++"_Set" ++ show (setnum rsetup)  
+-- | 
 
 naming :: (Model a) => WorkSetup a -> String 
 naming = makeRunName <$> ws_psetup <*>  ws_rsetup 
+
+{-
 
 md5naming :: (Model a) => WorkSetup a -> String
 md5naming ws = let md5str :: MD5Digest = hash' . B.pack . naming $ ws   
                in  "temp" ++ show md5str 
 
+-}
 

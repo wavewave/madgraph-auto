@@ -10,22 +10,23 @@
 -- Stability   : experimental
 -- Portability : GHC
 --
+-----------------------------------------------------------------------------
 
 module HEP.Automation.MadGraph.Machine where
 
-import Control.Applicative
+import           Control.Applicative
+import           Data.Typeable
+import           Data.Data
+import           Text.StringTemplate
+import           Text.StringTemplate.Helpers
+import           System.FilePath ((</>))
 
-import Data.Typeable
-import Data.Data
-
-import Text.StringTemplate
-import Text.StringTemplate.Helpers
-
-import System.FilePath ((</>))
-
+-- | 
 
 newtype Polarization = RH { rhpol_percent  :: Double }
                      deriving (Show,Typeable,Data)
+
+-- | 
 
 data InitPolarization = InitPolarization 
                         { particle1pol :: Polarization
@@ -33,8 +34,12 @@ data InitPolarization = InitPolarization
                         }  
                         deriving (Show,Typeable,Data)
 
+-- | 
+
 data Detector = Tevatron | LHC | CMS | ATLAS
               deriving (Show,Typeable,Data)
+
+-- | 
 
 data MachineType = TeVatron 
                  | LHC7 Detector
@@ -43,26 +48,42 @@ data MachineType = TeVatron
                  | PolParton Double InitPolarization Detector
                  deriving (Show,Typeable,Data)
 
+-- | 
+
 data RGRunType = Fixed | Auto 
                deriving (Show,Typeable,Data) 
+
+-- | 
 
 data CutType = NoCut | DefCut | KCut 
              deriving (Show,Typeable,Data)
 
+-- | 
+
 data MatchType = NoMatch | MLM
                deriving (Show,Typeable,Data)
+
+-- | 
 
 data PYTHIAType = NoPYTHIA | RunPYTHIA
                 deriving (Show,Typeable,Data)
 
+-- | 
+
 data PGSType = NoPGS | RunPGS | RunPGSNoTau
              deriving (Show,Typeable,Data)
+
+-- | 
 
 data PGSJetAlgorithm = Cone Double | KTJet Double | AntiKTJet Double
                        deriving (Show, Typeable, Data)
 
+-- | 
+
 data HEPFileType = NoUploadHEP | UploadHEP
                    deriving (Show, Typeable, Data)
+
+-- | 
 
 runCard4CutMatch :: CutType -> MatchType -> String
 runCard4CutMatch NoCut  NoMatch = "run_card_NoCut_NoMatch.dat"
@@ -71,10 +92,13 @@ runCard4CutMatch DefCut MLM     = "run_card_DefCut_MLM.dat"
 runCard4CutMatch KCut   MLM     = "run_card_KCut_MLM.dat"
 runCard4CutMatch _ _ = error "cut mlm does not match"
 
+-- | 
 
 pythiaCardMatch :: MatchType -> String
 pythiaCardMatch NoMatch = "pythia_card_default.dat"
 pythiaCardMatch MLM     = "pythia_card_MLM.dat"
+
+-- | 
 
 pgsCardMachine :: MachineType -> String 
 pgsCardMachine TeVatron = "pgs_card_TEV.dat.st"
@@ -95,6 +119,7 @@ pgsCardMachine (PolParton _ _ Tevatron) = "pgs_card_TEV.dat.st"
 pgsCardMachine (PolParton _ _ ATLAS) = "pgs_card_ATLAS.dat.st"
 pgsCardMachine (PolParton _ _ CMS) = "pgs_card_CMS.dat.st"
 
+-- | 
 
 runCardSetup :: FilePath -> MachineType -> CutType -> MatchType -> RGRunType -> Double -> Int -> Int -> IO String 
 runCardSetup tpath machine ctype mtype rgtype scale numevt setnum = do 
@@ -126,6 +151,7 @@ runCardSetup tpath machine ctype mtype rgtype scale numevt setnum = do
               , ("facScale"     , show scale ) ]
               (runCard4CutMatch ctype mtype)  ) ++ "\n\n\n"
 
+-- | 
 
 pythiaCardSetup :: FilePath -> MatchType -> PYTHIAType -> IO (Maybe String)
 pythiaCardSetup tpath mtype ptype = do  
@@ -136,6 +162,8 @@ pythiaCardSetup tpath mtype ptype = do
       NoPYTHIA -> return Nothing 
       RunPYTHIA -> do str <- readFile (tpath </> pythiaCardMatch NoMatch)
                       return (Just (str++"\n\n\n"))
+
+-- | 
                       
 pgsCardSetup :: FilePath -> MachineType -> PGSType -> PGSJetAlgorithm -> IO (Maybe String) 
 pgsCardSetup tpath machine pgstype jetalgo = do 
