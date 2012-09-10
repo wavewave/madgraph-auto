@@ -14,27 +14,31 @@
 -- Stability   : experimental
 -- Portability : GHC
 --
+-- types for specifying a pipeline job of madgraph
+-- 
+-----------------------------------------------------------------------------
 
 module HEP.Automation.MadGraph.SetupType where
 
-import Control.Monad.Reader
+-- from others 
 import Control.Monad.Error
-
-import HEP.Automation.MadGraph.Model
+import Control.Monad.Reader
+import Data.Data
+-- from hep-platform
+import HEP.Storage.WebDAV.Type
+-- from this package
 import HEP.Automation.MadGraph.Machine
+import HEP.Automation.MadGraph.Model
 import HEP.Automation.MadGraph.UserCut
 
-import HEP.Storage.WebDAV.Type
-
-import Data.Typeable
-import Data.Data
-
-data ScriptSetup = SS { 
-    templatedir :: String
-  , workingdir  :: String 
-  , mg5base    :: String
-  , workbase   :: String
-} deriving (Show,Typeable,Data)
+-- | 
+data ScriptSetup = 
+  SS { modeltmpldir :: String  -- ^ where model paramcard located, previously templatedir 
+     , runtmpldir   :: String  -- ^ where runcard and other templates located, previously templatedir 
+     , sandboxdir   :: String  -- ^ where we do some temporary file works, previously workdir 
+     , mg5base      :: String  -- ^ where mg5 main installation
+     , mcrundir     :: String  -- ^ where montecarlo run work directory located, previously workbase 
+     } deriving (Show,Typeable,Data)
 
 data ProcessSetup a = PS { 
     model   :: a

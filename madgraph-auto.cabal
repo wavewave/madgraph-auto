@@ -8,6 +8,9 @@ Author:		Ian-Woo Kim
 Maintainer: 	Ian-Woo Kim <ianwookim@gmail.com>
 Build-Type: 	Simple
 Cabal-Version:  >= 1.2
+data-files: 
+            template/*.dat.st
+            template/*.dat
 
 
 Library
@@ -36,3 +39,5 @@ Library
                    HEP.Automation.MadGraph.UserCut
                    HEP.Automation.MadGraph.Util
                    HEP.Automation.MadGraph.Log
+  Other-Modules: 
+                   Paths_madgraph_auto

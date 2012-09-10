@@ -12,17 +12,17 @@ import HEP.Automation.MadGraph.SetupType
 import HEP.Automation.MadGraph.Run
 import HEP.Storage.WebDAV
 
-------- 
+-- |  
 scriptsetup :: ScriptSetup
-scriptsetup = SS {
-    templatedir = "/Users/wavewave/repo/src/pipeline/template/"
-  , workingdir = "/Users/wavewave/repo/workspace/montecarlo/work/"
-  , mg5base    = "/Users/wavewave/repo/workspace/montecarlo/MadGraph5_v1_3_33/"
-  , workbase   = "/Users/wavewave/repo/workspace/montecarlo/mc/"
-  }
+scriptsetup = 
+  SS { modeltmpldir = "/home/wavewave/repo/src/madgraph-auto-model/template/"
+     , runtmpldir = "/home/wavewave/repo/src/madgraph-auto/template"
+     , sandboxdir = "/home/wavewave/repo/workspace/montecarlo/working"
+     , mg5base    = "/home/wavewave/repo/ext/MadGraph5_v1_4_8_4/"
+     , mcrundir   = "/home/wavewave/repo/workspace/montecarlo/mc/"
+     }
 
-
-
+-- | 
 processSetup :: ProcessSetup SM
 processSetup = PS {  
     model = SM
@@ -31,10 +31,11 @@ processSetup = PS {
   , workname   = "Test_20120727"
   }
 
+-- | 
 pset :: ModelParam SM
 pset = SMParam
 
-
+-- | 
 ucut :: UserCut 
 ucut = UserCut { 
     uc_metcut = 15.0
@@ -44,7 +45,7 @@ ucut = UserCut {
   , uc_etcutjet = 15.0 
 }
 
-
+-- | 
 rsetup = RS { param = SMParam 
             , numevent = 10000
             , machine = TeVatron
@@ -61,11 +62,10 @@ rsetup = RS { param = SMParam
             , setnum  = 1
             }
 
+-- | 
 wsetup = WS scriptsetup processSetup rsetup (CS NoParallel) (WebDAVRemoteDir "")
 
-
-
-
+-- | 
 main :: IO ()
 main = do putStrLn "models : sm "
           r <- flip runReaderT wsetup . runErrorT $ do 
