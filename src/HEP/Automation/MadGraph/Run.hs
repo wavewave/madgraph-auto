@@ -219,6 +219,14 @@ generateEvents = do
     NoParallel     -> workIOReadProcessWithExitCode ("bin/generate_events") ["0", taskname] ""
     Parallel ncore -> workIOReadProcessWithExitCode ("bin/generate_events") ["2", show ncore, taskname] ""
     Cluster _ _ -> undefined 
+  -- this is because madgraph-5-1.4 changes the file location. 
+  let eventdir = wdir </> "Events" 
+      unweightedevtfilename = taskname ++ "_unweighted_events.lhe" 
+      rawunweightedevtfilename = "unweighted_events.lhe"
+  liftIO $ setCurrentDirectory eventdir  
+  checkFile (eventdir </> taskname </> rawunweightedevtfilename <.> "gz") 10 
+  liftIO $ renameFile (eventdir</>taskname</>rawunweightedevtfilename<.>"gz") 
+                      (eventdir</>unweightedevtfilename<.>"gz")
   return ()
 
 -- | 
