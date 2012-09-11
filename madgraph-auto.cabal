@@ -11,7 +11,7 @@ Cabal-Version:  >= 1.2
 data-files: 
             template/*.dat.st
             template/*.dat
-
+            template/me5_configuration.txt 
 
 Library
   hs-source-dirs: src
