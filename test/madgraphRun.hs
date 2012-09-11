@@ -1,26 +1,33 @@
 module Main where
 
+import Control.Applicative
 import Control.Monad.Reader 
 import Control.Monad.Error
-
+import System.FilePath 
+-- 
 import HEP.Automation.MadGraph.Model
 import HEP.Automation.MadGraph.Model.SM
 import HEP.Automation.MadGraph.Machine
 import HEP.Automation.MadGraph.UserCut
-
 import HEP.Automation.MadGraph.SetupType
 import HEP.Automation.MadGraph.Run
 import HEP.Storage.WebDAV
+-- 
+import qualified Paths_madgraph_auto as PMadGraph
+import qualified Paths_madgraph_auto_model as PModel
 
 -- |  
-scriptsetup :: ScriptSetup
-scriptsetup = 
-  SS { modeltmpldir = "/home/wavewave/repo/src/madgraph-auto-model/template/"
-     , runtmpldir = "/home/wavewave/repo/src/madgraph-auto/template"
-     , sandboxdir = "/home/wavewave/repo/workspace/montecarlo/working"
-     , mg5base    = "/home/wavewave/repo/ext/MadGraph5_v1_4_8_4/"
-     , mcrundir   = "/home/wavewave/repo/workspace/montecarlo/mc/"
-     }
+getScriptSetup :: IO ScriptSetup
+getScriptSetup = do 
+  mdldir <- (</> "template") <$> PModel.getDataDir
+  rundir <- (</> "template") <$> PMadGraph.getDataDir 
+  return $ 
+    SS { modeltmpldir = mdldir -- "/home/wavewave/repo/src/madgraph-auto-model/template/"
+       , runtmpldir = rundir -- "/home/wavewave/repo/src/madgraph-auto/template"
+       , sandboxdir = "/home/wavewave/repo/workspace/montecarlo/working"
+       , mg5base    = "/home/wavewave/repo/ext/MadGraph5_v1_4_8_4/"
+       , mcrundir   = "/home/wavewave/repo/workspace/montecarlo/mc/"
+       }
 
 -- | 
 processSetup :: ProcessSetup SM
@@ -63,11 +70,17 @@ rsetup = RS { param = SMParam
             }
 
 -- | 
-wsetup = WS scriptsetup processSetup rsetup (CS NoParallel) (WebDAVRemoteDir "")
+getWSetup :: IO (WorkSetup SM)
+getWSetup = WS <$> getScriptSetup 
+               <*> pure processSetup 
+               <*> pure rsetup 
+               <*> pure (CS NoParallel) 
+               <*> pure (WebDAVRemoteDir "")
 
 -- | 
 main :: IO ()
 main = do putStrLn "models : sm "
+          wsetup <- getWSetup 
           r <- flip runReaderT wsetup . runErrorT $ do 
                  WS ssetup psetup _ _ _ <- ask 
                  createWorkDir ssetup psetup

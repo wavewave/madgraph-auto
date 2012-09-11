@@ -39,5 +39,5 @@ Library
                    HEP.Automation.MadGraph.UserCut
                    HEP.Automation.MadGraph.Util
                    HEP.Automation.MadGraph.Log
-  Other-Modules: 
+--  Other-Modules: 
                    Paths_madgraph_auto
