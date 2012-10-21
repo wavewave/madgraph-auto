@@ -30,7 +30,6 @@ Library
                    bytestring, 
                    LHE-sanitizer>=0.0.999, 
                    hslogger >= 1.1.4 
-                   -- evchain == 0.1.*
   Exposed-Modules: 
                    HEP.Automation.MadGraph.Machine
                    HEP.Automation.MadGraph.Model
@@ -39,5 +38,4 @@ Library
                    HEP.Automation.MadGraph.UserCut
                    HEP.Automation.MadGraph.Util
                    HEP.Automation.MadGraph.Log
-  -- Other-Modules: 
                    Paths_madgraph_auto
