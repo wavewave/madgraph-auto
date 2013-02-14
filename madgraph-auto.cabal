@@ -11,7 +11,7 @@ Cabal-Version:  >= 1.2
 data-files: 
             template/*.dat.st
             template/*.dat
-            template/me5_configuration.txt 
+            template/mg5_configuration.txt 
 
 Library
   hs-source-dirs: src
@@ -22,10 +22,10 @@ Library
                    unix, 
                    directory,
                    filepath,
-                   mtl == 2.*, 
+                   mtl > 2, 
                    transformers,  
                    HStringTemplate > 0.6, 
-                   HStringTemplateHelpersIW,
+                   devadmin,
                    webdav-manager >= 0.1.1.0, 
                    bytestring, 
                    LHE-sanitizer>=0.0.999, 

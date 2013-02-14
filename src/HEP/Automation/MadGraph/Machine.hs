@@ -43,6 +43,8 @@ data Detector = Tevatron | LHC | CMS | ATLAS
 
 data MachineType = TeVatron 
                  | LHC7 Detector
+                 | LHC8 Detector
+                 | LHC10 Detector
                  | LHC14 Detector 
                  | Parton Double Detector
                  | PolParton Double InitPolarization Detector
@@ -106,6 +108,14 @@ pgsCardMachine (LHC7 LHC)    = "pgs_card_LHC.dat.st"
 pgsCardMachine (LHC7 ATLAS)  = "pgs_card_ATLAS.dat.st"
 pgsCardMachine (LHC7 CMS)    = "pgs_card_CMS.dat.st"
 pgsCardMachine (LHC7 _)      = undefined
+pgsCardMachine (LHC8 LHC)    = "pgs_card_LHC.dat.st"
+pgsCardMachine (LHC8 ATLAS)  = "pgs_card_ATLAS.dat.st"
+pgsCardMachine (LHC8 CMS)    = "pgs_card_CMS.dat.st"
+pgsCardMachine (LHC8 _)      = undefined
+pgsCardMachine (LHC10 LHC)   = "pgs_card_LHC.dat.st"
+pgsCardMachine (LHC10 ATLAS) = "pgs_card_ATLAS.dat.st"
+pgsCardMachine (LHC10 CMS)   = "pgs_card_CMS.dat.st"
+pgsCardMachine (LHC10 _)     = undefined
 pgsCardMachine (LHC14 LHC)   = "pgs_card_LHC.dat.st"
 pgsCardMachine (LHC14 ATLAS) = "pgs_card_ATLAS.dat.st"
 pgsCardMachine (LHC14 CMS)   = "pgs_card_CMS.dat.st"
@@ -126,6 +136,8 @@ runCardSetup tpath machine ctype mtype rgtype scale numevt setnum = do
   let (beamtyp1,beamtyp2,beamenergy,beampol1,beampol2) = case machine of 
         TeVatron -> ("1","-1","980","0","0")
         LHC7 _    -> ("1","1","3500","0","0")
+        LHC8 _    -> ("1","1","4000","0","0")
+        LHC10 _   -> ("1","1","5000","0","0")
         LHC14 _   -> ("1","1","7000","0","0")
         Parton be _ -> ("0","0", show be,"0","0")
         PolParton be ipol _ -> ( "0","0", show be

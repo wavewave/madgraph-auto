@@ -125,7 +125,7 @@ cardPrepare = do
   checkDirectory (wdir </> "SubProcesses") 10
   checkDirectory carddir 10   
   -- erase previous run 
-  existThenRemove (carddir </> "me5_configuration.txt")
+  existThenRemove (carddir </> "mg5_configuration.txt")
   existThenRemove (carddir </> "param_card.dat") 
   existThenRemove (carddir </> "run_card.dat") 
   existThenRemove (carddir </> "pythia_card.dat") 
@@ -133,7 +133,7 @@ cardPrepare = do
   existThenRemove (carddir </> "pgs_card.dat")
   existThenRemove (carddir </> "pgs_card.dat.user")
   -- 
-  liftIO $ copyFile (runtmpldir ssetup </> "me5_configuration.txt" ) (carddir </> "me5_configuration.txt" )
+  liftIO $ copyFile (runtmpldir ssetup </> "mg5_configuration.txt" ) (carddir </> "me5_configuration.txt" )
   -- 
   paramcard  <- liftIO $ paramCardSetup 
                            (modeltmpldir ssetup)

@@ -1,12 +1,17 @@
+{-# LANGUAGE PackageImports #-}
+
 module Main where
 
 import Control.Applicative
-import Control.Monad.Reader 
-import Control.Monad.Error
+import Control.Monad
+import "mtl" Control.Monad.Reader 
+import "mtl" Control.Monad.Error
 import System.FilePath 
+import System.Directory 
 -- 
 import HEP.Automation.MadGraph.Model
-import HEP.Automation.MadGraph.Model.SM
+-- import HEP.Automation.MadGraph.Model.SM
+import HEP.Automation.MadGraph.Model.ADMXQLD311
 import HEP.Automation.MadGraph.Machine
 import HEP.Automation.MadGraph.UserCut
 import HEP.Automation.MadGraph.SetupType
@@ -22,25 +27,25 @@ getScriptSetup = do
   mdldir <- (</> "template") <$> PModel.getDataDir
   rundir <- (</> "template") <$> PMadGraph.getDataDir 
   return $ 
-    SS { modeltmpldir = mdldir -- "/home/wavewave/repo/src/madgraph-auto-model/template/"
-       , runtmpldir = rundir -- "/home/wavewave/repo/src/madgraph-auto/template"
+    SS { modeltmpldir = mdldir 
+       , runtmpldir = rundir 
        , sandboxdir = "/home/wavewave/repo/workspace/montecarlo/working"
        , mg5base    = "/home/wavewave/repo/ext/MadGraph5_v1_4_8_4/"
        , mcrundir   = "/home/wavewave/repo/workspace/montecarlo/mc/"
        }
 
 -- | 
-processSetup :: ProcessSetup SM
+processSetup :: ProcessSetup ADMXQLD311
 processSetup = PS {  
-    model = SM
-  , process = "\ngenerate P P > t t~ QED=99\n"
-  , processBrief = "TTBar" 
-  , workname   = "Test_20120727"
+    model = ADMXQLD311
+  , process = "\ngenerate P P > t1 t1~ QED=99\n"
+  , processBrief = "stoppair" 
+  , workname   = "Test4_20130213_ADMXQLD"
   }
 
 -- | 
-pset :: ModelParam SM
-pset = SMParam
+psets :: [ModelParam ADMXQLD311]
+psets = [ ADMXQLD311Param x | x <- [400,500..2000] ] 
 
 -- | 
 ucut :: UserCut 
@@ -53,9 +58,9 @@ ucut = UserCut {
 }
 
 -- | 
-rsetup = RS { param = SMParam 
+rsetup p = RS { param = p
             , numevent = 10000
-            , machine = TeVatron
+            , machine = LHC8 ATLAS
             , rgrun   = Fixed
             , rgscale = 200.0
             , match   = NoMatch
@@ -70,24 +75,58 @@ rsetup = RS { param = SMParam
             }
 
 -- | 
-getWSetup :: IO (WorkSetup SM)
-getWSetup = WS <$> getScriptSetup 
-               <*> pure processSetup 
-               <*> pure rsetup 
-               <*> pure (CS NoParallel) 
-               <*> pure (WebDAVRemoteDir "")
+getWSetup :: [IO (WorkSetup ADMXQLD311)]
+getWSetup = [ WS <$> getScriptSetup <*> pure processSetup <*> pure (rsetup p) 
+                 <*> pure (CS NoParallel) 
+                 <*> pure (WebDAVRemoteDir "") | p <- psets ]
+
+main = do 
+  mapM_ work =<< sequence getWSetup 
 
 -- | 
-main :: IO ()
-main = do putStrLn "models : sm "
-          wsetup <- getWSetup 
-          r <- flip runReaderT wsetup . runErrorT $ do 
-                 WS ssetup psetup _ _ _ <- ask 
-                 createWorkDir ssetup psetup
+-- work p  -- :: IO ()
+work wsetup = do -- wsetup <- getWSetup 
+            r <- flip runReaderT wsetup . runErrorT $ do 
+                 WS ssetup psetup rsetup _ _ <- ask 
+                 
+                 let wb = mcrundir ssetup 
+                     wn = workname psetup  
+                 b <- liftIO $ (doesDirectoryExist (wb </> wn))
+                 when (not b) $ createWorkDir ssetup psetup
                  cardPrepare                      
                  generateEvents   
-          print r 
-          return ()
+                 case (lhesanitizer rsetup,usercut rsetup,pythia rsetup) of
+                   (NoLHESanitize, NoUserCutDef,_) -> return ()
+                   (NoLHESanitize, UserCutDef _,_) -> do 
+                     runHEP2LHE       
+                     runHEPEVT2STDHEP 
+                     runPGS           
+                     runClean         
+                     updateBanner   
+                   (LHESanitize pid, NoUserCutDef, RunPYTHIA) -> do 
+                     sanitizeLHE
+                     runPYTHIA
+                     runHEP2LHE
+                     runPGS           
+                     runClean         
+                     updateBanner   
+                   (LHESanitize pid, NoUserCutDef, NoPYTHIA) -> do 
+                     sanitizeLHE
+                     updateBanner   
+                   (LHESanitize pid, UserCutDef _,RunPYTHIA) -> do 
+                     sanitizeLHE
+                     runPYTHIA
+                     runHEP2LHE       
+                     runHEPEVT2STDHEP 
+                     runPGS           
+                     runClean         
+                     updateBanner   
+                   (LHESanitize pid, UserCutDef _,NoPYTHIA) -> do 
+                     sanitizeLHE
+                     updateBanner   
+
+            print r 
+            return ()
 
 
 {-                runHEP2LHE       
