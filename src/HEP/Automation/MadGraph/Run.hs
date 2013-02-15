@@ -399,6 +399,7 @@ runClean = do
   workIOReadProcessWithExitCode (pgsdir </> "clean_output") [ "-muon", uncleanedfilename, cleanedfilename ] "" 
   liftIO $ renameFile (eventdir</>taskname</>cleanedfilename) (eventdir</>taskname</>finallhco)
   liftIO $ system ("gzip -f " ++ finallhco) 
+  return ()
 
 -- | 
 updateBanner :: (Model a) => WorkIO a () 
