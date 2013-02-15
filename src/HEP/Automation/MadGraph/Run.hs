@@ -237,7 +237,7 @@ sanitizeLHE = do
   debugMsgDef "Start sanitizeLHE"
   case lhesanitizer rsetup of 
     NoLHESanitize -> throwError "ERROR: why did you call me? I am in sanitizeLHEFile." 
-    LHESanitize pids -> do 
+    LHESanitize styp  -> do 
       wdir <- getWorkDir
       let eventdir = wdir </> "Events" 
           taskname = makeRunName psetup rsetup 
@@ -251,7 +251,10 @@ sanitizeLHE = do
 
       liftIO $ system ("gunzip -f " ++ unweightedevtfilename <.> "gz") 
       checkFile (eventdir </> taskname </> unweightedevtfilename) 10
-      liftIO $ sanitizeLHEFile pids unweightedevtfilename rawunweightedevtfilename
+
+      case styp of 
+        Elim pids -> liftIO $ sanitizeLHEFile pids unweightedevtfilename rawunweightedevtfilename
+        Replace pids -> liftIO $ sanitizeLHEFile_replace pids unweightedevtfilename rawunweightedevtfilename
   return () 
 
 -- | run PYTHIA as a user-defined process.
@@ -432,24 +435,28 @@ cleanHepFiles = do
       existThenRemoveForAny x = existThenRemove (eventdir</>taskname</> x)
       clean = mapM_ existThenRemoveForAny  
       hepfilename = taskname++"_pythia_events.hep"
+      hepfilename2 = "pythia_events.hep"
       hepevtfilename = "afterusercut.hepevt"  
       stdhepfilename = "afterusercut.stdhep"      
       uncleanedfilename = "pgs_uncleaned.lhco"
       cleanedfilename = "pgs_cleaned.lhco"
+      lhefile = "events.lhe.gz"
       onlyhep = [ hepfilename ] 
-      allhep  = [ hepfilename
+      allhep  = [ lhefile 
+                , hepfilename
+                , hepfilename2
                 , hepevtfilename
                 , stdhepfilename
                 , uncleanedfilename
                 , cleanedfilename ]
-      dellst = case (pythia rsetup, match rsetup, usercut rsetup) of 
+{-      dellst = case (pythia rsetup, match rsetup, usercut rsetup) of 
                  (NoPYTHIA,NoMatch,_) -> []
-                 (_,MLM,NoUserCutDef) -> onlyhep
+                 (_,MLM,NoUserCutDef) -> allhep -- onlyhep
                  (_,MLM,UserCutDef _) -> allhep
-                 (RunPYTHIA,_,NoUserCutDef) -> onlyhep
-                 (RunPYTHIA,_,UserCutDef _) -> allhep
+                 (RunPYTHIA,_,NoUserCutDef) -> allhep -- onlyhep
+                 (RunPYTHIA,_,UserCutDef _) -> allhep -}
   liftIO $ sleep 5
-  clean dellst
+  clean allhep -- dellst
 
 -- | 
 cleanAll :: (Model a) => WorkIO a () 

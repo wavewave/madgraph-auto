@@ -52,8 +52,11 @@ deriving instance (Model a) => Data (ProcessSetup a)
 
 -- deriving (Typeable,Data)
 
+data SanitizeType = Elim [Int] | Replace [(Int,Int)]
+                  deriving (Show,Typeable,Data)
+
 data LHESanitizerType = NoLHESanitize 
-                      | LHESanitize [Int]  
+                      | LHESanitize SanitizeType   
                       deriving (Show,Typeable,Data)
 
 data RunSetup a = RS { 

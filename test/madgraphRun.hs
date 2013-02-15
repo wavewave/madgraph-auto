@@ -39,14 +39,18 @@ getScriptSetup = do
 processSetup :: ProcessSetup ADMXQLD311
 processSetup = PS {  
     model = ADMXQLD311
-  , process = "\ngenerate P P > t t~ \n" -- "\ngenerate P P > t1 t1~ QED=0, t1 > d e+ sxxp~ , t1~ > d~ e- sxxp \n"
-  , processBrief = "ttbar" -- "stoppair_full" 
-  , workname   = "Test11_20130214_ADMXQLD"
+  , process = "\ngenerate P P > t1 t1~ QED=0, t1 > d e+ sxxp~ , t1~ > d~ e- sxxp \n"
+    -- "\ngenerate P P > t t~ \n" -- 
+  , processBrief = "stoppair_full" 
+    -- "ttbar" -- 
+  , workname   = "Test13_20130215_ADMXQLD"
   }
 
 -- | 
 psets :: [ModelParam ADMXQLD311]
-psets = [ ADMXQLD311Param x | x <- [100] ] 
+psets = [ ADMXQLD311Param x | x <- [500,1000] ] 
+-- [1500] ] 
+-- [100] ] 
 -- [600,700,800] ]
 
 -- [100,200..1600] ]
@@ -71,7 +75,8 @@ rsetup p = RS { param = p
             , cut     = NoCut 
             , pythia  = RunPYTHIA
             , usercut = NoUserCutDef 
-            , lhesanitizer = LHESanitize [] -- NoLHESanitizex
+            , lhesanitizer = LHESanitize (Replace [(9000201,1000022),(-9000201,1000022)]) -- NoLHESanitize
+                             -- LHESanitize (Elim [9000201]) 
             , pgs     = RunPGS
             , jetalgo = Cone 0.4
             , uploadhep = NoUploadHEP
@@ -94,6 +99,7 @@ main = do
 work wsetup = do -- wsetup <- getWSetup 
             r <- flip runReaderT wsetup . runErrorT $ do 
                  WS ssetup psetup rsetup _ _ <- ask 
+
                  
                  let wb = mcrundir ssetup 
                      wn = workname psetup  
@@ -129,18 +135,11 @@ work wsetup = do -- wsetup <- getWSetup
                      updateBanner   
                    (LHESanitize pid, UserCutDef _,NoPYTHIA) -> do 
                      sanitizeLHE
-                     updateBanner   
-                 cleanHepFiles 
-            print r 
+                     updateBanner    
+                 cleanHepFiles  
+            print r  
             return ()
 
-
-{-                runHEP2LHE       
-                runHEPEVT2STDHEP 
-	        runPGS            
-                runClean          
-                updateBanner -}
-          
 
 
 
