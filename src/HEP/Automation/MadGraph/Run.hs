@@ -223,10 +223,11 @@ generateEvents = do
   let eventdir = wdir </> "Events" 
       unweightedevtfilename = taskname ++ "_unweighted_events.lhe" 
       rawunweightedevtfilename = "unweighted_events.lhe"
-  liftIO $ setCurrentDirectory eventdir  
+  liftIO $ setCurrentDirectory (eventdir</>taskname)
+  liftIO $ system " ls -l " 
   checkFile (eventdir </> taskname </> rawunweightedevtfilename <.> "gz") 10 
   liftIO $ renameFile (eventdir</>taskname</>rawunweightedevtfilename<.>"gz") 
-                      (eventdir</>unweightedevtfilename<.>"gz")
+                      (eventdir</>taskname</>unweightedevtfilename<.>"gz")
   return ()
 
 -- | 
@@ -243,13 +244,13 @@ sanitizeLHE = do
           unweightedevtfilename = taskname ++ "_unweighted_events.lhe" 
           rawunweightedevtfilename = "unweighted_events.lhe"
 
-      liftIO $ setCurrentDirectory eventdir
-      checkFile (eventdir </> unweightedevtfilename <.> "gz") 10 
+      liftIO $ setCurrentDirectory (eventdir </> taskname)
+      checkFile (eventdir </> taskname </> unweightedevtfilename <.> "gz") 10 
 
-      debugMsgDef $ (eventdir </> unweightedevtfilename <.> "gz")
+      debugMsgDef $ (eventdir </> taskname </> unweightedevtfilename <.> "gz")
 
       liftIO $ system ("gunzip -f " ++ unweightedevtfilename <.> "gz") 
-      checkFile (eventdir </> unweightedevtfilename) 10
+      checkFile (eventdir </> taskname </> unweightedevtfilename) 10
       liftIO $ sanitizeLHEFile pids unweightedevtfilename rawunweightedevtfilename
   return () 
 
@@ -266,20 +267,25 @@ runPYTHIA = do
       unweightedevtfilename = taskname ++ "_unweighted_events.lhe" 
       rawunweightedevtfilename = "unweighted_events.lhe"
       -- hepfilename = taskname++"_pythia_events.hep"
-  liftIO $ setCurrentDirectory eventdir
   liftIO $ renameFile (carddir </> "pythia_card.dat.sanitize") (carddir </> "pythia_card.dat")
-  checkFile (eventdir </> rawunweightedevtfilename) 10
+  checkFile (eventdir</>taskname</> rawunweightedevtfilename) 10
+  liftIO $ renameFile (eventdir </> taskname </> rawunweightedevtfilename) (eventdir</> rawunweightedevtfilename)
+  liftIO $ setCurrentDirectory eventdir
+  
   b <- liftIO $ doesFileExist rawunweightedevtfilename
   if b 
     then do 
       debugMsgDef "Start PYTHIA"
-      liftIO $ do putEnv  $ "PDG_MASS_TBL=" ++ pythiadir </> "mass_width_2004.mc "
-                  readProcessWithExitCode (bindir </> "run_pythia") [] ""
-      liftIO $ threadDelay ( 60 * 1000000 )
-      checkFile (eventdir </> "pythia_events.hep") 10
+      -- liftIO $ do putEnv  $ "PDG_MASS_TBL=" ++ pythiadir </> "mass_width_2004.mc "
+      (_,rmsg,_) <- liftIO $ readProcessWithExitCode (bindir </> "internal" </> "run_pythia") [pythiadir] ""
+      debugMsgDef rmsg
+      -- liftIO $ threadDelay ( 1 * 1000000 )
+      checkFile (eventdir</>"pythia_events.hep") 10
 --      liftIO $ renameFile "pythia_events.hep" hepfilename
-      liftIO $ copyFile rawunweightedevtfilename unweightedevtfilename
+      liftIO $ renameFile rawunweightedevtfilename (eventdir</>taskname</>unweightedevtfilename)
+      liftIO $ setCurrentDirectory (eventdir</>taskname)
       liftIO $ system $ "gzip -f " ++ unweightedevtfilename
+      liftIO $ renameFile (eventdir </> "pythia_events.hep") (eventdir</>taskname</>"pythia_events.hep")
       checkFile (unweightedevtfilename <.> "gz") 10
     else throwError "ERROR: No unweighted events" 
   return ()
@@ -302,31 +308,41 @@ runHEP2LHE = do
                          UserCutDef _ -> "afterusercut.hepevt" 
                          NoUserCutDef -> "pythia_events.lhe"
   liftIO $ setCurrentDirectory eventdir
-  checkFile (eventdir </> hepfilename) 10 
-  b <- liftIO $ doesFileExist hepfilename 
-  if b 
-    then do 
-      debugMsgDef "Start hep2lhe"
-      workIOReadProcessWithExitCode  hep2lhe [hepfilename,hep2lhe_result] "" 
-      case usercut rsetup of
-        UserCutDef _  -> return () 
-        NoUserCutDef  -> do 
-          liftIO $ renameFile "pythia_events.lhe"  (taskname ++ "_pythia_events.lhe")
-          liftIO $ system $ "gzip -f " ++ (taskname ++ "_pythia_events.lhe")
-          return () 
-    else throwError "ERROR pythia result does not exist"  
-  return () 
+  checkFile (eventdir</>taskname</>hepfilename) 10 
+
+  liftIO $ renameFile (eventdir</>taskname</>hepfilename) (eventdir</>hepfilename)
+
+  debugMsgDef "Start hep2lhe"
+  (_,rmsg,_) <- workIOReadProcessWithExitCode  hep2lhe [hepfilename,hep2lhe_result] "" 
+  debugMsgDef rmsg 
+  case usercut rsetup of
+    UserCutDef _  -> return () 
+    NoUserCutDef  -> do 
+      let pythiaEventFileName = (taskname ++ "_pythia_events.lhe")
+      liftIO $ renameFile (eventdir</>"pythia_events.lhe") (eventdir</>taskname</>pythiaEventFileName)
+
+      liftIO $ system $ "gzip -f " ++ (eventdir </> taskname </> pythiaEventFileName )
+      return () 
+
+  liftIO $ renameFile (eventdir</>hepfilename) (eventdir</>taskname</>hepfilename)
+
+  -- b <- liftIO $ doesFileExist hepfilename 
+  -- 
+  -- if b 
+  --  then do 
+
 
 -- | 
 runHEPEVT2STDHEP :: (Model a) => WorkIO a () 
 runHEPEVT2STDHEP = do
-  WS ssetup _psetup _ _ _ <- ask 
+  WS ssetup psetup rsetup _ _ <- ask 
   wdir <- getWorkDir
   let eventdir = wdir </> "Events" 
       hepevtfilename = "afterusercut.hepevt"  
       stdhepfilename = "afterusercut.stdhep" 
-  liftIO $ setCurrentDirectory eventdir
-  checkFile (eventdir </> hepevtfilename) 10 
+      taskname = makeRunName psetup rsetup
+  liftIO $ setCurrentDirectory (eventdir</>taskname)
+  checkFile (eventdir</>taskname</>hepevtfilename) 10 
   b <- liftIO $ doesFileExist hepevtfilename 
   if b 
     then do 
@@ -339,31 +355,29 @@ runHEPEVT2STDHEP = do
 -- | 
 runPGS :: (Model a) => WorkIO a () 
 runPGS = do
-  WS _ssetup _psetup rsetup _ _ <- ask 
+  WS _ssetup psetup rsetup _ _ <- ask 
   wdir <- getWorkDir 
   let eventdir = wdir </> "Events" 
+      taskname = makeRunName psetup rsetup 
       pgsdir   = wdir </> "../pythia-pgs/src"
       carddir  = wdir </> "Cards"
       stdhepfilename = "afterusercut.stdhep" 
       hepfilename = "pythia_events.hep"
       uncleanedfilename = "pgs_uncleaned.lhco"
-  liftIO $ setCurrentDirectory eventdir
+  liftIO $ setCurrentDirectory (eventdir</>taskname)
   checkFile (carddir </> "pgs_card.dat.user") 10 
   liftIO $ renameFile (carddir </> "pgs_card.dat.user") (carddir </> "pgs_card.dat")
   let pythiaresult = case usercut rsetup of
                        UserCutDef _ -> stdhepfilename
                        NoUserCutDef -> hepfilename 
-  checkFile (eventdir </> pythiaresult) 10
-  b <- liftIO $ doesFileExist pythiaresult 
-  if b 
-    then do 
-      debugMsgDef "Start pgs"
-      liftIO $ do 
-        putEnv  $ "PDG_MASS_TBL=" ++ pgsdir </> "mass_width_2004.mc "
-        readProcessWithExitCode (pgsdir </> "pgs") ["--stdhep",pythiaresult,"--nev","0","--detector","../Cards/pgs_card.dat",uncleanedfilename] "" 
-    else throwError "ERROR pythia result does not exist"  
-  return () 
-
+  checkFile (eventdir</>taskname</>pythiaresult) 10
+  debugMsgDef "Start pgs"
+  (rmsg,rerr) <- liftIO $ do 
+    putEnv  $ "PDG_MASS_TBL=" ++ pgsdir </> "mass_width_2004.mc "
+    (_,rmsg,rerr) <- readProcessWithExitCode (pgsdir </> "pgs") ["--stdhep",pythiaresult,"--nev","0","--detector","../../Cards/pgs_card.dat",uncleanedfilename] "" 
+    return (rmsg,rerr)
+  debugMsgDef rmsg 
+  debugMsgDef rerr 
 -- | 
 runClean :: (Model a) => WorkIO a () 
 runClean = do
@@ -379,17 +393,12 @@ runClean = do
       cleanedfilename = "pgs_cleaned.lhco"
       finallhco = taskname ++ "_pgs_events.lhco"
       -- finallhcogz = taskname ++ "_pgs_events.lhco.gz"
-  liftIO $ setCurrentDirectory eventdir
-  checkFile (eventdir </> uncleanedfilename) 10
-  b <- liftIO $ doesFileExist uncleanedfilename 
-  if b 
-    then do 
-      debugMsgDef "Start clean_output"
-      workIOReadProcessWithExitCode (pgsdir </> "clean_output") [ "-muon", uncleanedfilename, cleanedfilename ] "" 
-      liftIO $ renameFile (eventdir </> cleanedfilename) (eventdir </> finallhco)
-      liftIO $ system ("gzip -f " ++ finallhco) 
-    else throwError "ERROR pythia result does not exist"  
-  return () 
+  liftIO $ setCurrentDirectory (eventdir</>taskname)
+  checkFile (eventdir</>taskname</>uncleanedfilename) 10
+  debugMsgDef "Start clean_output"
+  workIOReadProcessWithExitCode (pgsdir </> "clean_output") [ "-muon", uncleanedfilename, cleanedfilename ] "" 
+  liftIO $ renameFile (eventdir</>taskname</>cleanedfilename) (eventdir</>taskname</>finallhco)
+  liftIO $ system ("gzip -f " ++ finallhco) 
 
 -- | 
 updateBanner :: (Model a) => WorkIO a () 
@@ -405,12 +414,12 @@ updateBanner = do
           bannerfilename = taskname ++ "_banner.txt"
           newbannerfilename = taskname ++ "_newbanner.txt"
           usercutcontent = prettyprintUserCut uc
-      liftIO $ setCurrentDirectory eventdir
-      checkFile (eventdir </> bannerfilename) 10
-      bannerstr  <- liftIO $ readFile (eventdir </> bannerfilename)
+      liftIO $ setCurrentDirectory (eventdir</>taskname)
+      checkFile (eventdir</>taskname</>bannerfilename) 10
+      bannerstr  <- liftIO $ readFile (eventdir</>taskname</>bannerfilename)
       pgscardstr <- liftIO $ readFile (carddir </> "pgs_card.dat")  
       let newbannerstr = bannerstr ++ usercutcontent ++ pgscardstr
-      liftIO $ writeFile (eventdir </> newbannerfilename) newbannerstr 
+      liftIO $ writeFile (eventdir</>taskname</>newbannerfilename) newbannerstr 
 
 -- |
 cleanHepFiles :: (Model a) => WorkIO a () 
@@ -419,7 +428,7 @@ cleanHepFiles = do
   wdir <- getWorkDir 
   let taskname = makeRunName psetup rsetup 
       eventdir = wdir </> "Events" 
-      existThenRemoveForAny x = existThenRemove (eventdir </> x)
+      existThenRemoveForAny x = existThenRemove (eventdir</>taskname</> x)
       clean = mapM_ existThenRemoveForAny  
       hepfilename = taskname++"_pythia_events.hep"
       hepevtfilename = "afterusercut.hepevt"  
@@ -448,7 +457,7 @@ cleanAll = do
   wdir <- getWorkDir 
   let taskname = makeRunName psetup rsetup 
       eventdir = wdir </> "Events" 
-      existThenRemoveForAny x = existThenRemove (eventdir </> x)
+      existThenRemoveForAny x = existThenRemove (eventdir</>taskname</>x)
       clean = mapM_ existThenRemoveForAny  
       hepfilename = taskname++"_pythia_events.hep"
       hepevtfilename = "afterusercut.hepevt"  
@@ -488,13 +497,13 @@ cleanAll = do
                   , xsecstree ]
   liftIO $ sleep 5
   clean allfiles
-  b <- liftIO $ doesDirectoryExist ( eventdir </> pythiadir)
+  b <- liftIO $ doesDirectoryExist ( eventdir</>taskname</>pythiadir)
   if b 
     then do
-      liftIO $ setCurrentDirectory ( eventdir </> pythiadir ) 
+      liftIO $ setCurrentDirectory ( eventdir</>taskname</>pythiadir ) 
       liftIO $ system "rm *"
-      liftIO $ setCurrentDirectory eventdir 
-      liftIO $ removeDirectory (eventdir </> pythiadir )
+      liftIO $ setCurrentDirectory ( eventdir</>taskname )
+      liftIO $ removeDirectory (eventdir</>taskname</>pythiadir )
     else return () 
 
 -- |      
@@ -505,7 +514,7 @@ makeHepGz = do
   let taskname = makeRunName psetup rsetup 
       eventdir = wdir </> "Events" 
       hepfilename = taskname++"_pythia_events.hep"
-  liftIO $ setCurrentDirectory eventdir
+  liftIO $ setCurrentDirectory (eventdir</>taskname)
   b <- liftIO $ doesFileExist (hepfilename <.> "gz")
   if b 
     then return () 

@@ -33,13 +33,13 @@ import HEP.Automation.MadGraph.Log
 
 -- | 
 
-workIOReadProcessWithExitCode :: FilePath -> [String] -> String -> WorkIO a ()
+workIOReadProcessWithExitCode :: FilePath -> [String] -> String -> WorkIO a (ExitCode,String,String)
 workIOReadProcessWithExitCode cmd args input = do 
   (ex, out, err) <- liftIO $ readProcessWithExitCode cmd args input
   debugMsgDef out
   debugMsgDef err
   case ex of 
-    ExitSuccess -> return () 
+    ExitSuccess -> return (ex,out,err)
     ExitFailure c -> throwError $ "error exit code = " ++ show c ++ " while running " ++ cmd ++ " " ++ show args 
                                   ++ "\n stdout = " ++ out 
 

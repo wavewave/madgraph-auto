@@ -8,6 +8,7 @@ import "mtl" Control.Monad.Reader
 import "mtl" Control.Monad.Error
 import System.FilePath 
 import System.Directory 
+import System.Log.Logger
 -- 
 import HEP.Automation.MadGraph.Model
 -- import HEP.Automation.MadGraph.Model.SM
@@ -38,14 +39,17 @@ getScriptSetup = do
 processSetup :: ProcessSetup ADMXQLD311
 processSetup = PS {  
     model = ADMXQLD311
-  , process = "\ngenerate P P > t1 t1~ QED=99\n"
-  , processBrief = "stoppair" 
-  , workname   = "Test4_20130213_ADMXQLD"
+  , process = "\ngenerate P P > t t~ \n" -- "\ngenerate P P > t1 t1~ QED=0, t1 > d e+ sxxp~ , t1~ > d~ e- sxxp \n"
+  , processBrief = "ttbar" -- "stoppair_full" 
+  , workname   = "Test11_20130214_ADMXQLD"
   }
 
 -- | 
 psets :: [ModelParam ADMXQLD311]
-psets = [ ADMXQLD311Param x | x <- [400,500..2000] ] 
+psets = [ ADMXQLD311Param x | x <- [100] ] 
+-- [600,700,800] ]
+
+-- [100,200..1600] ]
 
 -- | 
 ucut :: UserCut 
@@ -60,15 +64,15 @@ ucut = UserCut {
 -- | 
 rsetup p = RS { param = p
             , numevent = 10000
-            , machine = LHC8 ATLAS
+            , machine = LHC7 ATLAS
             , rgrun   = Fixed
             , rgscale = 200.0
             , match   = NoMatch
             , cut     = NoCut 
-            , pythia  = NoPYTHIA
+            , pythia  = RunPYTHIA
             , usercut = NoUserCutDef 
-            , lhesanitizer = NoLHESanitize 
-            , pgs     = NoPGS
+            , lhesanitizer = LHESanitize [] -- NoLHESanitizex
+            , pgs     = RunPGS
             , jetalgo = Cone 0.4
             , uploadhep = NoUploadHEP
             , setnum  = 1
@@ -81,6 +85,8 @@ getWSetup = [ WS <$> getScriptSetup <*> pure processSetup <*> pure (rsetup p)
                  <*> pure (WebDAVRemoteDir "") | p <- psets ]
 
 main = do 
+  updateGlobalLogger "MadGraphAuto" (setLevel DEBUG)
+
   mapM_ work =<< sequence getWSetup 
 
 -- | 
@@ -124,7 +130,7 @@ work wsetup = do -- wsetup <- getWSetup
                    (LHESanitize pid, UserCutDef _,NoPYTHIA) -> do 
                      sanitizeLHE
                      updateBanner   
-
+                 cleanHepFiles 
             print r 
             return ()
 
