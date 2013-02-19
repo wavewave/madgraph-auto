@@ -39,16 +39,33 @@ getScriptSetup = do
 processSetup :: ProcessSetup ADMXQLD311
 processSetup = PS {  
     model = ADMXQLD311
-  , process = "\ngenerate P P > t1 t1~ QED=0, t1 > d e+ sxxp~ , t1~ > d~ e- sxxp \n"
+  , process = "\ngenerate p p > go go  QED=0, (go > t~ t1, t1 > d e+ sxxp~) , (go > t~ t1, t1 > d e+ sxxp~ ) \nadd process p p > go go  QED=0, (go > t~ t1, t1 > d e+ sxxp~) , (go > t t1~, t1~ > d~ e- sxxp ) \nadd process p p > go go  QED=0, (go > t t1~, t1~ > d~ e- sxxp) , (go > t~ t1, t1 > d e+ sxxp~ ) \nadd process p p > go go  QED=0, (go > t t1~, t1~ > d~ e- sxxp) , (go > t t1~, t1~ > d~ e- sxxp ) \n"
+
+    -- "\ngenerate P P > t1 t1~ QED=0, t1 > d e+ sxxp~ , t1~ > d~ e- sxxp \n"
     -- "\ngenerate P P > t t~ \n" -- 
-  , processBrief = "stoppair_full" 
+  , processBrief = "gluinopair_stopdecayfull" 
     -- "ttbar" -- 
-  , workname   = "Test13_20130215_ADMXQLD"
+  , workname   = "Test17_20130219_ADMXQLD"
   }
 
 -- | 
 psets :: [ModelParam ADMXQLD311]
-psets = [ ADMXQLD311Param x | x <- [500,1000] ] 
+psets = [ ADMXQLD311Param y x 50000 | (x,y) 
+            <- [(300,100)
+               ,(400,100),(400,200)
+               ,(500,100),(500,200),(500,300)
+               ,(600,100),(600,200),(600,300),(600,400)
+               ,(700,100),(700,200),(700,300),(700,400),(700,500)
+               ,(800,100),(800,200),(800,300),(800,400),(800,500),(800,600)
+               ,(900,100),(900,200),(900,300),(900,400),(900,500),(900,600),(900,700)
+               ,(1000,100),(1000,200),(1000,300),(1000,400),(1000,500),(1000,600),(1000,700),(1000,800) ] ] 
+
+
+-- [200,300,400] ] 
+
+-- x <- [100,500,1000,1500] ]
+
+-- [500,1000] ] 
 -- [1500] ] 
 -- [100] ] 
 -- [600,700,800] ]
@@ -69,13 +86,14 @@ ucut = UserCut {
 rsetup p = RS { param = p
             , numevent = 10000
             , machine = LHC7 ATLAS
-            , rgrun   = Fixed
+            , rgrun   = Auto -- Fixed
             , rgscale = 200.0
             , match   = NoMatch
             , cut     = NoCut 
             , pythia  = RunPYTHIA
             , usercut = NoUserCutDef 
-            , lhesanitizer = LHESanitize (Replace [(9000201,1000022),(-9000201,1000022)]) -- NoLHESanitize
+            , lhesanitizer = -- NoLHESanitize
+                             LHESanitize (Replace [(9000201,1000022),(-9000201,1000022)]) 
                              -- LHESanitize (Elim [9000201]) 
             , pgs     = RunPGS
             , jetalgo = Cone 0.4
