@@ -40,18 +40,22 @@ getScriptSetup = do
 processSetup :: ProcessSetup ADMXQLD211
 processSetup = PS {  
     model = ADMXQLD211
-  , process = "\ngenerate p p > go go  QED=0, (go > c~ cl, cl > d e+ sxxp~) , (go > c~ cl, cl > d e+ sxxp~ ) \nadd process p p > go go  QED=0, (go > c~ cl, cl > d e+ sxxp~) , (go > c cl~, cl~ > d~ e- sxxp ) \nadd process p p > go go  QED=0, (go > c cl~, cl~ > d~ e- sxxp) , (go > c~ cl, cl > d e+ sxxp~ ) \nadd process p p > go go  QED=0, (go > c cl~, cl~ > d~ e- sxxp) , (go > c cl~, cl~ > d~ e- sxxp ) \n"
+  , process = "\n\
+ \generate p p > go go / ul dl sl cl ur dr sr cr QED=0, (go > c~ cl, cl > d e+ sxxp~) , (go > c~ cl, cl > d e+ sxxp~ ) \n\
+ \add process p p > go go / ul dl sl cl ur dr sr cr QED=0, (go > c~ cl, cl > d e+ sxxp~) , (go > c cl~, cl~ > d~ e- sxxp ) \n\
+ \add process p p > go go / ul dl sl cl ur dr sr cr QED=0, (go > c cl~, cl~ > d~ e- sxxp) , (go > c~ cl, cl > d e+ sxxp~ ) \n\
+ \add process p p > go go / ul dl sl cl ur dr sr cr QED=0, (go > c cl~, cl~ > d~ e- sxxp) , (go > c cl~, cl~ > d~ e- sxxp ) \n"
 
     -- "\ngenerate P P > t1 t1~ QED=0, t1 > d e+ sxxp~ , t1~ > d~ e- sxxp \n"
     -- "\ngenerate P P > t t~ \n" -- 
   , processBrief = "gluinopair_stopdecayfull" 
     -- "ttbar" -- 
-  , workname   = "Test21_20130221_ADMXQLD211"
+  , workname   = "Test22_20130221_ADMXQLD211"
   }
 
 -- | 
 psets :: [ModelParam ADMXQLD211]
-psets = [ ADMXQLD211Param { mstop = 50000, mgluino = x, msquark = 50000, mscharm = y }
+psets = [ ADMXQLD211Param { mstop = 50000, mgluino = x, msquark = y }
         | (x,y) 
             <- [(300,100)
                ,(400,100),(400,200)
