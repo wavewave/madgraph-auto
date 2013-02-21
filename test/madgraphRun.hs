@@ -12,7 +12,7 @@ import System.Log.Logger
 -- 
 import HEP.Automation.MadGraph.Model
 -- import HEP.Automation.MadGraph.Model.SM
-import HEP.Automation.MadGraph.Model.ADMXQLD311
+import HEP.Automation.MadGraph.Model.ADMXQLD211
 import HEP.Automation.MadGraph.Machine
 import HEP.Automation.MadGraph.UserCut
 import HEP.Automation.MadGraph.SetupType
@@ -25,32 +25,34 @@ import qualified Paths_madgraph_auto_model as PModel
 -- |  
 getScriptSetup :: IO ScriptSetup
 getScriptSetup = do 
+  homedir <- getHomeDirectory
   mdldir <- (</> "template") <$> PModel.getDataDir
   rundir <- (</> "template") <$> PMadGraph.getDataDir 
   return $ 
     SS { modeltmpldir = mdldir 
        , runtmpldir = rundir 
-       , sandboxdir = "/home/wavewave/repo/workspace/montecarlo/working"
-       , mg5base    = "/home/wavewave/repo/ext/MadGraph5_v1_4_8_4/"
-       , mcrundir   = "/home/wavewave/repo/workspace/montecarlo/mc/"
+       , sandboxdir = homedir </> "repo/workspace/montecarlo/working"
+       , mg5base    = homedir </> "repo/ext/MadGraph5_v1_4_8_4/"
+       , mcrundir   = homedir </> "repo/workspace/montecarlo/mc/"
        }
 
 -- | 
-processSetup :: ProcessSetup ADMXQLD311
+processSetup :: ProcessSetup ADMXQLD211
 processSetup = PS {  
-    model = ADMXQLD311
-  , process = "\ngenerate p p > go go  QED=0, (go > t~ t1, t1 > d e+ sxxp~) , (go > t~ t1, t1 > d e+ sxxp~ ) \nadd process p p > go go  QED=0, (go > t~ t1, t1 > d e+ sxxp~) , (go > t t1~, t1~ > d~ e- sxxp ) \nadd process p p > go go  QED=0, (go > t t1~, t1~ > d~ e- sxxp) , (go > t~ t1, t1 > d e+ sxxp~ ) \nadd process p p > go go  QED=0, (go > t t1~, t1~ > d~ e- sxxp) , (go > t t1~, t1~ > d~ e- sxxp ) \n"
+    model = ADMXQLD211
+  , process = "\ngenerate p p > go go  QED=0, (go > c~ cl, cl > d e+ sxxp~) , (go > c~ cl, cl > d e+ sxxp~ ) \nadd process p p > go go  QED=0, (go > c~ cl, cl > d e+ sxxp~) , (go > c cl~, cl~ > d~ e- sxxp ) \nadd process p p > go go  QED=0, (go > c cl~, cl~ > d~ e- sxxp) , (go > c~ cl, cl > d e+ sxxp~ ) \nadd process p p > go go  QED=0, (go > c cl~, cl~ > d~ e- sxxp) , (go > c cl~, cl~ > d~ e- sxxp ) \n"
 
     -- "\ngenerate P P > t1 t1~ QED=0, t1 > d e+ sxxp~ , t1~ > d~ e- sxxp \n"
     -- "\ngenerate P P > t t~ \n" -- 
   , processBrief = "gluinopair_stopdecayfull" 
     -- "ttbar" -- 
-  , workname   = "Test17_20130219_ADMXQLD"
+  , workname   = "Test21_20130221_ADMXQLD211"
   }
 
 -- | 
-psets :: [ModelParam ADMXQLD311]
-psets = [ ADMXQLD311Param y x 50000 | (x,y) 
+psets :: [ModelParam ADMXQLD211]
+psets = [ ADMXQLD211Param { mstop = 50000, mgluino = x, msquark = 50000, mscharm = y }
+        | (x,y) 
             <- [(300,100)
                ,(400,100),(400,200)
                ,(500,100),(500,200),(500,300)
@@ -102,7 +104,7 @@ rsetup p = RS { param = p
             }
 
 -- | 
-getWSetup :: [IO (WorkSetup ADMXQLD311)]
+getWSetup :: [IO (WorkSetup ADMXQLD211)]
 getWSetup = [ WS <$> getScriptSetup <*> pure processSetup <*> pure (rsetup p) 
                  <*> pure (CS NoParallel) 
                  <*> pure (WebDAVRemoteDir "") | p <- psets ]
