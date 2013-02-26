@@ -96,22 +96,23 @@ instance (Model a) => Show (RunSetup a) where
           ++ show pg ++ ":" ++ show ja ++ ":" ++ show hu ++ ":" 
           ++  show es ++ "|"
 
-
+{-
 data ClusterSetup a = CS { 
   cluster :: ClusterRunType a
 } deriving (Show,Typeable,Data)
-
+-}
 
 data WorkSetup a = WS { 
   ws_ssetup :: ScriptSetup, 
   ws_psetup :: ProcessSetup a, 
   ws_rsetup :: RunSetup a, 
-  ws_csetup :: ClusterSetup a, 
+  -- ws_csetup :: ClusterSetup a, 
   ws_storage :: WebDAVRemoteDir
 } deriving (Show,Typeable,Data)
 
 type WorkIO b a = ErrorT String (ReaderT (WorkSetup b) IO) a 
 
+{-
 data ClusterRunType a = NoParallel 
                       | Parallel Int 
                       | Cluster { 
@@ -138,3 +139,4 @@ data ClusterWork a = ClusterWork {
   slaves :: [WorkSetup a] 
   }
 
+-}

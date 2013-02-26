@@ -51,7 +51,7 @@ compileshSetup ssetup = do
 -- | 
 compileFortran :: (Model a) => WorkIO a ()
 compileFortran = do 
-  WS ssetup _ rsetup _ _ <- ask   
+  WS ssetup _ rsetup _ <- ask   
   case (usercut rsetup) of 
     NoUserCutDef -> return () 
     UserCutDef uc -> do 
@@ -103,20 +103,21 @@ createWorkDir ssetup psetup = do
   liftIO $ renameDirectory (mg5base ssetup </> workname psetup) (mcrundir ssetup </> workname psetup) 
   return () 
 
+
 -- | Get a path for working directory
 getWorkDir :: (Model a) => WorkIO a FilePath   
 getWorkDir = do 
-  WS ssetup psetup _rsetup csetup _ <- ask   
-  case cluster csetup of 
-    Cluster _ cluname -> return $ mcrundir ssetup </> cluname 
-    _                 -> return $ mcrundir ssetup </> workname psetup
+  WS ssetup psetup _rsetup _ <- ask   
+  return (mcrundir ssetup </> workname psetup)
+
+
 
 -- | prepare for cards: param_card.dat, run_card.dat, pythia_card.dat 
 --   and pgs_card.dat. Depending on UserDefinedCut or LHESanitize, 
 --   pythia_card.dat.sanitize and/or pgs_card.dat.user is created. 
 cardPrepare :: (Model a) => WorkIO a () 
 cardPrepare = do 
-  WS ssetup psetup rsetup _ _ <- ask 
+  WS ssetup psetup rsetup _ <- ask 
   wdir <- getWorkDir 
   let taskname = makeRunName psetup rsetup 
   let carddir = wdir </> "Cards"
@@ -189,7 +190,7 @@ cardPrepare = do
 -- | 
 generateEvents :: (Model a) => WorkIO a () 
 generateEvents = do 
-  WS _ssetup psetup rsetup csetup _ <- ask
+  WS _ssetup psetup rsetup csetup <- ask
   wdir <- getWorkDir
   let taskname = makeRunName psetup rsetup 
   debugMsgDef $ "generating event for " ++ taskname
@@ -215,10 +216,14 @@ generateEvents = do
         NoPGS -> return ()
         _ -> checkFile (wdir </> "Cards/pgs_card.dat.user") 10
   --  
+  workIOReadProcessWithExitCode ("bin/generate_events") ["0", taskname] ""
+  
+  {-
   case cluster csetup of
-    NoParallel     -> workIOReadProcessWithExitCode ("bin/generate_events") ["0", taskname] ""
+    NoParallel     -> 
     Parallel ncore -> workIOReadProcessWithExitCode ("bin/generate_events") ["2", show ncore, taskname] ""
     Cluster _ _ -> undefined 
+  -}
   -- this is because madgraph-5-1.4 changes the file location. 
   let eventdir = wdir </> "Events" 
       unweightedevtfilename = taskname ++ "_unweighted_events.lhe" 
@@ -233,7 +238,7 @@ generateEvents = do
 -- | 
 sanitizeLHE :: (Model a) => WorkIO a () 
 sanitizeLHE = do 
-  WS _ssetup psetup rsetup _csetup _storage <- ask 
+  WS _ssetup psetup rsetup _storage <- ask 
   debugMsgDef "Start sanitizeLHE"
   case lhesanitizer rsetup of 
     NoLHESanitize -> throwError "ERROR: why did you call me? I am in sanitizeLHEFile." 
@@ -260,7 +265,7 @@ sanitizeLHE = do
 -- | run PYTHIA as a user-defined process.
 runPYTHIA :: (Model a) => WorkIO a () 
 runPYTHIA = do
-  WS _ssetup psetup rsetup _ _ <- ask 
+  WS _ssetup psetup rsetup _ <- ask 
   wdir <- getWorkDir 
   let bindir = wdir </> "bin"
       eventdir = wdir </> "Events" 
@@ -296,7 +301,7 @@ runPYTHIA = do
 -- | 
 runHEP2LHE :: (Model a) => WorkIO a () 
 runHEP2LHE = do
-  WS ssetup psetup rsetup _ _ <- ask 
+  WS ssetup psetup rsetup _ <- ask 
   wdir <- getWorkDir 
   let eventdir = wdir </> "Events" 
       pythiadir = wdir </> "../pythia-pgs/src"
@@ -338,7 +343,7 @@ runHEP2LHE = do
 -- | 
 runHEPEVT2STDHEP :: (Model a) => WorkIO a () 
 runHEPEVT2STDHEP = do
-  WS ssetup psetup rsetup _ _ <- ask 
+  WS ssetup psetup rsetup _ <- ask 
   wdir <- getWorkDir
   let eventdir = wdir </> "Events" 
       hepevtfilename = "afterusercut.hepevt"  
@@ -358,7 +363,7 @@ runHEPEVT2STDHEP = do
 -- | 
 runPGS :: (Model a) => WorkIO a () 
 runPGS = do
-  WS _ssetup psetup rsetup _ _ <- ask 
+  WS _ssetup psetup rsetup _ <- ask 
   wdir <- getWorkDir 
   let eventdir = wdir </> "Events" 
       taskname = makeRunName psetup rsetup 
@@ -384,7 +389,7 @@ runPGS = do
 -- | 
 runClean :: (Model a) => WorkIO a () 
 runClean = do
-  WS _ssetup psetup rsetup _ _ <- ask
+  WS _ssetup psetup rsetup _ <- ask
   wdir <- getWorkDir 
   let eventdir = wdir </> "Events" 
       pgsdir   = wdir </> "../pythia-pgs/src"
@@ -407,7 +412,7 @@ runClean = do
 -- | 
 updateBanner :: (Model a) => WorkIO a () 
 updateBanner = do
-  WS _ssetup psetup rsetup _ _ <- ask 
+  WS _ssetup psetup rsetup _ <- ask 
   wdir <- getWorkDir 
   case (usercut rsetup) of 
     NoUserCutDef -> return () 
@@ -428,7 +433,7 @@ updateBanner = do
 -- |
 cleanHepFiles :: (Model a) => WorkIO a () 
 cleanHepFiles = do 
-  WS _ssetup psetup rsetup _ _ <- ask 
+  WS _ssetup psetup rsetup _ <- ask 
   wdir <- getWorkDir 
   let taskname = makeRunName psetup rsetup 
       eventdir = wdir </> "Events" 
@@ -449,19 +454,13 @@ cleanHepFiles = do
                 , stdhepfilename
                 , uncleanedfilename
                 , cleanedfilename ]
-{-      dellst = case (pythia rsetup, match rsetup, usercut rsetup) of 
-                 (NoPYTHIA,NoMatch,_) -> []
-                 (_,MLM,NoUserCutDef) -> allhep -- onlyhep
-                 (_,MLM,UserCutDef _) -> allhep
-                 (RunPYTHIA,_,NoUserCutDef) -> allhep -- onlyhep
-                 (RunPYTHIA,_,UserCutDef _) -> allhep -}
   liftIO $ sleep 5
-  clean allhep -- dellst
+  clean allhep 
 
 -- | 
 cleanAll :: (Model a) => WorkIO a () 
 cleanAll = do 
-  WS _ssetup psetup rsetup _ _ <- ask 
+  WS _ssetup psetup rsetup _ <- ask 
   wdir <- getWorkDir 
   let taskname = makeRunName psetup rsetup 
       eventdir = wdir </> "Events" 
@@ -517,7 +516,7 @@ cleanAll = do
 -- |      
 makeHepGz :: (Model a) => WorkIO a () 
 makeHepGz = do 
-  WS _ssetup psetup rsetup _ _ <- ask 
+  WS _ssetup psetup rsetup _ <- ask 
   wdir <- getWorkDir 
   let taskname = makeRunName psetup rsetup 
       eventdir = wdir </> "Events" 
