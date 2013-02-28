@@ -1,13 +1,15 @@
-{-# LANGUAGE PackageImports, TypeFamilies, FlexibleInstances #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE RecordWildCards #-}
 
 -----------------------------------------------------------------------------
 -- |
 -- Module      : HEP.Automation.MadGraph.SetupType 
--- Copyright   : (c) 2011, 2012 Ian-Woo Kim
+-- Copyright   : (c) 2011-2013 Ian-Woo Kim
 --
 -- License     : BSD3
 -- Maintainer  : Ian-Woo Kim <ianwookim@gmail.com>
@@ -76,6 +78,47 @@ data RunSetup a = RS {
   , setnum  :: Int 
 } 
 
+
+
+-- | this is RunSetup without parameter
+--   I am going to replace RunSetup with this soon.
+data MGRunSetup = MGRS { 
+    mgrs_numevent :: Int
+  , mgrs_machine :: MachineType
+  , mgrs_rgrun   :: RGRunType
+  , mgrs_rgscale :: Double
+  , mgrs_match   :: MatchType
+  , mgrs_cut     :: CutType
+  , mgrs_pythia  :: PYTHIAType
+  , mgrs_usercut :: UserCutSet
+  , mgrs_lhesanitizer :: LHESanitizerType
+  , mgrs_pgs     :: PGSType 
+  , mgrs_jetalgo :: PGSJetAlgorithm
+  , mgrs_uploadhep :: HEPFileType
+  , mgrs_setnum  :: Int 
+} 
+
+
+mGRunSetup2RunSetup ::  ModelParam a -> MGRunSetup -> RunSetup a
+mGRunSetup2RunSetup p MGRS {..}  = 
+  RS { param = p 
+     , numevent = mgrs_numevent
+     , machine = mgrs_machine
+     , rgrun = mgrs_rgrun 
+     , rgscale = mgrs_rgscale
+     , match = mgrs_match 
+     , cut = mgrs_cut 
+     , pythia = mgrs_pythia
+     , usercut = mgrs_usercut 
+     , lhesanitizer = mgrs_lhesanitizer
+     , pgs = mgrs_pgs 
+     , jetalgo = mgrs_jetalgo 
+     , uploadhep = mgrs_uploadhep
+     , setnum = mgrs_setnum 
+     } 
+
+
+
 deriving instance Typeable1 RunSetup  
 deriving instance (Model a) => Data (RunSetup a)
 
@@ -91,6 +134,15 @@ instance (Model a) => Show (ProcessSetup a) where
 instance (Model a) => Show (RunSetup a) where
   show (RS pa nu ma rgr rgs mat cu py us ls pg ja hu es) = 
     "Run:" ++ show pa ++ ":" ++ show nu ++ ":" ++ show ma ++ ":" 
+          ++ show rgr ++ ":" ++ show rgs ++ ":" ++ show mat ++ ":"
+          ++ show cu ++ ":" ++ show py ++ ":" ++ show us ++ ":" ++ show ls ++ ":" 
+          ++ show pg ++ ":" ++ show ja ++ ":" ++ show hu ++ ":" 
+          ++  show es ++ "|"
+
+
+instance Show MGRunSetup where
+  show (MGRS nu ma rgr rgs mat cu py us ls pg ja hu es) = 
+    "MGRun:" ++ show nu ++ ":" ++ show ma ++ ":" 
           ++ show rgr ++ ":" ++ show rgs ++ ":" ++ show mat ++ ":"
           ++ show cu ++ ":" ++ show py ++ ":" ++ show us ++ ":" ++ show ls ++ ":" 
           ++ show pg ++ ":" ++ show ja ++ ":" ++ show hu ++ ":" 
