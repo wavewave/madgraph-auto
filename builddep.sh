@@ -23,7 +23,7 @@ cabal copy
 
 
 # upload documentation
-tar cvzf madgraph-auto.tar.gz $HOME/.cabal/share/doc/LHE* $HOME/.cabal/share/doc/HEPUtil*  $HOME/.cabal/share/doc/LHCOAnalysis*
+tar cvzf madgraph-auto.tar.gz $HOME/.cabal/share/doc/madgraph-auto* $HOME/.cabal/share/doc/LHE* $HOME/.cabal/share/doc/HEPUtil*  $HOME/.cabal/share/doc/LHCOAnalysis*
 echo $CR | curl --digest -T madgraph-auto.tar.gz -K - $SRVRURL 
 
 # this is needed for checking
