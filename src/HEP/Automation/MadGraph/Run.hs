@@ -1,9 +1,9 @@
-{-# LANGUAGE ScopedTypeVariables, PackageImports #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 -----------------------------------------------------------------------------
 -- |
 -- Module      : HEP.Automation.MadGraph.Run 
--- Copyright   : (c) 2011, 2012 Ian-Woo Kim
+-- Copyright   : (c) 2011-2013 Ian-Woo Kim
 --
 -- License     : BSD3
 -- Maintainer  : Ian-Woo Kim <ianwookim@gmail.com>
@@ -28,7 +28,7 @@ import System.Posix.Env
 import System.Process
 import Text.StringTemplate
 -- from hep-platform
-import HEP.Automation.MadGraph.LHESanitizer.Parse 
+import HEP.Parser.LHE.Sanitizer
 import Text.StringTemplate.Helpers
 -- from this package
 import HEP.Automation.MadGraph.Log
