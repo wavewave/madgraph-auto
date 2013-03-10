@@ -1,5 +1,5 @@
 Name:		madgraph-auto
-Version:	0.6.999
+Version:	0.999
 Synopsis:	automated program library for madgraph run
 Description: 	automated program library for madgraph run  
 License: 	BSD3
@@ -26,9 +26,9 @@ Library
                    transformers,  
                    HStringTemplate > 0.6, 
                    devadmin,
-                   webdav-manager >= 0.1.1.0, 
+                   webdav-manager >= 0.999, 
                    bytestring, 
-                   LHE-sanitizer>=0.0.999, 
+                   LHE-sanitizer>=0.999, 
                    hslogger >= 1.1.4 
   Exposed-Modules: 
                    HEP.Automation.MadGraph.Machine
