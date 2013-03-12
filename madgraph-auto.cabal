@@ -35,7 +35,7 @@ Library
                    HEP.Automation.MadGraph.Model
                    HEP.Automation.MadGraph.Run
                    HEP.Automation.MadGraph.SetupType
-                   HEP.Automation.MadGraph.UserCut
+                   -- HEP.Automation.MadGraph.UserCut
                    HEP.Automation.MadGraph.Util
                    HEP.Automation.MadGraph.Log
                    Paths_madgraph_auto

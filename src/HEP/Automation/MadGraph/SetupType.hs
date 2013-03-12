@@ -31,7 +31,7 @@ import HEP.Storage.WebDAV.Type
 -- from this package
 import HEP.Automation.MadGraph.Machine
 import HEP.Automation.MadGraph.Model
-import HEP.Automation.MadGraph.UserCut
+-- import HEP.Automation.MadGraph.UserCut
 
 -- | 
 data ScriptSetup = 
@@ -70,7 +70,7 @@ data RunSetup a = RS {
   , match   :: MatchType
   , cut     :: CutType
   , pythia  :: PYTHIAType
-  , usercut :: UserCutSet
+  -- , usercut :: UserCutSet
   , lhesanitizer :: LHESanitizerType
   , pgs     :: PGSType 
   , jetalgo :: PGSJetAlgorithm
@@ -90,7 +90,7 @@ data MGRunSetup = MGRS {
   , mgrs_match   :: MatchType
   , mgrs_cut     :: CutType
   , mgrs_pythia  :: PYTHIAType
-  , mgrs_usercut :: UserCutSet
+  -- , mgrs_usercut :: UserCutSet
   , mgrs_lhesanitizer :: LHESanitizerType
   , mgrs_pgs     :: PGSType 
   , mgrs_jetalgo :: PGSJetAlgorithm
@@ -109,7 +109,7 @@ mGRunSetup2RunSetup p MGRS {..}  =
      , match = mgrs_match 
      , cut = mgrs_cut 
      , pythia = mgrs_pythia
-     , usercut = mgrs_usercut 
+     -- , usercut = mgrs_usercut 
      , lhesanitizer = mgrs_lhesanitizer
      , pgs = mgrs_pgs 
      , jetalgo = mgrs_jetalgo 
@@ -123,8 +123,8 @@ deriving instance Typeable1 RunSetup
 deriving instance (Model a) => Data (RunSetup a)
 
 
-data SMPConfiguration = SingleCPU | MultiCPU Int
-  deriving (Show,Typeable,Data)
+-- data SMPConfiguration = SingleCPU | MultiCPU Int
+--   deriving (Show,Typeable,Data)
 
 instance (Model a) => Show (ProcessSetup a) where
   show (PS mdl pr prb wk ) = 
@@ -132,63 +132,29 @@ instance (Model a) => Show (ProcessSetup a) where
                ++ pr ++ ":" ++ prb ++ ":" ++ wk ++ "|"
 
 instance (Model a) => Show (RunSetup a) where
-  show (RS pa nu ma rgr rgs mat cu py us ls pg ja hu es) = 
+  show (RS pa nu ma rgr rgs mat cu py ls pg ja hu es) = 
     "Run:" ++ show pa ++ ":" ++ show nu ++ ":" ++ show ma ++ ":" 
           ++ show rgr ++ ":" ++ show rgs ++ ":" ++ show mat ++ ":"
-          ++ show cu ++ ":" ++ show py ++ ":" ++ show us ++ ":" ++ show ls ++ ":" 
+          ++ show cu ++ ":" ++ show py ++ ":" ++ show ls ++ ":" 
           ++ show pg ++ ":" ++ show ja ++ ":" ++ show hu ++ ":" 
           ++  show es ++ "|"
 
 
 instance Show MGRunSetup where
-  show (MGRS nu ma rgr rgs mat cu py us ls pg ja hu es) = 
+  show (MGRS nu ma rgr rgs mat cu py ls pg ja hu es) = 
     "MGRun:" ++ show nu ++ ":" ++ show ma ++ ":" 
           ++ show rgr ++ ":" ++ show rgs ++ ":" ++ show mat ++ ":"
-          ++ show cu ++ ":" ++ show py ++ ":" ++ show us ++ ":" ++ show ls ++ ":" 
+          ++ show cu ++ ":" ++ show py ++ ":" ++ show ls ++ ":" 
           ++ show pg ++ ":" ++ show ja ++ ":" ++ show hu ++ ":" 
           ++  show es ++ "|"
 
-{-
-data ClusterSetup a = CS { 
-  cluster :: ClusterRunType a
-} deriving (Show,Typeable,Data)
--}
 
 data WorkSetup a = WS { 
   ws_ssetup :: ScriptSetup, 
   ws_psetup :: ProcessSetup a, 
   ws_rsetup :: RunSetup a, 
-  -- ws_csetup :: ClusterSetup a, 
   ws_storage :: WebDAVRemoteDir
 } deriving (Show,Typeable,Data)
 
 type WorkIO b a = ErrorT String (ReaderT (WorkSetup b) IO) a 
 
-{-
-data ClusterRunType a = NoParallel 
-                      | Parallel Int 
-                      | Cluster { 
-                          cluster_masterwork :: WorkSetup a, 
-                          cluster_workname   :: FilePath
-                          } deriving (Typeable,Data)
-
-instance Show (ClusterRunType a) where
-  show NoParallel = "NoParallel"
-  show (Parallel i) = "Parallel " ++ show i 
-  show (Cluster _ _f) = "Cluster"
-  
-  
-defaultClusterNamingFunction :: WorkSetup a -> WorkSetup a -> FilePath
-defaultClusterNamingFunction masterws ws =
-  let wn = workname . ws_psetup $ masterws  
-      snum = setnum .  ws_rsetup $ ws
-  in  wn ++ "Cluster" ++ show snum
-      
-
-      
-data ClusterWork a = ClusterWork { 
-  master :: WorkSetup a, 
-  slaves :: [WorkSetup a] 
-  }
-
--}

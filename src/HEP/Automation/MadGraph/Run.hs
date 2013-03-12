@@ -35,7 +35,7 @@ import HEP.Automation.MadGraph.Log
 import HEP.Automation.MadGraph.Machine
 import HEP.Automation.MadGraph.Model 
 import HEP.Automation.MadGraph.SetupType
-import HEP.Automation.MadGraph.UserCut
+-- import HEP.Automation.MadGraph.UserCut
 import HEP.Automation.MadGraph.Util
 
 -- | 
@@ -48,6 +48,7 @@ compileshSetup ssetup = do
               [ ("mgfourbase", mg4base) ]
               "compile.sh") ++ "\n\n\n"
 
+{- 
 -- | 
 compileFortran :: (Model a) => WorkIO a ()
 compileFortran = do 
@@ -83,7 +84,7 @@ compileFortran = do
       liftIO $ threadDelay 1000000
       workIOReadProcessWithExitCode "sh" ["./compile.sh"] "" 
       return ()
-
+  -}
 -- | Creating working directory. 
 --   Working directory is an autonomous directory of a single madgraph setup
 createWorkDir :: (Model a) => ScriptSetup -> ProcessSetup a -> WorkIO a ()
@@ -113,8 +114,8 @@ getWorkDir = do
 
 
 -- | prepare for cards: param_card.dat, run_card.dat, pythia_card.dat 
---   and pgs_card.dat. Depending on UserDefinedCut or LHESanitize, 
---   pythia_card.dat.sanitize and/or pgs_card.dat.user is created. 
+--   and pgs_card.dat. Depending on LHESanitize, 
+--   pythia_card.dat.sanitize and pgs_card.dat.sanitize are created. 
 cardPrepare :: (Model a) => WorkIO a () 
 cardPrepare = do 
   WS ssetup psetup rsetup _ <- ask 
@@ -132,9 +133,9 @@ cardPrepare = do
   existThenRemove (carddir </> "pythia_card.dat") 
   existThenRemove (carddir </> "pythia_card.dat.sanitize") 
   existThenRemove (carddir </> "pgs_card.dat")
-  existThenRemove (carddir </> "pgs_card.dat.user")
+  existThenRemove (carddir </> "pgs_card.dat.sanitize")
   -- 
-  liftIO $ copyFile (runtmpldir ssetup </> "mg5_configuration.txt" ) (carddir </> "me5_configuration.txt" )
+  liftIO $ copyFile (runtmpldir ssetup </> "mg5_configuration.txt" ) (carddir </> "mg5_configuration.txt" )
   -- 
   paramcard  <- liftIO $ paramCardSetup 
                            (modeltmpldir ssetup)
@@ -171,13 +172,11 @@ cardPrepare = do
   --   
   case pgscard  of 
     Nothing  -> return () 
-    Just str -> case (usercut rsetup,lhesanitizer rsetup) of 
-      (NoUserCutDef,NoLHESanitize) -> 
+    Just str -> case lhesanitizer rsetup of 
+      NoLHESanitize -> 
         liftIO $ writeFile (carddir </> "pgs_card.dat") str
-      (UserCutDef _,NoLHESanitize) -> 
-        liftIO $ writeFile (carddir </> "pgs_card.dat.user") str
-      (_,LHESanitize _) -> 
-        liftIO $ writeFile (carddir </> "pgs_card.dat.user") str 
+      LHESanitize _ -> 
+        liftIO $ writeFile (carddir </> "pgs_card.dat.sanitize") str 
   -- 
   case pgs rsetup of 
     RunPGSNoTau -> do 
@@ -205,25 +204,17 @@ generateEvents = do
   -- 
   case lhesanitizer rsetup of 
     NoLHESanitize -> 
-      case (pgs rsetup, usercut rsetup)  of 
-        (RunPGS,NoUserCutDef)      -> checkFile (wdir </> "Cards/pgs_card.dat") 10
-        (RunPGSNoTau,NoUserCutDef) -> checkFile (wdir </> "Cards/pgs_card.dat") 10      
-        (RunPGS,UserCutDef _)      -> checkFile (wdir </> "Cards/pgs_card.dat.user") 10
-        (RunPGSNoTau,UserCutDef _) -> checkFile (wdir </> "Cards/pgs_card.dat.user") 10
-        (NoPGS,_)  -> return () 
+      case pgs rsetup  of 
+        RunPGS      -> checkFile (wdir </> "Cards/pgs_card.dat") 10
+        RunPGSNoTau -> checkFile (wdir </> "Cards/pgs_card.dat") 10      
+        NoPGS  -> return () 
     LHESanitize _ -> 
       case pgs rsetup of 
         NoPGS -> return ()
-        _ -> checkFile (wdir </> "Cards/pgs_card.dat.user") 10
+        _ -> checkFile (wdir </> "Cards/pgs_card.dat.sanitize") 10
   --  
   workIOReadProcessWithExitCode ("bin/generate_events") ["0", taskname] ""
   
-  {-
-  case cluster csetup of
-    NoParallel     -> 
-    Parallel ncore -> workIOReadProcessWithExitCode ("bin/generate_events") ["2", show ncore, taskname] ""
-    Cluster _ _ -> undefined 
-  -}
   -- this is because madgraph-5-1.4 changes the file location. 
   let eventdir = wdir </> "Events" 
       unweightedevtfilename = taskname ++ "_unweighted_events.lhe" 
@@ -309,12 +300,8 @@ runHEP2LHE = do
       hepfilename = case lhesanitizer rsetup of 
                       NoLHESanitize -> taskname++"_pythia_events.hep"
                       LHESanitize _ -> "pythia_events.hep"
-  let hep2lhe = case usercut rsetup of 
-                  UserCutDef _ -> (sandboxdir ssetup) </> "hep2lhe.iw"
-                  NoUserCutDef -> pythiadir </> "hep2lhe"
-      hep2lhe_result = case usercut rsetup of 
-                         UserCutDef _ -> "afterusercut.hepevt" 
-                         NoUserCutDef -> "pythia_events.lhe"
+  let hep2lhe = pythiadir </> "hep2lhe"
+      hep2lhe_result = "pythia_events.lhe"
   liftIO $ setCurrentDirectory eventdir
   checkFile (eventdir</>taskname</>hepfilename) 10 
 
@@ -323,23 +310,14 @@ runHEP2LHE = do
   debugMsgDef "Start hep2lhe"
   (_,rmsg,_) <- workIOReadProcessWithExitCode  hep2lhe [hepfilename,hep2lhe_result] "" 
   debugMsgDef rmsg 
-  case usercut rsetup of
-    UserCutDef _  -> return () 
-    NoUserCutDef  -> do 
-      let pythiaEventFileName = (taskname ++ "_pythia_events.lhe")
-      liftIO $ renameFile (eventdir</>"pythia_events.lhe") (eventdir</>taskname</>pythiaEventFileName)
-
-      liftIO $ system $ "gzip -f " ++ (eventdir </> taskname </> pythiaEventFileName )
-      return () 
-
+  -- 
+  let pythiaEventFileName = (taskname ++ "_pythia_events.lhe")
+  liftIO $ renameFile (eventdir</>"pythia_events.lhe") (eventdir</>taskname</>pythiaEventFileName)
+  liftIO $ system $ "gzip -f " ++ (eventdir </> taskname </> pythiaEventFileName )
   liftIO $ renameFile (eventdir</>hepfilename) (eventdir</>taskname</>hepfilename)
 
-  -- b <- liftIO $ doesFileExist hepfilename 
-  -- 
-  -- if b 
-  --  then do 
 
-
+{-
 -- | 
 runHEPEVT2STDHEP :: (Model a) => WorkIO a () 
 runHEPEVT2STDHEP = do
@@ -359,6 +337,8 @@ runHEPEVT2STDHEP = do
                                        [hepevtfilename,stdhepfilename] "" 
     else throwError "ERROR pythia result does not exist"  
   return () 
+-}
+
 
 -- | 
 runPGS :: (Model a) => WorkIO a () 
@@ -369,15 +349,12 @@ runPGS = do
       taskname = makeRunName psetup rsetup 
       pgsdir   = wdir </> "../pythia-pgs/src"
       carddir  = wdir </> "Cards"
-      stdhepfilename = "afterusercut.stdhep" 
       hepfilename = "pythia_events.hep"
       uncleanedfilename = "pgs_uncleaned.lhco"
   liftIO $ setCurrentDirectory (eventdir</>taskname)
-  checkFile (carddir </> "pgs_card.dat.user") 10 
-  liftIO $ renameFile (carddir </> "pgs_card.dat.user") (carddir </> "pgs_card.dat")
-  let pythiaresult = case usercut rsetup of
-                       UserCutDef _ -> stdhepfilename
-                       NoUserCutDef -> hepfilename 
+  checkFile (carddir </> "pgs_card.dat.sanitize") 10 
+  liftIO $ renameFile (carddir </> "pgs_card.dat.sanitize") (carddir </> "pgs_card.dat")
+  let pythiaresult = hepfilename 
   checkFile (eventdir</>taskname</>pythiaresult) 10
   debugMsgDef "Start pgs"
   (rmsg,rerr) <- liftIO $ do 
@@ -409,6 +386,7 @@ runClean = do
   liftIO $ system ("gzip -f " ++ finallhco) 
   return ()
 
+{-
 -- | 
 updateBanner :: (Model a) => WorkIO a () 
 updateBanner = do
@@ -429,6 +407,7 @@ updateBanner = do
       pgscardstr <- liftIO $ readFile (carddir </> "pgs_card.dat")  
       let newbannerstr = bannerstr ++ usercutcontent ++ pgscardstr
       liftIO $ writeFile (eventdir</>taskname</>newbannerfilename) newbannerstr 
+-}
 
 -- |
 cleanHepFiles :: (Model a) => WorkIO a () 
@@ -525,12 +504,12 @@ makeHepGz = do
   b <- liftIO $ doesFileExist (hepfilename <.> "gz")
   if b 
     then return () 
-    else case (pythia rsetup, match rsetup, usercut rsetup, uploadhep rsetup) of 
-           (_,MLM,_,UploadHEP) -> do 
+    else case (pythia rsetup, match rsetup, uploadhep rsetup) of 
+           (_,MLM,UploadHEP) -> do 
               checkFile hepfilename 10 
               liftIO $ system $ "gzip -f " ++ hepfilename 
               return ()
-           (RunPYTHIA,_,_,UploadHEP) -> do 
+           (RunPYTHIA,_,UploadHEP) -> do 
               checkFile hepfilename 10 
               liftIO $ system $ "gzip -f " ++ hepfilename
               return () 
