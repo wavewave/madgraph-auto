@@ -32,7 +32,6 @@ import HEP.Automation.MadGraph.SetupType
 import HEP.Automation.MadGraph.Log
 
 -- | 
-
 workIOReadProcessWithExitCode :: FilePath -> [String] -> String -> WorkIO a (ExitCode,String,String)
 workIOReadProcessWithExitCode cmd args input = do 
   (ex, out, err) <- liftIO $ readProcessWithExitCode cmd args input
@@ -44,7 +43,6 @@ workIOReadProcessWithExitCode cmd args input = do
                                   ++ "\n stdout = " ++ out 
 
 -- | 
-
 checkFile :: (Model a) => FilePath -> Int -> WorkIO a () 
 checkFile fp n = do 
   if n < 0 
@@ -82,7 +80,6 @@ checkFile fp n = do
             checkFile fp (n-1)  
 
 -- | 
-
 checkVetoFile :: (Model a) => FilePath -> Int -> WorkIO a () 
 checkVetoFile fp n = do 
   if n < 0 
@@ -94,7 +91,6 @@ checkVetoFile fp n = do
         else do { liftIO $ threadDelay 5000000; checkVetoFile fp (n-1) }
 
 -- | 
-
 existThenRemove :: (Model a) => FilePath -> WorkIO a () 
 existThenRemove fp = do 
   b <- liftIO $ doesFileExist fp 
@@ -103,7 +99,6 @@ existThenRemove fp = do
     else return () 
 
 -- | 
-
 checkDirectory :: (Model a) => FilePath -> Int -> WorkIO a () 
 checkDirectory fp n = do 
   if n < 0 
@@ -115,7 +110,6 @@ checkDirectory fp n = do
          else do { liftIO $ threadDelay 5000000 ; checkDirectory fp (n-1) }  
 
 -- | 
-
 makeRunName :: (Model a) => ProcessSetup a -> RunSetup a -> String 
 makeRunName psetup rsetup = 
   let mprefix = briefShow (model psetup)  
@@ -139,26 +133,23 @@ makeRunName psetup rsetup =
         NoCut -> "NoCut"
         DefCut -> "DefCut"
         KCut -> "KCut"
-      pgsName = case snd (jetalgo rsetup) of
-        WithTau -> "_WithTau"
-        NoTau   -> "_NoTau" 
-      jetalgoName = case fst (jetalgo rsetup) of
-        Cone conesize -> "Cone" ++ show conesize
-        KTJet conesize -> "KT" ++ show conesize
-        AntiKTJet conesize -> "AntiKT" ++ show conesize
+      pgsName = case (pgs rsetup) of
+        NoPGS -> "" 
+        RunPGS (jetalgo,tau) ->
+          let taustr = case tau of 
+                WithTau -> "_WithTau"
+                NoTau   -> "_NoTau" 
+              jetalgoName = case jetalgo of
+                Cone conesize -> "Cone" ++ show conesize
+                KTJet conesize -> "KT" ++ show conesize
+                AntiKTJet conesize -> "AntiKT" ++ show conesize
+          in jetalgoName ++ taustr 
   in  mprefix++masscoup++"_"++processBrief psetup
         ++"_"++machineName++"_"++matchName++"_"++cutName++pgsName
-        ++"_"++jetalgoName ++"_Set" ++ show (setnum rsetup)  
--- | 
+        ++"_Set" ++ show (setnum rsetup)  
 
+-- | 
 naming :: (Model a) => WorkSetup a -> String 
 naming = makeRunName <$> ws_psetup <*>  ws_rsetup 
 
-{-
-
-md5naming :: (Model a) => WorkSetup a -> String
-md5naming ws = let md5str :: MD5Digest = hash' . B.pack . naming $ ws   
-               in  "temp" ++ show md5str 
-
--}
 

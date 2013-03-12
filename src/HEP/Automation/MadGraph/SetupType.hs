@@ -70,10 +70,9 @@ data RunSetup a = RS {
   , match   :: MatchType
   , cut     :: CutType
   , pythia  :: PYTHIAType
-  -- , usercut :: UserCutSet
   , lhesanitizer :: LHESanitizerType
   , pgs     :: PGSType 
-  , jetalgo :: PGSJetAlgoNTau
+  -- , jetalgo :: PGSJetAlgoNTau
   , uploadhep :: HEPFileType
   , setnum  :: Int 
 } 
@@ -90,10 +89,9 @@ data MGRunSetup = MGRS {
   , mgrs_match   :: MatchType
   , mgrs_cut     :: CutType
   , mgrs_pythia  :: PYTHIAType
-  -- , mgrs_usercut :: UserCutSet
   , mgrs_lhesanitizer :: LHESanitizerType
   , mgrs_pgs     :: PGSType 
-  , mgrs_jetalgo :: PGSJetAlgoNTau
+  -- , mgrs_jetalgo :: PGSJetAlgoNTau
   , mgrs_uploadhep :: HEPFileType
   , mgrs_setnum  :: Int 
 } 
@@ -109,10 +107,9 @@ mGRunSetup2RunSetup p MGRS {..}  =
      , match = mgrs_match 
      , cut = mgrs_cut 
      , pythia = mgrs_pythia
-     -- , usercut = mgrs_usercut 
      , lhesanitizer = mgrs_lhesanitizer
      , pgs = mgrs_pgs 
-     , jetalgo = mgrs_jetalgo 
+     -- , jetalgo = mgrs_jetalgo 
      , uploadhep = mgrs_uploadhep
      , setnum = mgrs_setnum 
      } 
@@ -123,29 +120,26 @@ deriving instance Typeable1 RunSetup
 deriving instance (Model a) => Data (RunSetup a)
 
 
--- data SMPConfiguration = SingleCPU | MultiCPU Int
---   deriving (Show,Typeable,Data)
-
 instance (Model a) => Show (ProcessSetup a) where
   show (PS mdl pr prb wk ) = 
     "Process:" ++ modelName mdl ++ ":"
                ++ pr ++ ":" ++ prb ++ ":" ++ wk ++ "|"
 
 instance (Model a) => Show (RunSetup a) where
-  show (RS pa nu ma rgr rgs mat cu py ls pg ja hu es) = 
+  show (RS pa nu ma rgr rgs mat cu py ls pg hu es) = 
     "Run:" ++ show pa ++ ":" ++ show nu ++ ":" ++ show ma ++ ":" 
           ++ show rgr ++ ":" ++ show rgs ++ ":" ++ show mat ++ ":"
           ++ show cu ++ ":" ++ show py ++ ":" ++ show ls ++ ":" 
-          ++ show pg ++ ":" ++ show ja ++ ":" ++ show hu ++ ":" 
+          ++ show pg ++ ":" ++ show hu ++ ":" 
           ++  show es ++ "|"
 
 
 instance Show MGRunSetup where
-  show (MGRS nu ma rgr rgs mat cu py ls pg ja hu es) = 
+  show (MGRS nu ma rgr rgs mat cu py ls pg hu es) = 
     "MGRun:" ++ show nu ++ ":" ++ show ma ++ ":" 
           ++ show rgr ++ ":" ++ show rgs ++ ":" ++ show mat ++ ":"
           ++ show cu ++ ":" ++ show py ++ ":" ++ show ls ++ ":" 
-          ++ show pg ++ ":" ++ show ja ++ ":" ++ show hu ++ ":" 
+          ++ show pg ++ ":" ++ show hu ++ ":" 
           ++  show es ++ "|"
 
 

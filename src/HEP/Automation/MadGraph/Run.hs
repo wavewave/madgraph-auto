@@ -158,7 +158,6 @@ cardPrepare = do
                            (runtmpldir ssetup)
                            (machine rsetup)
                            (pgs     rsetup) 
-                           (jetalgo rsetup)
   --                 
   liftIO $ writeFile (carddir </> "param_card.dat") paramcard
   liftIO $ writeFile (carddir </> "run_card.dat")   runcard
@@ -177,14 +176,6 @@ cardPrepare = do
         liftIO $ writeFile (carddir </> "pgs_card.dat") str
       LHESanitize _ -> 
         liftIO $ writeFile (carddir </> "pgs_card.dat.sanitize") str 
-  -- 
-  {- 
-  case pgs rsetup of 
-    RunPGSNoTau -> do 
-      liftIO $ copyFile (runtmpldir ssetup </> "run_pgs_notau" ) (mcrundir ssetup </> workname psetup </> "bin" </> "run_pgs" )
-      liftIO $ setFileMode (mcrundir ssetup </> workname psetup </> "bin" </> "run_pgs") 0o755 
-        
-    _ -> return ()  -}
   return () 
 
 -- | 
@@ -206,9 +197,8 @@ generateEvents = do
   case lhesanitizer rsetup of 
     NoLHESanitize -> 
       case pgs rsetup  of 
-        RunPGS      -> checkFile (wdir </> "Cards/pgs_card.dat") 10
-        -- RunPGSNoTau -> checkFile (wdir </> "Cards/pgs_card.dat") 10      
-        NoPGS  -> return () 
+        RunPGS _ -> checkFile (wdir </> "Cards/pgs_card.dat") 10
+        NoPGS    -> return () 
     LHESanitize _ -> 
       case pgs rsetup of 
         NoPGS -> return ()
@@ -276,12 +266,9 @@ runPYTHIA = do
   if b 
     then do 
       debugMsgDef "Start PYTHIA"
-      -- liftIO $ do putEnv  $ "PDG_MASS_TBL=" ++ pythiadir </> "mass_width_2004.mc "
       (_,rmsg,_) <- liftIO $ readProcessWithExitCode (bindir </> "internal" </> "run_pythia") [pythiadir] ""
       debugMsgDef rmsg
-      -- liftIO $ threadDelay ( 1 * 1000000 )
       checkFile (eventdir</>"pythia_events.hep") 10
---      liftIO $ renameFile "pythia_events.hep" hepfilename
       liftIO $ renameFile rawunweightedevtfilename (eventdir</>taskname</>unweightedevtfilename)
       liftIO $ setCurrentDirectory (eventdir</>taskname)
       liftIO $ system $ "gzip -f " ++ unweightedevtfilename

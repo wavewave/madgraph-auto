@@ -70,12 +70,8 @@ data MatchType = NoMatch | MLM
 data PYTHIAType = NoPYTHIA | RunPYTHIA
                 deriving (Show,Typeable,Data)
 
--- | 
 
-data PGSType = NoPGS | RunPGS 
-             deriving (Show,Typeable,Data)
-
--- | 
+-- | jet algorithm implemented in PGS (Cone, K_T , anti-K_T algorithm) 
 data PGSJetAlgorithm = Cone Double | KTJet Double | AntiKTJet Double
                        deriving (Show, Typeable, Data)
 
@@ -88,7 +84,11 @@ type PGSJetAlgoNTau = (PGSJetAlgorithm,PGSTau)
 
 
 -- | 
+data PGSType = NoPGS | RunPGS PGSJetAlgoNTau 
+             deriving (Show,Typeable,Data)
 
+
+-- | 
 data HEPFileType = NoUploadHEP | UploadHEP
                    deriving (Show, Typeable, Data)
 
@@ -187,26 +187,22 @@ pythiaCardSetup tpath mtype ptype = do
 pgsCardSetup :: FilePath          -- ^ template path
              -> MachineType       -- ^ machine type
              -> PGSType           -- ^ pgs work type
-             -> PGSJetAlgoNTau    -- ^ pgs algorithm and whether identify taus
              -> IO (Maybe String) -- ^ pgs card string
-pgsCardSetup tpath machine pgstype (jetalgo,tau) = do 
-  pgscardstr <- case pgstype of 
-                  NoPGS -> return Nothing
-                  RunPGS -> do str <- readFile (tpath </> pgsCardMachine machine)
-                               return (Just (str++"\n\n\n"))
-{-                   RunPGSNoTau -> do str <- readFile (tpath </> pgsCardMachine machine)
-                                    return (Just (str++"\n\n\n")) -}
-  let addnotau = case tau of 
+pgsCardSetup tpath machine NoPGS = return Nothing 
+pgsCardSetup tpath machine (RunPGS (jetalgo,tau)) = do 
+    tmplstr <- (++ "\n\n\n") <$> readFile (tpath </> pgsCardMachine machine) 
+    let addnotau = case tau of 
                    NoTau -> "notau"
                    WithTau -> ""  
-  let mstr = case jetalgo of 
-        Cone conesize  -> render1 [ ("jetalgo", "cone"++addnotau)
-                                  , ("conesize", show conesize) ] <$> pgscardstr
-        KTJet conesize -> render1 [ ("jetalgo", "ktjet"++addnotau) 
-                                  , ("conesize", show conesize) ] <$> pgscardstr
-        AntiKTJet conesize -> render1 [ ("jetalgo", "antikt"++addnotau) 
-                                  , ("conesize", show conesize) ] <$> pgscardstr
-  return mstr 
+    let str = case jetalgo of 
+          Cone conesize  -> render1 [ ("jetalgo", "cone"++addnotau)
+                                    , ("conesize", show conesize) ] tmplstr
+          KTJet conesize -> render1 [ ("jetalgo", "ktjet"++addnotau) 
+                                    , ("conesize", show conesize) ] tmplstr
+          AntiKTJet conesize -> render1 [ ("jetalgo", "antikt"++addnotau) 
+                                    , ("conesize", show conesize) ] tmplstr
+    return (Just str)
+
 
 
 
