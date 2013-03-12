@@ -73,7 +73,7 @@ data RunSetup a = RS {
   -- , usercut :: UserCutSet
   , lhesanitizer :: LHESanitizerType
   , pgs     :: PGSType 
-  , jetalgo :: PGSJetAlgorithm
+  , jetalgo :: PGSJetAlgoNTau
   , uploadhep :: HEPFileType
   , setnum  :: Int 
 } 
@@ -93,7 +93,7 @@ data MGRunSetup = MGRS {
   -- , mgrs_usercut :: UserCutSet
   , mgrs_lhesanitizer :: LHESanitizerType
   , mgrs_pgs     :: PGSType 
-  , mgrs_jetalgo :: PGSJetAlgorithm
+  , mgrs_jetalgo :: PGSJetAlgoNTau
   , mgrs_uploadhep :: HEPFileType
   , mgrs_setnum  :: Int 
 } 

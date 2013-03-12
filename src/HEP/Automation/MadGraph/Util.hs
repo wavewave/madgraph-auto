@@ -139,10 +139,10 @@ makeRunName psetup rsetup =
         NoCut -> "NoCut"
         DefCut -> "DefCut"
         KCut -> "KCut"
-      pgsName = case (pgs rsetup) of
-        RunPGSNoTau -> "_NoTau"
-        _           -> "" 
-      jetalgoName = case (jetalgo rsetup) of
+      pgsName = case snd (jetalgo rsetup) of
+        WithTau -> "_WithTau"
+        NoTau   -> "_NoTau" 
+      jetalgoName = case fst (jetalgo rsetup) of
         Cone conesize -> "Cone" ++ show conesize
         KTJet conesize -> "KT" ++ show conesize
         AntiKTJet conesize -> "AntiKT" ++ show conesize

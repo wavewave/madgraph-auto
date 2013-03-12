@@ -178,12 +178,13 @@ cardPrepare = do
       LHESanitize _ -> 
         liftIO $ writeFile (carddir </> "pgs_card.dat.sanitize") str 
   -- 
+  {- 
   case pgs rsetup of 
     RunPGSNoTau -> do 
       liftIO $ copyFile (runtmpldir ssetup </> "run_pgs_notau" ) (mcrundir ssetup </> workname psetup </> "bin" </> "run_pgs" )
       liftIO $ setFileMode (mcrundir ssetup </> workname psetup </> "bin" </> "run_pgs") 0o755 
         
-    _ -> return () 
+    _ -> return ()  -}
   return () 
 
 -- | 
@@ -206,7 +207,7 @@ generateEvents = do
     NoLHESanitize -> 
       case pgs rsetup  of 
         RunPGS      -> checkFile (wdir </> "Cards/pgs_card.dat") 10
-        RunPGSNoTau -> checkFile (wdir </> "Cards/pgs_card.dat") 10      
+        -- RunPGSNoTau -> checkFile (wdir </> "Cards/pgs_card.dat") 10      
         NoPGS  -> return () 
     LHESanitize _ -> 
       case pgs rsetup of 
