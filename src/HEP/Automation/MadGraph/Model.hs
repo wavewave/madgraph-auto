@@ -29,7 +29,7 @@ class (Show a, Typeable a, Data a, Show (ModelParam a),Typeable (ModelParam a),D
   interpreteParam :: String -> ModelParam a
 
 data MadGraphVersion = MadGraph4 | MadGraph5
-                  deriving Show
+                  deriving (Show,Typeable,Data)
 
 makeProcessFile :: Model a => a -> String -> String -> String
 makeProcessFile model process dirname = 

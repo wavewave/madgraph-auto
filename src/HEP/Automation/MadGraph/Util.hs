@@ -110,10 +110,10 @@ checkDirectory fp n = do
          else do { liftIO $ threadDelay 5000000 ; checkDirectory fp (n-1) }  
 
 -- | 
-makeRunName :: (Model a) => ProcessSetup a -> RunSetup a -> String 
-makeRunName psetup rsetup = 
+makeRunName :: (Model a) => ProcessSetup a -> ModelParam a -> RunSetup -> String 
+makeRunName psetup param rsetup = 
   let mprefix = briefShow (model psetup)  
-      masscoup = briefParamShow (param rsetup) 
+      masscoup = briefParamShow param 
       machineName = case (machine rsetup) of 
         TeVatron -> "TeVa" 
         LHC7 detector -> "LHC7" ++ show detector
@@ -144,12 +144,16 @@ makeRunName psetup rsetup =
                 KTJet conesize -> "KT" ++ show conesize
                 AntiKTJet conesize -> "AntiKT" ++ show conesize
           in jetalgoName ++ taustr 
-  in  mprefix++masscoup++"_"++processBrief psetup
-        ++"_"++machineName++"_"++matchName++"_"++cutName++pgsName
-        ++"_Set" ++ show (setnum rsetup)  
+  in  mprefix++masscoup
+      ++"_"++processBrief psetup
+      ++"_"++machineName
+      ++"_"++matchName
+      ++"_"++cutName
+      ++"_"++pgsName
+      ++"_Set" ++ show (setnum rsetup)  
 
 -- | 
 naming :: (Model a) => WorkSetup a -> String 
-naming = makeRunName <$> ws_psetup <*>  ws_rsetup 
+naming = makeRunName <$> ws_psetup <*> ws_param <*> ws_rsetup 
 
 

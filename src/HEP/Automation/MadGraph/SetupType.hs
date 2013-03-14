@@ -61,26 +61,30 @@ data LHESanitizerType = NoLHESanitize
                       | LHESanitize SanitizeType   
                       deriving (Show,Typeable,Data)
 
-data RunSetup a = RS { 
-    param   :: ModelParam a
-  , numevent :: Int
-  , machine :: MachineType
-  , rgrun   :: RGRunType
-  , rgscale :: Double
-  , match   :: MatchType
-  , cut     :: CutType
-  , pythia  :: PYTHIAType
-  , lhesanitizer :: LHESanitizerType
-  , pgs     :: PGSType 
-  -- , jetalgo :: PGSJetAlgoNTau
-  , uploadhep :: HEPFileType
-  , setnum  :: Int 
-} 
+--     param   :: ModelParam a
+
+
+data RunSetup = 
+    RS { numevent :: Int
+       , machine :: MachineType
+       , rgrun   :: RGRunType
+       , rgscale :: Double
+       , match   :: MatchType
+       , cut     :: CutType
+       , pythia  :: PYTHIAType
+       , lhesanitizer :: LHESanitizerType
+       , pgs     :: PGSType 
+       -- , jetalgo :: PGSJetAlgoNTau
+       , uploadhep :: HEPFileType
+       , setnum  :: Int 
+       } 
 
 
 
 -- | this is RunSetup without parameter
 --   I am going to replace RunSetup with this soon.
+
+{-
 data MGRunSetup = MGRS { 
     mgrs_numevent :: Int
   , mgrs_machine :: MachineType
@@ -94,8 +98,9 @@ data MGRunSetup = MGRS {
   -- , mgrs_jetalgo :: PGSJetAlgoNTau
   , mgrs_uploadhep :: HEPFileType
   , mgrs_setnum  :: Int 
-} 
+} -}
 
+{-
 
 mGRunSetup2RunSetup ::  ModelParam a -> MGRunSetup -> RunSetup a
 mGRunSetup2RunSetup p MGRS {..}  = 
@@ -114,10 +119,10 @@ mGRunSetup2RunSetup p MGRS {..}  =
      , setnum = mgrs_setnum 
      } 
 
+-}
 
-
-deriving instance Typeable1 RunSetup  
-deriving instance (Model a) => Data (RunSetup a)
+deriving instance Typeable RunSetup  
+deriving instance Data RunSetup
 
 
 instance (Model a) => Show (ProcessSetup a) where
@@ -125,15 +130,19 @@ instance (Model a) => Show (ProcessSetup a) where
     "Process:" ++ modelName mdl ++ ":"
                ++ pr ++ ":" ++ prb ++ ":" ++ wk ++ "|"
 
-instance (Model a) => Show (RunSetup a) where
-  show (RS pa nu ma rgr rgs mat cu py ls pg hu es) = 
-    "Run:" ++ show pa ++ ":" ++ show nu ++ ":" ++ show ma ++ ":" 
+-- instance (Model a) => Show (ModelParam a) where
+--   show pa =  
+
+
+instance Show RunSetup where
+  show (RS nu ma rgr rgs mat cu py ls pg hu es) = 
+    "Run:" ++ show nu ++ ":" ++ show ma ++ ":" 
           ++ show rgr ++ ":" ++ show rgs ++ ":" ++ show mat ++ ":"
           ++ show cu ++ ":" ++ show py ++ ":" ++ show ls ++ ":" 
           ++ show pg ++ ":" ++ show hu ++ ":" 
           ++  show es ++ "|"
 
-
+{-
 instance Show MGRunSetup where
   show (MGRS nu ma rgr rgs mat cu py ls pg hu es) = 
     "MGRun:" ++ show nu ++ ":" ++ show ma ++ ":" 
@@ -141,14 +150,19 @@ instance Show MGRunSetup where
           ++ show cu ++ ":" ++ show py ++ ":" ++ show ls ++ ":" 
           ++ show pg ++ ":" ++ show hu ++ ":" 
           ++  show es ++ "|"
-
+-}
 
 data WorkSetup a = WS { 
   ws_ssetup :: ScriptSetup, 
   ws_psetup :: ProcessSetup a, 
-  ws_rsetup :: RunSetup a, 
+  ws_param  :: ModelParam a, 
+  ws_rsetup :: RunSetup, 
   ws_storage :: WebDAVRemoteDir
-} deriving (Show,Typeable,Data)
+} 
+
+deriving instance (Model a) => Show (WorkSetup a)
+deriving instance Typeable1 WorkSetup 
+deriving instance (Model a) => Data (WorkSetup a)
 
 type WorkIO b a = ErrorT String (ReaderT (WorkSetup b) IO) a 
 

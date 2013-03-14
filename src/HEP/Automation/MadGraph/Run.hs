@@ -17,6 +17,7 @@
 module HEP.Automation.MadGraph.Run where
 
 -- from others 
+import Control.Applicative ((<$>),(<*>))
 import Control.Concurrent
 import Control.Monad.Error
 import Control.Monad.Reader
@@ -48,43 +49,6 @@ compileshSetup ssetup = do
               [ ("mgfourbase", mg4base) ]
               "compile.sh") ++ "\n\n\n"
 
-{- 
--- | 
-compileFortran :: (Model a) => WorkIO a ()
-compileFortran = do 
-  WS ssetup _ rsetup _ <- ask   
-  case (usercut rsetup) of 
-    NoUserCutDef -> return () 
-    UserCutDef uc -> do 
-      debugMsgDef "set up fortran program" 
-      let existThenRemoveForAny x = existThenRemove (sandboxdir ssetup </> x)
-          cpFrmTmpl2Working x = copyFile (runtmpldir ssetup </> x) 
-                                         (sandboxdir ssetup </> x)
-      let filelistNoTemplate   =  [ "getjet.f" 
-                                  , "hepevt2stdhep.f"
-                                  , "pgs_ranmar.f" 
-                                  , "pythia.f"
-                                  , "stdhep_print.f"
-                                  , "pgs.inc" 
-                                  , "ktclusdble.f"
-                                  , "ME2pythia.f"
-                                  ]
-      -- erase previous run 
-      mapM_ existThenRemoveForAny  ("compile.sh" :"hep2lhe.f" : filelistNoTemplate)
-      -- setup new hep2lhe.f with a given user cut 
-      hep2lhe <- liftIO $ hep2lheSetup (runtmpldir ssetup) uc
-      liftIO $ writeFile (sandboxdir ssetup </> "hep2lhe.f") hep2lhe
-      -- setup new compile.sh according to system configuration.
-      compilesh  <- liftIO $ compileshSetup ssetup 
-      liftIO $ writeFile (sandboxdir ssetup </> "compile.sh") compilesh
-      -- copy files and compile
-      liftIO $ mapM_ cpFrmTmpl2Working filelistNoTemplate 
-      liftIO $ setCurrentDirectory (sandboxdir ssetup)
-      checkFile (sandboxdir ssetup </> "compile.sh") 10 
-      liftIO $ threadDelay 1000000
-      workIOReadProcessWithExitCode "sh" ["./compile.sh"] "" 
-      return ()
-  -}
 -- | Creating working directory. 
 --   Working directory is an autonomous directory of a single madgraph setup
 createWorkDir :: (Model a) => ScriptSetup -> ProcessSetup a -> WorkIO a ()
@@ -107,10 +71,8 @@ createWorkDir ssetup psetup = do
 
 -- | Get a path for working directory
 getWorkDir :: (Model a) => WorkIO a FilePath   
-getWorkDir = do 
-  WS ssetup psetup _rsetup _ <- ask   
-  return (mcrundir ssetup </> workname psetup)
-
+getWorkDir = ask >>= \ws ->
+             return (mcrundir (ws_ssetup ws) </> workname (ws_psetup ws))
 
 
 -- | prepare for cards: param_card.dat, run_card.dat, pythia_card.dat 
@@ -118,9 +80,11 @@ getWorkDir = do
 --   pythia_card.dat.sanitize and pgs_card.dat.sanitize are created. 
 cardPrepare :: (Model a) => WorkIO a () 
 cardPrepare = do 
-  WS ssetup psetup rsetup _ <- ask 
+  ws <- ask 
+  let (ssetup,psetup,param,rsetup) = 
+         ((,,,) <$> ws_ssetup <*> ws_psetup <*> ws_param <*> ws_rsetup) ws 
   wdir <- getWorkDir 
-  let taskname = makeRunName psetup rsetup 
+  let taskname = makeRunName psetup param rsetup 
   let carddir = wdir </> "Cards"
   debugMsgDef $ "prepare for cards for " ++ taskname
   checkDirectory wdir 10
@@ -140,7 +104,7 @@ cardPrepare = do
   paramcard  <- liftIO $ paramCardSetup 
                            (modeltmpldir ssetup)
                            (model psetup)
-                           (param rsetup)
+                           param
   runcard    <- liftIO $ runCardSetup 
                            (runtmpldir ssetup)
                            (machine rsetup) 
@@ -181,9 +145,11 @@ cardPrepare = do
 -- | 
 generateEvents :: (Model a) => WorkIO a () 
 generateEvents = do 
-  WS _ssetup psetup rsetup csetup <- ask
+  ws <- ask 
+  let (ssetup,psetup,param,rsetup) = 
+         ((,,,) <$> ws_ssetup <*> ws_psetup <*> ws_param <*> ws_rsetup) ws 
   wdir <- getWorkDir
-  let taskname = makeRunName psetup rsetup 
+  let taskname = makeRunName psetup param rsetup 
   debugMsgDef $ "generating event for " ++ taskname
   liftIO $ setCurrentDirectory wdir 
   checkFile (wdir </> "Cards/run_card.dat") 10
@@ -220,14 +186,18 @@ generateEvents = do
 -- | 
 sanitizeLHE :: (Model a) => WorkIO a () 
 sanitizeLHE = do 
-  WS _ssetup psetup rsetup _storage <- ask 
+  ws <- ask 
+  let (ssetup,psetup,param,rsetup) = 
+         ((,,,) <$> ws_ssetup <*> ws_psetup <*> ws_param <*> ws_rsetup) ws 
+
+  -- WS _ssetup psetup param rsetup _storage <- ask 
   debugMsgDef "Start sanitizeLHE"
   case lhesanitizer rsetup of 
     NoLHESanitize -> throwError "ERROR: why did you call me? I am in sanitizeLHEFile." 
     LHESanitize styp  -> do 
       wdir <- getWorkDir
       let eventdir = wdir </> "Events" 
-          taskname = makeRunName psetup rsetup 
+          taskname = makeRunName psetup param rsetup 
           unweightedevtfilename = taskname ++ "_unweighted_events.lhe" 
           rawunweightedevtfilename = "unweighted_events.lhe"
 
@@ -247,13 +217,15 @@ sanitizeLHE = do
 -- | run PYTHIA as a user-defined process.
 runPYTHIA :: (Model a) => WorkIO a () 
 runPYTHIA = do
-  WS _ssetup psetup rsetup _ <- ask 
+  ws <- ask 
+  let (ssetup,psetup,param,rsetup) = 
+         ((,,,) <$> ws_ssetup <*> ws_psetup <*> ws_param <*> ws_rsetup) ws 
   wdir <- getWorkDir 
   let bindir = wdir </> "bin"
       eventdir = wdir </> "Events" 
       carddir  = wdir </> "Cards"
       pythiadir = wdir </> "../pythia-pgs/src"
-      taskname = makeRunName psetup rsetup 
+      taskname = makeRunName psetup param rsetup 
       unweightedevtfilename = taskname ++ "_unweighted_events.lhe" 
       rawunweightedevtfilename = "unweighted_events.lhe"
       -- hepfilename = taskname++"_pythia_events.hep"
@@ -280,11 +252,13 @@ runPYTHIA = do
 -- | 
 runHEP2LHE :: (Model a) => WorkIO a () 
 runHEP2LHE = do
-  WS ssetup psetup rsetup _ <- ask 
+  ws <- ask 
+  let (ssetup,psetup,param,rsetup) = 
+         ((,,,) <$> ws_ssetup <*> ws_psetup <*> ws_param <*> ws_rsetup) ws 
   wdir <- getWorkDir 
   let eventdir = wdir </> "Events" 
       pythiadir = wdir </> "../pythia-pgs/src"
-      taskname = makeRunName psetup rsetup 
+      taskname = makeRunName psetup param rsetup 
       hepfilename = case lhesanitizer rsetup of 
                       NoLHESanitize -> taskname++"_pythia_events.hep"
                       LHESanitize _ -> "pythia_events.hep"
@@ -305,36 +279,15 @@ runHEP2LHE = do
   liftIO $ renameFile (eventdir</>hepfilename) (eventdir</>taskname</>hepfilename)
 
 
-{-
--- | 
-runHEPEVT2STDHEP :: (Model a) => WorkIO a () 
-runHEPEVT2STDHEP = do
-  WS ssetup psetup rsetup _ <- ask 
-  wdir <- getWorkDir
-  let eventdir = wdir </> "Events" 
-      hepevtfilename = "afterusercut.hepevt"  
-      stdhepfilename = "afterusercut.stdhep" 
-      taskname = makeRunName psetup rsetup
-  liftIO $ setCurrentDirectory (eventdir</>taskname)
-  checkFile (eventdir</>taskname</>hepevtfilename) 10 
-  b <- liftIO $ doesFileExist hepevtfilename 
-  if b 
-    then do 
-      debugMsgDef "Start hepevt2stdhep"
-      workIOReadProcessWithExitCode (sandboxdir ssetup </> "hepevt2stdhep.iw") 
-                                       [hepevtfilename,stdhepfilename] "" 
-    else throwError "ERROR pythia result does not exist"  
-  return () 
--}
-
-
 -- | 
 runPGS :: (Model a) => WorkIO a () 
 runPGS = do
-  WS _ssetup psetup rsetup _ <- ask 
+  ws <- ask 
+  let (ssetup,psetup,param,rsetup) = 
+         ((,,,) <$> ws_ssetup <*> ws_psetup <*> ws_param <*> ws_rsetup) ws 
   wdir <- getWorkDir 
   let eventdir = wdir </> "Events" 
-      taskname = makeRunName psetup rsetup 
+      taskname = makeRunName psetup param rsetup 
       pgsdir   = wdir </> "../pythia-pgs/src"
       carddir  = wdir </> "Cards"
       hepfilename = "pythia_events.hep"
@@ -354,18 +307,16 @@ runPGS = do
 -- | 
 runClean :: (Model a) => WorkIO a () 
 runClean = do
-  WS _ssetup psetup rsetup _ <- ask
+  ws <- ask 
+  let (ssetup,psetup,param,rsetup) = 
+         ((,,,) <$> ws_ssetup <*> ws_psetup <*> ws_param <*> ws_rsetup) ws 
   wdir <- getWorkDir 
   let eventdir = wdir </> "Events" 
       pgsdir   = wdir </> "../pythia-pgs/src"
-      taskname = makeRunName psetup rsetup 
-      -- hepfilename = taskname++"_pythia_events.hep"
-      -- hepevtfilename = "afterusercut.hepevt"  
-      -- stdhepfilename = "afterusercut.stdhep" 
+      taskname = makeRunName psetup param rsetup 
       uncleanedfilename = "pgs_uncleaned.lhco"
       cleanedfilename = "pgs_cleaned.lhco"
       finallhco = taskname ++ "_pgs_events.lhco"
-      -- finallhcogz = taskname ++ "_pgs_events.lhco.gz"
   liftIO $ setCurrentDirectory (eventdir</>taskname)
   checkFile (eventdir</>taskname</>uncleanedfilename) 10
   debugMsgDef "Start clean_output"
@@ -384,7 +335,7 @@ updateBanner = do
     NoUserCutDef -> return () 
     UserCutDef uc -> do  
       let eventdir = wdir </> "Events" 
-          taskname = makeRunName psetup rsetup 
+          taskname = makeRunName psetup param rsetup 
           carddir  = wdir </> "Cards"
           bannerfilename = taskname ++ "_banner.txt"
           newbannerfilename = taskname ++ "_newbanner.txt"
@@ -400,9 +351,11 @@ updateBanner = do
 -- |
 cleanHepFiles :: (Model a) => WorkIO a () 
 cleanHepFiles = do 
-  WS _ssetup psetup rsetup _ <- ask 
+  ws <- ask 
+  let (ssetup,psetup,param,rsetup) = 
+         ((,,,) <$> ws_ssetup <*> ws_psetup <*> ws_param <*> ws_rsetup) ws 
   wdir <- getWorkDir 
-  let taskname = makeRunName psetup rsetup 
+  let taskname = makeRunName psetup param rsetup 
       eventdir = wdir </> "Events" 
       existThenRemoveForAny x = existThenRemove (eventdir</>taskname</> x)
       clean = mapM_ existThenRemoveForAny  
@@ -427,9 +380,11 @@ cleanHepFiles = do
 -- | 
 cleanAll :: (Model a) => WorkIO a () 
 cleanAll = do 
-  WS _ssetup psetup rsetup _ <- ask 
+  ws <- ask 
+  let (ssetup,psetup,param,rsetup) = 
+         ((,,,) <$> ws_ssetup <*> ws_psetup <*> ws_param <*> ws_rsetup) ws 
   wdir <- getWorkDir 
-  let taskname = makeRunName psetup rsetup 
+  let taskname = makeRunName psetup param rsetup 
       eventdir = wdir </> "Events" 
       existThenRemoveForAny x = existThenRemove (eventdir</>taskname</>x)
       clean = mapM_ existThenRemoveForAny  
@@ -483,9 +438,11 @@ cleanAll = do
 -- |      
 makeHepGz :: (Model a) => WorkIO a () 
 makeHepGz = do 
-  WS _ssetup psetup rsetup _ <- ask 
+  ws <- ask 
+  let (ssetup,psetup,param,rsetup) = 
+         ((,,,) <$> ws_ssetup <*> ws_psetup <*> ws_param <*> ws_rsetup) ws 
   wdir <- getWorkDir 
-  let taskname = makeRunName psetup rsetup 
+  let taskname = makeRunName psetup param rsetup 
       eventdir = wdir </> "Events" 
       hepfilename = taskname++"_pythia_events.hep"
   liftIO $ setCurrentDirectory (eventdir</>taskname)
