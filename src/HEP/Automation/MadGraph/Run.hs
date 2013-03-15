@@ -39,6 +39,11 @@ import HEP.Automation.MadGraph.SetupType
 -- import HEP.Automation.MadGraph.UserCut
 import HEP.Automation.MadGraph.Util
 
+(#) :: a -> (a -> b) -> b
+x # f = f x
+
+infixr 9 #
+
 -- | 
 compileshSetup :: ScriptSetup -> IO String 
 compileshSetup ssetup = do
@@ -126,20 +131,19 @@ cardPrepare = do
   liftIO $ writeFile (carddir </> "param_card.dat") paramcard
   liftIO $ writeFile (carddir </> "run_card.dat")   runcard
   -- 
-  case pythiacard of 
-    Nothing  -> return () 
-    Just str -> 
+  pythiacard # 
+    maybe (return ()) (\str -> 
       case lhesanitizer rsetup of 
         NoLHESanitize -> liftIO $ writeFile (carddir </> "pythia_card.dat") str
-        LHESanitize _ -> liftIO $ writeFile (carddir </> "pythia_card.dat.sanitize") str 
-  --   
-  case pgscard  of 
-    Nothing  -> return () 
-    Just str -> case lhesanitizer rsetup of 
-      NoLHESanitize -> 
-        liftIO $ writeFile (carddir </> "pgs_card.dat") str
-      LHESanitize _ -> 
-        liftIO $ writeFile (carddir </> "pgs_card.dat.sanitize") str 
+        LHESanitize _ -> liftIO $ writeFile (carddir </> "pythia_card.dat.sanitize") str
+    )
+  -- 
+  pgscard # 
+    maybe (return ()) (\str -> 
+      case lhesanitizer rsetup of 
+        NoLHESanitize -> liftIO $ writeFile (carddir </> "pgs_card.dat") str
+        LHESanitize _ -> liftIO $ writeFile (carddir </> "pgs_card.dat.sanitize") str 
+    )
   return () 
 
 -- | 
@@ -393,11 +397,11 @@ cleanAll = do
       stdhepfilename = "afterusercut.stdhep"      
       uncleanedfilename = "pgs_uncleaned.lhco"
       cleanedfilename = "pgs_cleaned.lhco"
-      bannerfile    = taskname++ "_banner.txt"
+      bannerfile    = taskname++ "_fermi_banner.txt"
       treefile1     = taskname++ "_beforeveto.tree.gz"
       lheeventfile1 = taskname ++ "_events.lhe.gz"
       treefile2     = taskname ++ "_events.tree.gz"
-      newbannerfile = taskname ++ "_newbanner.txt"
+      newbannerfile = taskname ++ "_fermi_newbanner.txt"
       pgseventfile  = taskname ++ "_pgs_events.lhco.gz"
       plotpythiafile = taskname ++ "_plots_pythia.html"
       pythiadir      = taskname ++ "_pythia"
