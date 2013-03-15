@@ -31,7 +31,6 @@ import HEP.Storage.WebDAV.Type
 -- from this package
 import HEP.Automation.MadGraph.Machine
 import HEP.Automation.MadGraph.Model
--- import HEP.Automation.MadGraph.UserCut
 
 -- | 
 data ScriptSetup = 
@@ -61,9 +60,6 @@ data LHESanitizerType = NoLHESanitize
                       | LHESanitize SanitizeType   
                       deriving (Show,Typeable,Data)
 
---     param   :: ModelParam a
-
-
 data RunSetup = 
     RS { numevent :: Int
        , machine :: MachineType
@@ -74,52 +70,9 @@ data RunSetup =
        , pythia  :: PYTHIAType
        , lhesanitizer :: LHESanitizerType
        , pgs     :: PGSType 
-       -- , jetalgo :: PGSJetAlgoNTau
        , uploadhep :: HEPFileType
        , setnum  :: Int 
        } 
-
-
-
--- | this is RunSetup without parameter
---   I am going to replace RunSetup with this soon.
-
-{-
-data MGRunSetup = MGRS { 
-    mgrs_numevent :: Int
-  , mgrs_machine :: MachineType
-  , mgrs_rgrun   :: RGRunType
-  , mgrs_rgscale :: Double
-  , mgrs_match   :: MatchType
-  , mgrs_cut     :: CutType
-  , mgrs_pythia  :: PYTHIAType
-  , mgrs_lhesanitizer :: LHESanitizerType
-  , mgrs_pgs     :: PGSType 
-  -- , mgrs_jetalgo :: PGSJetAlgoNTau
-  , mgrs_uploadhep :: HEPFileType
-  , mgrs_setnum  :: Int 
-} -}
-
-{-
-
-mGRunSetup2RunSetup ::  ModelParam a -> MGRunSetup -> RunSetup a
-mGRunSetup2RunSetup p MGRS {..}  = 
-  RS { param = p 
-     , numevent = mgrs_numevent
-     , machine = mgrs_machine
-     , rgrun = mgrs_rgrun 
-     , rgscale = mgrs_rgscale
-     , match = mgrs_match 
-     , cut = mgrs_cut 
-     , pythia = mgrs_pythia
-     , lhesanitizer = mgrs_lhesanitizer
-     , pgs = mgrs_pgs 
-     -- , jetalgo = mgrs_jetalgo 
-     , uploadhep = mgrs_uploadhep
-     , setnum = mgrs_setnum 
-     } 
-
--}
 
 deriving instance Typeable RunSetup  
 deriving instance Data RunSetup
@@ -130,9 +83,6 @@ instance (Model a) => Show (ProcessSetup a) where
     "Process:" ++ modelName mdl ++ ":"
                ++ pr ++ ":" ++ prb ++ ":" ++ wk ++ "|"
 
--- instance (Model a) => Show (ModelParam a) where
---   show pa =  
-
 
 instance Show RunSetup where
   show (RS nu ma rgr rgs mat cu py ls pg hu es) = 
@@ -142,15 +92,6 @@ instance Show RunSetup where
           ++ show pg ++ ":" ++ show hu ++ ":" 
           ++  show es ++ "|"
 
-{-
-instance Show MGRunSetup where
-  show (MGRS nu ma rgr rgs mat cu py ls pg hu es) = 
-    "MGRun:" ++ show nu ++ ":" ++ show ma ++ ":" 
-          ++ show rgr ++ ":" ++ show rgs ++ ":" ++ show mat ++ ":"
-          ++ show cu ++ ":" ++ show py ++ ":" ++ show ls ++ ":" 
-          ++ show pg ++ ":" ++ show hu ++ ":" 
-          ++  show es ++ "|"
--}
 
 data WorkSetup a = WS { 
   ws_ssetup :: ScriptSetup, 
