@@ -73,7 +73,7 @@ nb_core = None #
 # Pythia-PGS Package
 # relative path start from main directory
 #  
-pythia-pgs_path = /home/wavewave/repo/ext/MadGraph5_v1_4_8_4/pythia-pgs #  
+pythia-pgs_path = $pythiapgs$ #  
 
 # Delphes Package
 # relative path start from main directory

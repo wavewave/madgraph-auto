@@ -156,4 +156,12 @@ makeRunName psetup param rsetup =
 naming :: (Model a) => WorkSetup a -> String 
 naming = makeRunName <$> ws_psetup <*> ws_param <*> ws_rsetup 
 
+-- | 
+
+withTempFile :: MonadIO m => FilePath -> FilePath -> m r -> m r
+withTempFile ofp tfp act = do
+  liftIO $ renameFile ofp tfp 
+  r <- act 
+  liftIO $ renameFile tfp ofp 
+  return r
 

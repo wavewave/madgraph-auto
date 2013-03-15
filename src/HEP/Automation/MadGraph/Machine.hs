@@ -92,8 +92,9 @@ data PGSType = NoPGS | RunPGS PGSJetAlgoNTau
 data HEPFileType = NoUploadHEP | UploadHEP
                    deriving (Show, Typeable, Data)
 
--- | 
 
+
+-- | 
 runCard4CutMatch :: CutType -> MatchType -> String
 runCard4CutMatch NoCut  NoMatch = "run_card_NoCut_NoMatch.dat"
 runCard4CutMatch DefCut NoMatch = "run_card_DefCut_NoMatch.dat"
@@ -102,7 +103,6 @@ runCard4CutMatch KCut   MLM     = "run_card_KCut_MLM.dat"
 runCard4CutMatch _ _ = error "cut mlm does not match"
 
 -- | 
-
 pythiaCardMatch :: MatchType -> String
 pythiaCardMatch NoMatch = "pythia_card_default.dat"
 pythiaCardMatch MLM     = "pythia_card_MLM.dat"
@@ -137,7 +137,6 @@ pgsCardMachine (PolParton _ _ ATLAS) = "pgs_card_ATLAS.dat.st"
 pgsCardMachine (PolParton _ _ CMS) = "pgs_card_CMS.dat.st"
 
 -- | 
-
 runCardSetup :: FilePath -> MachineType -> CutType -> MatchType -> RGRunType -> Double -> Int -> Int -> IO String 
 runCardSetup tpath machine ctype mtype rgtype scale numevt setnum = do 
   let (beamtyp1,beamtyp2,beamenergy,beampol1,beampol2) = case machine of 

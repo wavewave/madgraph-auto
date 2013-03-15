@@ -54,6 +54,8 @@ compileshSetup ssetup = do
               [ ("mgfourbase", mg4base) ]
               "compile.sh") ++ "\n\n\n"
 
+
+
 -- | Creating working directory. 
 --   Working directory is an autonomous directory of a single madgraph setup
 createWorkDir :: (Model a) => ScriptSetup -> ProcessSetup a -> WorkIO a ()
@@ -80,6 +82,18 @@ getWorkDir = ask >>= \ws ->
              return (mcrundir (ws_ssetup ws) </> workname (ws_psetup ws))
 
 
+-- | get string for me5_configuration.txt
+me5confSetup :: (Model a) => WorkIO a String 
+me5confSetup = do 
+  tpath <- ask >>= return . runtmpldir . ws_ssetup 
+  wdir <- getWorkDir
+  templates <- liftIO $ directoryGroup tpath 
+  return $ renderTemplateGroup
+             templates
+             [ ("pythiapgs", wdir </> "../pythia-pgs" ) ] 
+             "me5_configuration.txt" 
+
+
 -- | prepare for cards: param_card.dat, run_card.dat, pythia_card.dat 
 --   and pgs_card.dat. Depending on LHESanitize, 
 --   pythia_card.dat.sanitize and pgs_card.dat.sanitize are created. 
@@ -96,7 +110,7 @@ cardPrepare = do
   checkDirectory (wdir </> "SubProcesses") 10
   checkDirectory carddir 10   
   -- erase previous run 
-  existThenRemove (carddir </> "mg5_configuration.txt")
+  existThenRemove (carddir </> "me5_configuration.txt")
   existThenRemove (carddir </> "param_card.dat") 
   existThenRemove (carddir </> "run_card.dat") 
   existThenRemove (carddir </> "pythia_card.dat") 
@@ -104,8 +118,9 @@ cardPrepare = do
   existThenRemove (carddir </> "pgs_card.dat")
   existThenRemove (carddir </> "pgs_card.dat.sanitize")
   -- 
-  liftIO $ copyFile (runtmpldir ssetup </> "mg5_configuration.txt" ) (carddir </> "mg5_configuration.txt" )
-  -- 
+  -- liftIO $ copyFile (runtmpldir ssetup </> "me5_configuration.txt" ) (carddir </> "me5_configuration.txt" )
+  --
+  me5conf <- me5confSetup 
   paramcard  <- liftIO $ paramCardSetup 
                            (modeltmpldir ssetup)
                            (model psetup)
@@ -128,6 +143,7 @@ cardPrepare = do
                            (machine rsetup)
                            (pgs     rsetup) 
   --                 
+  liftIO $ writeFile (carddir </> "me5_configuration.txt") me5conf 
   liftIO $ writeFile (carddir </> "param_card.dat") paramcard
   liftIO $ writeFile (carddir </> "run_card.dat")   runcard
   -- 
@@ -232,6 +248,7 @@ runPYTHIA = do
       taskname = makeRunName psetup param rsetup 
       unweightedevtfilename = taskname ++ "_unweighted_events.lhe" 
       rawunweightedevtfilename = "unweighted_events.lhe"
+      fullhepfilename = taskname++"_pythia_events.hep"
       -- hepfilename = taskname++"_pythia_events.hep"
   liftIO $ renameFile (carddir </> "pythia_card.dat.sanitize") (carddir </> "pythia_card.dat")
   checkFile (eventdir</>taskname</> rawunweightedevtfilename) 10
@@ -248,7 +265,8 @@ runPYTHIA = do
       liftIO $ renameFile rawunweightedevtfilename (eventdir</>taskname</>unweightedevtfilename)
       liftIO $ setCurrentDirectory (eventdir</>taskname)
       liftIO $ system $ "gzip -f " ++ unweightedevtfilename
-      liftIO $ renameFile (eventdir </> "pythia_events.hep") (eventdir</>taskname</>"pythia_events.hep")
+      liftIO $ renameFile (eventdir </> "pythia_events.hep") 
+                          (eventdir</>taskname</>fullhepfilename)
       checkFile (unweightedevtfilename <.> "gz") 10
     else throwError "ERROR: No unweighted events" 
   return ()
@@ -263,24 +281,26 @@ runHEP2LHE = do
   let eventdir = wdir </> "Events" 
       pythiadir = wdir </> "../pythia-pgs/src"
       taskname = makeRunName psetup param rsetup 
+      fullhepfilename = taskname++"_pythia_events.hep"
       hepfilename = case lhesanitizer rsetup of 
-                      NoLHESanitize -> taskname++"_pythia_events.hep"
+                      NoLHESanitize -> fullhepfilename 
                       LHESanitize _ -> "pythia_events.hep"
+      
   let hep2lhe = pythiadir </> "hep2lhe"
       hep2lhe_result = "pythia_events.lhe"
   liftIO $ setCurrentDirectory eventdir
-  checkFile (eventdir</>taskname</>hepfilename) 10 
+  checkFile (eventdir</>taskname</>fullhepfilename) 10 
 
-  liftIO $ renameFile (eventdir</>taskname</>hepfilename) (eventdir</>hepfilename)
-
-  debugMsgDef "Start hep2lhe"
-  (_,rmsg,_) <- workIOReadProcessWithExitCode  hep2lhe [hepfilename,hep2lhe_result] "" 
-  debugMsgDef rmsg 
-  -- 
-  let pythiaEventFileName = (taskname ++ "_pythia_events.lhe")
-  liftIO $ renameFile (eventdir</>"pythia_events.lhe") (eventdir</>taskname</>pythiaEventFileName)
-  liftIO $ system $ "gzip -f " ++ (eventdir </> taskname </> pythiaEventFileName )
-  liftIO $ renameFile (eventdir</>hepfilename) (eventdir</>taskname</>hepfilename)
+  withTempFile (eventdir</>taskname</>fullhepfilename) 
+               (eventdir</>hepfilename) $ do 
+    debugMsgDef "Start hep2lhe"
+    (_,rmsg,_) <- workIOReadProcessWithExitCode  hep2lhe [hepfilename,hep2lhe_result] "" 
+    debugMsgDef rmsg 
+    -- 
+    let pythiaEventFileName = (taskname ++ "_pythia_events.lhe")
+    liftIO $ renameFile (eventdir</>"pythia_events.lhe") (eventdir</>taskname</>pythiaEventFileName)
+    liftIO $ system $ "gzip -f " ++ (eventdir </> taskname </> pythiaEventFileName )
+    return ()
 
 
 -- | 
@@ -294,20 +314,24 @@ runPGS = do
       taskname = makeRunName psetup param rsetup 
       pgsdir   = wdir </> "../pythia-pgs/src"
       carddir  = wdir </> "Cards"
+      fullhepfilename = taskname ++ "_pythia_events.hep"
       hepfilename = "pythia_events.hep"
       uncleanedfilename = "pgs_uncleaned.lhco"
   liftIO $ setCurrentDirectory (eventdir</>taskname)
   checkFile (carddir </> "pgs_card.dat.sanitize") 10 
   liftIO $ renameFile (carddir </> "pgs_card.dat.sanitize") (carddir </> "pgs_card.dat")
   let pythiaresult = hepfilename 
-  checkFile (eventdir</>taskname</>pythiaresult) 10
-  debugMsgDef "Start pgs"
-  (rmsg,rerr) <- liftIO $ do 
-    putEnv  $ "PDG_MASS_TBL=" ++ pgsdir </> "mass_width_2004.mc "
-    (_,rmsg,rerr) <- readProcessWithExitCode (pgsdir </> "pgs") ["--stdhep",pythiaresult,"--nev","0","--detector","../../Cards/pgs_card.dat",uncleanedfilename] "" 
-    return (rmsg,rerr)
-  debugMsgDef rmsg 
-  debugMsgDef rerr 
+  -- 
+  withTempFile (eventdir</>taskname</>fullhepfilename) 
+               (eventdir</>taskname</>pythiaresult) $ do 
+    checkFile (eventdir</>taskname</>pythiaresult) 10
+    debugMsgDef "Start pgs"
+    (rmsg,rerr) <- liftIO $ do 
+      putEnv  $ "PDG_MASS_TBL=" ++ pgsdir </> "mass_width_2004.mc "
+      (_,rmsg,rerr) <- readProcessWithExitCode (pgsdir </> "pgs") ["--stdhep",pythiaresult,"--nev","0","--detector","../../Cards/pgs_card.dat",uncleanedfilename] "" 
+      return (rmsg,rerr)
+    debugMsgDef rmsg 
+    debugMsgDef rerr 
 -- | 
 runClean :: (Model a) => WorkIO a () 
 runClean = do
