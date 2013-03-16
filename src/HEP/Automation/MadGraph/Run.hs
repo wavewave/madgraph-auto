@@ -259,18 +259,20 @@ runPYTHIA = do
   if b 
     then do 
       debugMsgDef "Start PYTHIA"
-      (_,rmsg,_) <- liftIO $ readProcessWithExitCode (bindir </> "internal" </> "run_pythia") [pythiadir] ""
-      debugMsgDef rmsg
+      (_,_rmsg,rerr) <- liftIO $ readProcessWithExitCode (bindir </> "internal" </> "run_pythia") [pythiadir] ""
+      debugMsgDef rerr -- rmsg
       checkFile (eventdir</>"pythia_events.hep") 10
       liftIO $ renameFile rawunweightedevtfilename (eventdir</>taskname</>unweightedevtfilename)
       liftIO $ setCurrentDirectory (eventdir</>taskname)
       liftIO $ system $ "gzip -f " ++ unweightedevtfilename
       liftIO $ renameFile (eventdir </> "pythia_events.hep") 
                           (eventdir</>taskname</>fullhepfilename)
+
       checkFile (unweightedevtfilename <.> "gz") 10
     else throwError "ERROR: No unweighted events" 
   return ()
 
+{-
 -- | 
 runHEP2LHE :: (Model a) => WorkIO a () 
 runHEP2LHE = do
@@ -294,14 +296,14 @@ runHEP2LHE = do
   withTempFile (eventdir</>taskname</>fullhepfilename) 
                (eventdir</>hepfilename) $ do 
     debugMsgDef "Start hep2lhe"
-    (_,rmsg,_) <- workIOReadProcessWithExitCode  hep2lhe [hepfilename,hep2lhe_result] "" 
-    debugMsgDef rmsg 
+    (_,_,rerr) <- workIOReadProcessWithExitCode  hep2lhe [hepfilename,hep2lhe_result] "" 
+    -- debugMsgDef rerr 
     -- 
     let pythiaEventFileName = (taskname ++ "_pythia_events.lhe")
     liftIO $ renameFile (eventdir</>"pythia_events.lhe") (eventdir</>taskname</>pythiaEventFileName)
     liftIO $ system $ "gzip -f " ++ (eventdir </> taskname </> pythiaEventFileName )
     return ()
-
+-}
 
 -- | 
 runPGS :: (Model a) => WorkIO a () 
@@ -330,8 +332,9 @@ runPGS = do
       putEnv  $ "PDG_MASS_TBL=" ++ pgsdir </> "mass_width_2004.mc "
       (_,rmsg,rerr) <- readProcessWithExitCode (pgsdir </> "pgs") ["--stdhep",pythiaresult,"--nev","0","--detector","../../Cards/pgs_card.dat",uncleanedfilename] "" 
       return (rmsg,rerr)
-    debugMsgDef rmsg 
-    debugMsgDef rerr 
+    -- debugMsgDef rmsg 
+    -- debugMsgDef rerr 
+    return ()
 -- | 
 runClean :: (Model a) => WorkIO a () 
 runClean = do
