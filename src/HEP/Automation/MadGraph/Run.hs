@@ -379,6 +379,38 @@ updateBanner = do
       liftIO $ writeFile (eventdir</>taskname</>newbannerfilename) newbannerstr 
 -}
 
+renamePythiaPGSResult :: Model a => WorkIO a () 
+renamePythiaPGSResult = do 
+  ws <- ask 
+  let (ssetup,psetup,param,rsetup) = 
+         ((,,,) <$> ws_ssetup <*> ws_psetup <*> ws_param <*> ws_rsetup) ws 
+  wdir <- getWorkDir 
+  let taskname = makeRunName psetup param rsetup 
+      eventdir = wdir </> "Events" 
+      taskdir = eventdir </> taskname 
+      ohep = "fermi_pythia_events.hep.gz"
+      nhep = taskname++"_pythia_events.hep.gz"
+      olhe = "fermi_pythia_events.lhe.gz"
+      nlhe = taskname ++ "_pythia_events.lhe.gz"
+      olhco = "fermi_pgs_events.lhco.gz"
+      nlhco = taskname ++ "_pgs_events.lhco.gz"
+      opylog = "fermi_pythia.log"
+      npylog = taskname ++ "_pythia.log"
+      opgslog= "fermi_pgs.log"
+      npgslog = taskname ++ "_pgs.log"
+      existThenRename x y = do
+        b <- liftIO $ doesFileExist (taskdir </> x )
+        if b
+          then do liftIO $ renameFile (taskdir </> x) (taskdir </> y) 
+                  checkVetoFile (taskdir </> x) 3
+          else return ()
+  existThenRename ohep nhep 
+  existThenRename olhe nlhe
+  existThenRename olhco nlhco 
+  existThenRename opylog npylog
+  existThenRename opgslog npgslog 
+
+
 -- |
 cleanHepFiles :: (Model a) => WorkIO a () 
 cleanHepFiles = do 
