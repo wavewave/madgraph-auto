@@ -26,6 +26,7 @@ module HEP.Automation.MadGraph.SetupType where
 import Control.Monad.Error
 import Control.Monad.Reader
 import Data.Data
+import Data.List
 -- from hep-platform
 import HEP.Storage.WebDAV.Type
 -- from this package
@@ -43,7 +44,7 @@ data ScriptSetup =
 
 data ProcessSetup a = PS { 
     model   :: a
-  , process :: String
+  , process :: [String]
   , processBrief :: String  
   , workname :: String 
   } 
@@ -81,7 +82,7 @@ deriving instance Data RunSetup
 instance (Model a) => Show (ProcessSetup a) where
   show (PS mdl pr prb wk ) = 
     "Process:" ++ modelName mdl ++ ":"
-               ++ pr ++ ":" ++ prb ++ ":" ++ wk ++ "|"
+               ++ intercalate "/" pr ++ ":" ++ prb ++ ":" ++ wk ++ "|"
 
 
 instance Show RunSetup where

@@ -39,12 +39,17 @@ class (Show a, Typeable a, Data a, Show (ModelParam a),Typeable (ModelParam a),D
 data MadGraphVersion = MadGraph4 | MadGraph5
                   deriving (Show,Typeable,Data)
 
-makeProcessFile :: Model a => a -> String -> String -> String
-makeProcessFile model process dirname = 
+makeProcessFile :: Model a => a -> [String] -> String -> String
+makeProcessFile model processes dirname = 
   let importline = case madgraphVersion model of
         MadGraph4 -> "import model_v4 " ++ modelName model
         MadGraph5 -> "import model " ++ modelName model
-  in importline ++ "\n" ++ process ++ "\n" ++ "output " ++ dirname ++ "\n\n" 
+      processstr = case processes of 
+                     [] -> error "makeProcessFile : no process "
+                     x:xs -> let p' = ("generate " ++ x)  
+                                      : map ("add process " ++) xs
+                             in unlines p' 
+  in importline ++ "\n" ++ processstr ++ "\n" ++ "output " ++ dirname ++ "\n\n" 
 
 data DummyModel = DummyModel 
                 deriving (Show,Typeable,Data) 
