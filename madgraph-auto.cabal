@@ -22,7 +22,10 @@ Library
                    unix, 
                    directory,
                    filepath,
-                   mtl > 2, 
+                   mtl > 2,
+                   aeson, 
+                   text >= 0.11,
+                   unordered-containers >= 0.2, 
                    transformers,  
                    HStringTemplate > 0.6, 
                    devadmin,
@@ -31,11 +34,11 @@ Library
                    LHE-sanitizer>=0.999, 
                    hslogger >= 1.1.4 
   Exposed-Modules: 
+                   HEP.Automation.MadGraph.JSON
                    HEP.Automation.MadGraph.Machine
                    HEP.Automation.MadGraph.Model
                    HEP.Automation.MadGraph.Run
                    HEP.Automation.MadGraph.SetupType
-                   -- HEP.Automation.MadGraph.UserCut
                    HEP.Automation.MadGraph.Util
                    HEP.Automation.MadGraph.Log
                    Paths_madgraph_auto

@@ -1,15 +1,23 @@
-{-# LANGUAGE TypeFamilies, FlexibleInstances, FlexibleContexts, DeriveDataTypeable, StandaloneDeriving #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE StandaloneDeriving #-}
+-- {-# LANGUAGE ExistentialQuantification #-}
 
 -----------------------------------------------------------------------------
 -- |
 -- Module      : HEP.Automation.MadGraph.Model 
--- Copyright   : (c) 2011, 2012 Ian-Woo Kim
+-- Copyright   : (c) 2011-2013 Ian-Woo Kim
 --
 -- License     : BSD3
 -- Maintainer  : Ian-Woo Kim <ianwookim@gmail.com>
 -- Stability   : experimental
 -- Portability : GHC
 --
+-- Common model interface 
+--
+-----------------------------------------------------------------------------
 
 module HEP.Automation.MadGraph.Model where
 
@@ -65,3 +73,4 @@ instance Typeable (ModelParam DummyModel) where
   typeOf _ = mkTyConApp modelParamTc [dummyModelTr]
 
 deriving instance Data (ModelParam DummyModel)
+
