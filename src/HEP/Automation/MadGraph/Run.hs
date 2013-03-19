@@ -32,11 +32,11 @@ import Text.StringTemplate
 import HEP.Parser.LHE.Sanitizer
 import Text.StringTemplate.Helpers
 -- from this package
+import HEP.Automation.MadGraph.Card
 import HEP.Automation.MadGraph.Log
-import HEP.Automation.MadGraph.Machine
 import HEP.Automation.MadGraph.Model 
 import HEP.Automation.MadGraph.SetupType
--- import HEP.Automation.MadGraph.UserCut
+import HEP.Automation.MadGraph.Type
 import HEP.Automation.MadGraph.Util
 
 (#) :: a -> (a -> b) -> b
@@ -259,8 +259,8 @@ runPYTHIA = do
   if b 
     then do 
       debugMsgDef "Start PYTHIA"
-      (_,_rmsg,rerr) <- liftIO $ readProcessWithExitCode (bindir </> "internal" </> "run_pythia") [pythiadir] ""
-      debugMsgDef rerr -- rmsg
+      (_,rmsg,_rerr) <- liftIO $ readProcessWithExitCode (bindir </> "internal" </> "run_pythia") [pythiadir] ""
+      debugMsgDef rmsg
       checkFile (eventdir</>"pythia_events.hep") 10
       liftIO $ renameFile rawunweightedevtfilename (eventdir</>taskname</>unweightedevtfilename)
       liftIO $ setCurrentDirectory (eventdir</>taskname)

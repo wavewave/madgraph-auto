@@ -12,85 +12,15 @@
 --
 -----------------------------------------------------------------------------
 
-module HEP.Automation.MadGraph.Machine where
+module HEP.Automation.MadGraph.Card where
 
 import           Control.Applicative
-import           Data.Typeable
-import           Data.Data
 import           Text.StringTemplate
 import           Text.StringTemplate.Helpers
 import           System.FilePath ((</>))
+--
+import HEP.Automation.MadGraph.Type
 
--- | 
-
-newtype Polarization = RH { rhpol_percent  :: Double }
-                     deriving (Show,Typeable,Data)
-
--- | 
-
-data InitPolarization = InitPolarization 
-                        { particle1pol :: Polarization
-                        , particle2pol :: Polarization
-                        }  
-                        deriving (Show,Typeable,Data)
-
--- | 
-
-data Detector = Tevatron | LHC | CMS | ATLAS
-              deriving (Show,Typeable,Data)
-
--- | 
-
-data MachineType = TeVatron 
-                 | LHC7 Detector
-                 | LHC8 Detector
-                 | LHC10 Detector
-                 | LHC14 Detector 
-                 | Parton Double Detector
-                 | PolParton Double InitPolarization Detector
-                 deriving (Show,Typeable,Data)
-
--- | 
-
-data RGRunType = Fixed | Auto 
-               deriving (Show,Typeable,Data) 
-
--- | 
-
-data CutType = NoCut | DefCut | KCut 
-             deriving (Show,Typeable,Data)
-
--- | 
-
-data MatchType = NoMatch | MLM
-               deriving (Show,Typeable,Data)
-
--- | 
-
-data PYTHIAType = NoPYTHIA | RunPYTHIA
-                deriving (Show,Typeable,Data)
-
-
--- | jet algorithm implemented in PGS (Cone, K_T , anti-K_T algorithm) 
-data PGSJetAlgorithm = Cone Double | KTJet Double | AntiKTJet Double
-                       deriving (Show, Typeable, Data)
-
--- | 
-data PGSTau = NoTau | WithTau
-              deriving (Show,Typeable,Data)
-
--- | 
-type PGSJetAlgoNTau = (PGSJetAlgorithm,PGSTau) 
-
-
--- | 
-data PGSType = NoPGS | RunPGS PGSJetAlgoNTau 
-             deriving (Show,Typeable,Data)
-
-
--- | 
-data HEPFileType = NoUploadHEP | UploadHEP
-                   deriving (Show, Typeable, Data)
 
 
 

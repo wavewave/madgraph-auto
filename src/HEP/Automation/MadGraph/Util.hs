@@ -18,18 +18,15 @@ import Control.Applicative
 import Control.Concurrent
 import Control.Monad.Reader 
 import Control.Monad.Error
--- import Crypto.Classes
--- import qualified Data.ByteString.Char8 as B
--- import Data.Digest.Pure.MD5 
 import System.Directory
 import System.Process
 import System.Exit
 import System.Posix.Files
-
-import HEP.Automation.MadGraph.Model 
-import HEP.Automation.MadGraph.Machine
-import HEP.Automation.MadGraph.SetupType
+--
 import HEP.Automation.MadGraph.Log
+import HEP.Automation.MadGraph.Model 
+import HEP.Automation.MadGraph.SetupType
+import HEP.Automation.MadGraph.Type
 
 -- | 
 workIOReadProcessWithExitCode :: FilePath -> [String] -> String -> WorkIO a (ExitCode,String,String)

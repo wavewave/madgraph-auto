@@ -30,8 +30,9 @@ import Data.List
 -- from hep-platform
 import HEP.Storage.WebDAV.Type
 -- from this package
-import HEP.Automation.MadGraph.Machine
+import HEP.Automation.MadGraph.Card
 import HEP.Automation.MadGraph.Model
+import HEP.Automation.MadGraph.Type
 
 -- | 
 data ScriptSetup = 
@@ -44,7 +45,7 @@ data ScriptSetup =
 
 data ProcessSetup a = PS { 
     model   :: a
-  , process :: [String]
+  , process :: MGProcess 
   , processBrief :: String  
   , workname :: String 
   } 
@@ -54,12 +55,6 @@ deriving instance (Model a) => Data (ProcessSetup a)
 
 -- deriving (Typeable,Data)
 
-data SanitizeType = Elim [Int] | Replace [(Int,Int)]
-                  deriving (Show,Typeable,Data)
-
-data LHESanitizerType = NoLHESanitize 
-                      | LHESanitize SanitizeType   
-                      deriving (Show,Typeable,Data)
 
 data RunSetup = 
     RS { numevent :: Int
@@ -80,7 +75,7 @@ deriving instance Data RunSetup
 
 
 instance (Model a) => Show (ProcessSetup a) where
-  show (PS mdl pr prb wk ) = 
+  show (PS mdl (MGProc _ pr) prb wk ) = 
     "Process:" ++ modelName mdl ++ ":"
                ++ intercalate "/" pr ++ ":" ++ prb ++ ":" ++ wk ++ "|"
 

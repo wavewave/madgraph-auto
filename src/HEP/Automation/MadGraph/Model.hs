@@ -23,7 +23,8 @@ module HEP.Automation.MadGraph.Model where
 
 import Data.Typeable
 import Data.Data
-
+--
+import HEP.Automation.MadGraph.Type
 
 class (Show a, Typeable a, Data a, Show (ModelParam a),Typeable (ModelParam a),Data (ModelParam a)) => Model a where
   data ModelParam a :: * 
@@ -39,17 +40,18 @@ class (Show a, Typeable a, Data a, Show (ModelParam a),Typeable (ModelParam a),D
 data MadGraphVersion = MadGraph4 | MadGraph5
                   deriving (Show,Typeable,Data)
 
-makeProcessFile :: Model a => a -> [String] -> String -> String
-makeProcessFile model processes dirname = 
+makeProcessFile :: Model a => a -> MGProcess -> String -> String
+makeProcessFile model (MGProc predef processes) dirname = 
   let importline = case madgraphVersion model of
         MadGraph4 -> "import model_v4 " ++ modelName model
         MadGraph5 -> "import model " ++ modelName model
+      predefstr = unlines predef
       processstr = case processes of 
                      [] -> error "makeProcessFile : no process "
                      x:xs -> let p' = ("generate " ++ x)  
                                       : map ("add process " ++) xs
                              in unlines p' 
-  in importline ++ "\n" ++ processstr ++ "\n" ++ "output " ++ dirname ++ "\n\n" 
+  in importline ++ "\n" ++ predefstr ++ "\n" ++ processstr ++ "\n" ++ "output " ++ dirname ++ "\n\n" 
 
 data DummyModel = DummyModel 
                 deriving (Show,Typeable,Data) 

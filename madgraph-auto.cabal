@@ -34,11 +34,12 @@ Library
                    LHE-sanitizer>=0.999, 
                    hslogger >= 1.1.4 
   Exposed-Modules: 
+                   HEP.Automation.MadGraph.Card
                    HEP.Automation.MadGraph.JSON
-                   HEP.Automation.MadGraph.Machine
+                   HEP.Automation.MadGraph.Log
                    HEP.Automation.MadGraph.Model
                    HEP.Automation.MadGraph.Run
                    HEP.Automation.MadGraph.SetupType
+                   HEP.Automation.MadGraph.Type
                    HEP.Automation.MadGraph.Util
-                   HEP.Automation.MadGraph.Log
                    Paths_madgraph_auto
