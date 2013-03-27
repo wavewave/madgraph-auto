@@ -424,6 +424,10 @@ cleanHepFiles = do
       clean = mapM_ existThenRemoveForAny  
       hepfilename = taskname++"_pythia_events.hep"
       hepfilename2 = "pythia_events.hep"
+      hepfilename3 = "fermi_pythia_events.hep" 
+      hepgzfilename = taskname++"_pythia_events.hep.gz"
+      hepgzfilename2 = "pythia_events.hep.gz"
+      hepgzfilename3 = "fermi_pythia_events.hep.gz" 
       hepevtfilename = "afterusercut.hepevt"  
       stdhepfilename = "afterusercut.stdhep"      
       uncleanedfilename = "pgs_uncleaned.lhco"
@@ -433,6 +437,10 @@ cleanHepFiles = do
       allhep  = [ lhefile 
                 , hepfilename
                 , hepfilename2
+                , hepfilename3 
+                , hepgzfilename
+                , hepgzfilename2
+                , hepgzfilename3 
                 , hepevtfilename
                 , stdhepfilename
                 , uncleanedfilename
