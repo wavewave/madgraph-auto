@@ -18,6 +18,9 @@ module HEP.Automation.MadGraph.Type where
 
 import           Data.Typeable
 import           Data.Data
+-- 
+import           HEP.Parser.LHE.Sanitizer.Type
+
 
 newtype HashSalt = HashSalt { unHashSalt :: Maybe Int } 
                  deriving (Show,Typeable,Data)       
@@ -26,9 +29,6 @@ data MGProcess = MGProc { mgp_definelines :: [String]
                         , mgp_processes   :: [String] }
                  deriving (Show,Typeable,Data)        
 
-
-data SanitizeType = Elim [Int] | Replace [(Int,Int)]
-                  deriving (Show,Typeable,Data)
 
 data LHESanitizerType = NoLHESanitize 
                       | LHESanitize SanitizeType   

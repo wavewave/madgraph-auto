@@ -5,7 +5,7 @@
 -- Module      : HEP.Automation.MadGraph.Run 
 -- Copyright   : (c) 2011-2013 Ian-Woo Kim
 --
--- License     : BSD3
+-- License     : GPL-3
 -- Maintainer  : Ian-Woo Kim <ianwookim@gmail.com>
 -- Stability   : experimental
 -- Portability : GHC
@@ -230,9 +230,12 @@ sanitizeLHE = do
       liftIO $ system ("gunzip -f " ++ unweightedevtfilename <.> "gz") 
       checkFile (eventdir </> taskname </> unweightedevtfilename) 10
 
+      liftIO $ sanitizeLHEFile styp unweightedevtfilename rawunweightedevtfilename
+      {- 
       case styp of 
         Elim pids -> liftIO $ sanitizeLHEFile pids unweightedevtfilename rawunweightedevtfilename
         Replace pids -> liftIO $ sanitizeLHEFile_replace pids unweightedevtfilename rawunweightedevtfilename
+      -}
   return () 
 
 -- | run PYTHIA as a user-defined process.
