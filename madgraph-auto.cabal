@@ -2,7 +2,7 @@ Name:		madgraph-auto
 Version:	0.999
 Synopsis:	automated program library for madgraph run
 Description: 	automated program library for madgraph run  
-License: 	BSD3
+License: 	GPL-3
 License-file:	LICENSE
 Author:		Ian-Woo Kim
 Maintainer: 	Ian-Woo Kim <ianwookim@gmail.com>
@@ -32,7 +32,8 @@ Library
                    webdav-manager >= 0.999, 
                    bytestring, 
                    LHE-sanitizer>=0.999, 
-                   hslogger >= 1.1.4 
+                   hslogger >= 1.1.4, 
+                   hashable >= 1.2 
   Exposed-Modules: 
                    HEP.Automation.MadGraph.Card
                    HEP.Automation.MadGraph.JSON

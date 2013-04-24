@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, DeriveDataTypeable #-}
 
 -----------------------------------------------------------------------------
 -- |
@@ -19,6 +19,9 @@ module HEP.Automation.MadGraph.Type where
 import           Data.Typeable
 import           Data.Data
 
+newtype HashSalt = HashSalt { unHashSalt :: Maybe Int } 
+                 deriving (Show,Typeable,Data)       
+ 
 data MGProcess = MGProc { mgp_definelines :: [String] 
                         , mgp_processes   :: [String] }
                  deriving (Show,Typeable,Data)        

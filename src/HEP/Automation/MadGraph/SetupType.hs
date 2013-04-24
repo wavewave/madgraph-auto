@@ -48,6 +48,7 @@ data ProcessSetup a = PS {
   , process :: MGProcess 
   , processBrief :: String  
   , workname :: String 
+  , hashSalt :: HashSalt 
   } 
 
 deriving instance Typeable1 ProcessSetup  
@@ -75,7 +76,7 @@ deriving instance Data RunSetup
 
 
 instance (Model a) => Show (ProcessSetup a) where
-  show (PS mdl (MGProc _ pr) prb wk ) = 
+  show (PS mdl (MGProc _ pr) prb wk _ ) = 
     "Process:" ++ modelName mdl ++ ":"
                ++ intercalate "/" pr ++ ":" ++ prb ++ ":" ++ wk ++ "|"
 

@@ -3,9 +3,9 @@
 -----------------------------------------------------------------------------
 -- |
 -- Module      : HEP.Automation.MadGraph.Machine 
--- Copyright   : (c) 2011, 2012 Ian-Woo Kim
+-- Copyright   : (c) 2011-2013 Ian-Woo Kim
 --
--- License     : BSD3
+-- License     : GPL-3
 -- Maintainer  : Ian-Woo Kim <ianwookim@gmail.com>
 -- Stability   : experimental
 -- Portability : GHC
@@ -15,6 +15,7 @@
 module HEP.Automation.MadGraph.Card where
 
 import           Control.Applicative
+import           Data.Hashable 
 import           Text.StringTemplate
 import           Text.StringTemplate.Helpers
 import           System.FilePath ((</>))
@@ -66,9 +67,19 @@ pgsCardMachine (PolParton _ _ Tevatron) = "pgs_card_TEV.dat.st"
 pgsCardMachine (PolParton _ _ ATLAS) = "pgs_card_ATLAS.dat.st"
 pgsCardMachine (PolParton _ _ CMS) = "pgs_card_CMS.dat.st"
 
+
 -- | 
-runCardSetup :: FilePath -> MachineType -> CutType -> MatchType -> RGRunType -> Double -> Int -> Int -> IO String 
-runCardSetup tpath machine ctype mtype rgtype scale numevt setnum = do 
+runCardSetup :: FilePath 
+             -> MachineType 
+             -> CutType 
+             -> MatchType 
+             -> RGRunType 
+             -> Double 
+             -> Int        -- ^ number of events 
+             -> HashSalt  
+             -> Int        -- ^ set number
+             -> IO String 
+runCardSetup tpath machine ctype mtype rgtype scale numevt hsalt setnum = do 
   let (beamtyp1,beamtyp2,beamenergy,beampol1,beampol2) = case machine of 
         TeVatron -> ("1","-1","980","0","0")
         LHC7 _    -> ("1","1","3500","0","0")
@@ -83,12 +94,25 @@ runCardSetup tpath machine ctype mtype rgtype scale numevt setnum = do
         Fixed -> "T"
         Auto  -> "F"
       numevtfinal = if numevt > 100000 then 100000 else numevt 
-      
+      iseed = case unHashSalt hsalt of
+                Nothing -> show setnum  
+                Just hs -> show (hashWithSalt hs setnum `mod` 1000 + 1001)
+
+  putStrLn "======================================"
+  putStrLn "======================================"
+  putStrLn "======================================"
+  putStrLn iseed 
+  putStrLn "======================================"
+  putStrLn "======================================"
+  putStrLn "======================================"
+
+
+
   templates <- directoryGroup tpath 
   return $ (renderTemplateGroup
               templates
               [ ("numevt"       , show numevtfinal ) 
-              , ("iseed"        , show setnum )
+              , ("iseed"        , iseed )
 	      , ("beamTypeOne"  , beamtyp1   )
               , ("beamTypeTwo"  , beamtyp2   )
               , ("beamEnergy"   , beamenergy )

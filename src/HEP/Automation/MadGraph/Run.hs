@@ -133,6 +133,7 @@ cardPrepare = do
                            (rgrun   rsetup) 
                            (rgscale rsetup) 
 		           (numevent rsetup) 
+                           (hashSalt psetup) 
                            (setnum rsetup)
   pythiacard <- liftIO $ pythiaCardSetup 
                            (runtmpldir ssetup)
