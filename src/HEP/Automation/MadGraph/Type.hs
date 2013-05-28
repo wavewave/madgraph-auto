@@ -73,7 +73,7 @@ data MatchType = NoMatch | MLM
                deriving (Show,Typeable,Data)
 
 -- | 
-data PYTHIAType = NoPYTHIA | RunPYTHIA
+data PYTHIAType = NoPYTHIA | RunPYTHIA | RunPYTHIA8
                 deriving (Show,Typeable,Data)
 
 

@@ -179,7 +179,7 @@ generateEvents = do
   case (pythia rsetup,lhesanitizer rsetup) of 
     (RunPYTHIA,NoLHESanitize) -> checkFile (wdir </> "Cards/pythia_card.dat") 10
     (RunPYTHIA,LHESanitize _) -> checkFile (wdir </> "Cards/pythia_card.dat.sanitize") 10
-    (NoPYTHIA,_) -> return () 
+    (_,_) -> return () 
   -- 
   case lhesanitizer rsetup of 
     NoLHESanitize -> 
@@ -231,11 +231,15 @@ sanitizeLHE = do
       checkFile (eventdir </> taskname </> unweightedevtfilename) 10
 
       liftIO $ sanitizeLHEFile styp unweightedevtfilename rawunweightedevtfilename
-      {- 
-      case styp of 
-        Elim pids -> liftIO $ sanitizeLHEFile pids unweightedevtfilename rawunweightedevtfilename
-        Replace pids -> liftIO $ sanitizeLHEFile_replace pids unweightedevtfilename rawunweightedevtfilename
-      -}
+
+      case pythia rsetup of 
+        RunPYTHIA -> return ()
+        _ -> do 
+          liftIO $ system $ "gzip -f " ++ rawunweightedevtfilename
+          liftIO $ renameFile (eventdir </> taskname </> rawunweightedevtfilename <.> "gz") 
+                              (eventdir </> taskname </> unweightedevtfilename <.> "gz")
+
+
   return () 
 
 -- | run PYTHIA as a user-defined process.
@@ -275,6 +279,45 @@ runPYTHIA = do
       checkFile (unweightedevtfilename <.> "gz") 10
     else throwError "ERROR: No unweighted events" 
   return ()
+
+-- | run PYTHIA as a user-defined process.
+runPYTHIA8 :: (Model a) => WorkIO a () 
+runPYTHIA8 = do
+  ws <- ask 
+  let (ssetup,psetup,param,rsetup) = 
+         ((,,,) <$> ws_ssetup <*> ws_psetup <*> ws_param <*> ws_rsetup) ws 
+  wdir <- getWorkDir 
+  let bindir = wdir </> "bin"
+      eventdir = wdir </> "Events" 
+      carddir  = wdir </> "Cards"
+      pythiadir = wdir </> "../pythia-pgs/src"
+      taskname = makeRunName psetup param rsetup 
+      unweightedevtfilename = taskname ++ "_unweighted_events.lhe" 
+      rawunweightedevtfilename = "unweighted_events.lhe"
+      fullhepfilename = taskname++"_pythia_events.hep"
+  liftIO $ putStrLn "Start PYTHIA8"
+
+  {- 
+  checkFile (eventdir</>taskname</> rawunweightedevtfilename) 10
+  liftIO $ setCurrentDirectory (eventdir</>taskname)
+  debugMsgDef "Start PYTHIA8"
+  (_,rmsg,_rerr) <- liftIO $ readProcessWithExitCode (bindir </> "internal" </> "run_pythia") [pythiadir] ""
+  debugMsgDef rmsg
+
+
+
+  checkFile (eventdir</>"pythia_events.hep") 10
+
+
+
+  liftIO $ setCurrentDirectory (eventdir</>taskname)
+
+                      (eventdir</>taskname</>fullhepfilename)
+
+  -}
+  return ()
+
+
 
 {-
 -- | 

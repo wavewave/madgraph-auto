@@ -41,6 +41,8 @@ data ScriptSetup =
      , sandboxdir   :: String  -- ^ where we do some temporary file works, previously workdir 
      , mg5base      :: String  -- ^ where mg5 main installation
      , mcrundir     :: String  -- ^ where montecarlo run work directory located, previously workbase 
+     , pythia8toHEPEVT :: FilePath -- ^ pythia8toHEPEVT script path
+     , hepevt2stdhep :: FilePath   -- ^ hepevt2stdhep script path 
      } deriving (Show,Typeable,Data)
 
 data ProcessSetup a = PS { 

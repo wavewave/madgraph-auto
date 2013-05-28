@@ -132,6 +132,7 @@ pythiaCardSetup tpath mtype ptype = do
               return (Just str)
     NoMatch -> case ptype of
       NoPYTHIA -> return Nothing 
+      RunPYTHIA8 -> return Nothing 
       RunPYTHIA -> do str <- readFile (tpath </> pythiaCardMatch NoMatch)
                       return (Just (str++"\n\n\n"))
 
