@@ -46,7 +46,13 @@ checkFile fp n = do
     then throwError $ "no " ++ fp ++ " ever created." 
     else do 
       b <- liftIO $ doesFileExist fp 
-      if b  
+      if b 
+        then return () 
+        else do 
+          debugMsgDef $ fp ++ " not exist : " ++ show (n-1) ++ " chances left" 
+          liftIO $ threadDelay 5000000 
+          checkFile fp (n-1)   
+{-      if b  
         then do 
           b2 <- liftIO $ getFileStatus fp >>= return.(> (0 :: Int)).fromIntegral.fileSize
           if b2 
@@ -74,7 +80,7 @@ checkFile fp n = do
           else do  
             debugMsgDef $ fp ++ " not exist : " ++ show (n-1) ++ " chances left" 
             liftIO $ threadDelay 5000000 
-            checkFile fp (n-1)  
+            checkFile fp (n-1)   -}
 
 -- | 
 checkVetoFile :: (Model a) => FilePath -> Int -> WorkIO a () 

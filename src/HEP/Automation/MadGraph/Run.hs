@@ -63,9 +63,12 @@ createWorkDir ssetup psetup = do
   debugMsgDef "set up a working directory" 
   let processfilecontent = makeProcessFile (model psetup) (process psetup) (workname psetup)
   liftIO $ writeFile (sandboxdir ssetup </> "proc_card_mg5.dat") processfilecontent
-  checkFile (sandboxdir ssetup </> "proc_card_mg5.dat") 10 
+  -- checkFile (sandboxdir ssetup </> "proc_card_mg5.dat") 10 
+  liftIO $ putStrLn (mg5base ssetup)
   liftIO $ setCurrentDirectory (mg5base ssetup)
-  workIOReadProcessWithExitCode ("bin/mg5") [sandboxdir ssetup </> "proc_card_mg5.dat"] ""
+  liftIO $ putStrLn "createWorkDir" 
+  workIOReadProcessWithExitCode ("bin/mg5") ["-f", sandboxdir ssetup </> "proc_card_mg5.dat"] ""
+  liftIO $ system $ "bin/mg5 -f " ++ sandboxdir ssetup </> "proc_card_mg5.dat" 
   checkDirectory (mg5base ssetup </> workname psetup) 10
   checkDirectory (mg5base ssetup </> workname psetup </> "SubProcesses") 10
   debugMsgDef $ "moving directory" 
@@ -74,7 +77,7 @@ createWorkDir ssetup psetup = do
                  ++ (mcrundir ssetup </> workname psetup) 
   liftIO $ renameDirectory (mg5base ssetup </> workname psetup) (mcrundir ssetup </> workname psetup) 
   return () 
-
+  
 
 -- | Get a path for working directory
 getWorkDir :: (Model a) => WorkIO a FilePath   
@@ -234,7 +237,8 @@ sanitizeLHE = do
 
       case pythia rsetup of 
         RunPYTHIA -> return ()
-        _ -> do 
+        RunPYTHIA8 -> return ()
+        NoPYTHIA -> do 
           liftIO $ system $ "gzip -f " ++ rawunweightedevtfilename
           liftIO $ renameFile (eventdir </> taskname </> rawunweightedevtfilename <.> "gz") 
                               (eventdir </> taskname </> unweightedevtfilename <.> "gz")
@@ -295,62 +299,28 @@ runPYTHIA8 = do
       unweightedevtfilename = taskname ++ "_unweighted_events.lhe" 
       rawunweightedevtfilename = "unweighted_events.lhe"
       fullhepfilename = taskname++"_pythia_events.hep"
+      hepevtfilename = "pythia_event.hepevt"
+      stdhepresult = "pythia_event.hep"
   liftIO $ putStrLn "Start PYTHIA8"
-
-  {- 
+ 
   checkFile (eventdir</>taskname</> rawunweightedevtfilename) 10
-  liftIO $ setCurrentDirectory (eventdir</>taskname)
+  liftIO $ setCurrentDirectory (eventdir </> taskname)
+  
+  liftIO $ setEnv "PYTHIA8DATA" (pythia8dir ssetup </> "xmldoc") True
+  
   debugMsgDef "Start PYTHIA8"
-  (_,rmsg,_rerr) <- liftIO $ readProcessWithExitCode (bindir </> "internal" </> "run_pythia") [pythiadir] ""
+  (_,rmsg,_rerr) <- 
+    liftIO $ readProcessWithExitCode (pythia8toHEPEVT ssetup) [rawunweightedevtfilename,hepevtfilename]  ""
   debugMsgDef rmsg
+  (_,rmsg2,_rerr) <- 
+    liftIO $ readProcessWithExitCode (hepevt2stdhep ssetup) [hepevtfilename,stdhepresult]  ""
+  debugMsgDef rmsg2 
+  liftIO $ renameFile stdhepresult fullhepfilename
+  liftIO $ renameFile rawunweightedevtfilename unweightedevtfilename
+  liftIO $ system $ "gzip -f " ++ unweightedevtfilename
 
-
-
-  checkFile (eventdir</>"pythia_events.hep") 10
-
-
-
-  liftIO $ setCurrentDirectory (eventdir</>taskname)
-
-                      (eventdir</>taskname</>fullhepfilename)
-
-  -}
   return ()
 
-
-
-{-
--- | 
-runHEP2LHE :: (Model a) => WorkIO a () 
-runHEP2LHE = do
-  ws <- ask 
-  let (ssetup,psetup,param,rsetup) = 
-         ((,,,) <$> ws_ssetup <*> ws_psetup <*> ws_param <*> ws_rsetup) ws 
-  wdir <- getWorkDir 
-  let eventdir = wdir </> "Events" 
-      pythiadir = wdir </> "../pythia-pgs/src"
-      taskname = makeRunName psetup param rsetup 
-      fullhepfilename = taskname++"_pythia_events.hep"
-      hepfilename = case lhesanitizer rsetup of 
-                      NoLHESanitize -> fullhepfilename 
-                      LHESanitize _ -> "pythia_events.hep"
-      
-  let hep2lhe = pythiadir </> "hep2lhe"
-      hep2lhe_result = "pythia_events.lhe"
-  liftIO $ setCurrentDirectory eventdir
-  checkFile (eventdir</>taskname</>fullhepfilename) 10 
-
-  withTempFile (eventdir</>taskname</>fullhepfilename) 
-               (eventdir</>hepfilename) $ do 
-    debugMsgDef "Start hep2lhe"
-    (_,_,rerr) <- workIOReadProcessWithExitCode  hep2lhe [hepfilename,hep2lhe_result] "" 
-    -- debugMsgDef rerr 
-    -- 
-    let pythiaEventFileName = (taskname ++ "_pythia_events.lhe")
-    liftIO $ renameFile (eventdir</>"pythia_events.lhe") (eventdir</>taskname</>pythiaEventFileName)
-    liftIO $ system $ "gzip -f " ++ (eventdir </> taskname </> pythiaEventFileName )
-    return ()
--}
 
 -- | 
 runPGS :: (Model a) => WorkIO a () 
