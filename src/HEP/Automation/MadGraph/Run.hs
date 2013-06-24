@@ -318,7 +318,7 @@ runPYTHIA8 = do
   liftIO $ renameFile stdhepresult fullhepfilename
   liftIO $ renameFile rawunweightedevtfilename unweightedevtfilename
   liftIO $ system $ "gzip -f " ++ unweightedevtfilename
-
+  liftIO $ removeFile hepevtfilename
   return ()
 
 
