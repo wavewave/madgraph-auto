@@ -97,17 +97,6 @@ runCardSetup tpath machine ctype mtype rgtype scale numevt hsalt setnum = do
       iseed = case unHashSalt hsalt of
                 Nothing -> show setnum  
                 Just hs -> show (hashWithSalt hs setnum `mod` 1000 + 1001)
-
-  putStrLn "======================================"
-  putStrLn "======================================"
-  putStrLn "======================================"
-  putStrLn iseed 
-  putStrLn "======================================"
-  putStrLn "======================================"
-  putStrLn "======================================"
-
-
-
   templates <- directoryGroup tpath 
   return $ (renderTemplateGroup
               templates
