@@ -96,7 +96,7 @@ runCardSetup tpath machine ctype mtype rgtype scale numevt hsalt setnum = do
       numevtfinal = if numevt > 100000 then 100000 else numevt 
       iseed = case unHashSalt hsalt of
                 Nothing -> show setnum  
-                Just hs -> show (hashWithSalt hs setnum `mod` 1000 + 1001)
+                Just hs -> show (hashWithSalt hs setnum `mod` 1000 + 1021)
   templates <- directoryGroup tpath 
   return $ (renderTemplateGroup
               templates
