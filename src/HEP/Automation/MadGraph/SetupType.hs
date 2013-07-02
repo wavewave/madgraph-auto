@@ -28,6 +28,7 @@ import Control.Monad.Reader
 import Data.Data
 import Data.List
 -- from hep-platform
+import HEP.Parser.LHE.Sanitizer.Type
 import HEP.Storage.WebDAV.Type
 -- from this package
 import HEP.Automation.MadGraph.Card
@@ -68,7 +69,7 @@ data RunSetup =
        , match   :: MatchType
        , cut     :: CutType
        , pythia  :: PYTHIAType
-       , lhesanitizer :: LHESanitizerType
+       , lhesanitizer :: [SanitizeCmd]
        , pgs     :: PGSType 
        , uploadhep :: HEPFileType
        , setnum  :: Int 

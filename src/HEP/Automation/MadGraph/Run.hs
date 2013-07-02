@@ -154,15 +154,15 @@ cardPrepare = do
   pythiacard # 
     maybe (return ()) (\str -> 
       case lhesanitizer rsetup of 
-        NoLHESanitize -> liftIO $ writeFile (carddir </> "pythia_card.dat") str
-        LHESanitize _ -> liftIO $ writeFile (carddir </> "pythia_card.dat.sanitize") str
+        [] -> liftIO $ writeFile (carddir </> "pythia_card.dat") str
+        _ -> liftIO $ writeFile (carddir </> "pythia_card.dat.sanitize") str
     )
   -- 
   pgscard # 
     maybe (return ()) (\str -> 
       case lhesanitizer rsetup of 
-        NoLHESanitize -> liftIO $ writeFile (carddir </> "pgs_card.dat") str
-        LHESanitize _ -> liftIO $ writeFile (carddir </> "pgs_card.dat.sanitize") str 
+        [] -> liftIO $ writeFile (carddir </> "pgs_card.dat") str
+        _ -> liftIO $ writeFile (carddir </> "pgs_card.dat.sanitize") str 
     )
   return () 
 
@@ -180,16 +180,16 @@ generateEvents = do
   checkFile (wdir </> "Cards/param_card.dat") 10
   -- 
   case (pythia rsetup,lhesanitizer rsetup) of 
-    (RunPYTHIA,NoLHESanitize) -> checkFile (wdir </> "Cards/pythia_card.dat") 10
-    (RunPYTHIA,LHESanitize _) -> checkFile (wdir </> "Cards/pythia_card.dat.sanitize") 10
+    (RunPYTHIA,[]) -> checkFile (wdir </> "Cards/pythia_card.dat") 10
+    (RunPYTHIA,_:_) -> checkFile (wdir </> "Cards/pythia_card.dat.sanitize") 10
     (_,_) -> return () 
   -- 
   case lhesanitizer rsetup of 
-    NoLHESanitize -> 
+    [] -> 
       case pgs rsetup  of 
         RunPGS _ -> checkFile (wdir </> "Cards/pgs_card.dat") 10
         NoPGS    -> return () 
-    LHESanitize _ -> 
+    _:_ -> 
       case pgs rsetup of 
         NoPGS -> return ()
         _ -> checkFile (wdir </> "Cards/pgs_card.dat.sanitize") 10
@@ -217,8 +217,8 @@ sanitizeLHE = do
   -- WS _ssetup psetup param rsetup _storage <- ask 
   debugMsgDef "Start sanitizeLHE"
   case lhesanitizer rsetup of 
-    NoLHESanitize -> throwError "ERROR: why did you call me? I am in sanitizeLHEFile." 
-    LHESanitize styp  -> do 
+    [] -> throwError "ERROR: why did you call me? I am in sanitizeLHE." 
+    cmds  -> do 
       wdir <- getWorkDir
       let eventdir = wdir </> "Events" 
           taskname = makeRunName psetup param rsetup 
@@ -233,7 +233,7 @@ sanitizeLHE = do
       liftIO $ system ("gunzip -f " ++ unweightedevtfilename <.> "gz") 
       checkFile (eventdir </> taskname </> unweightedevtfilename) 10
 
-      liftIO $ sanitizeLHEFile styp unweightedevtfilename rawunweightedevtfilename
+      liftIO $ sanitize cmds unweightedevtfilename rawunweightedevtfilename
 
       case pythia rsetup of 
         RunPYTHIA -> return ()

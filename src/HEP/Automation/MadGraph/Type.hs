@@ -29,10 +29,12 @@ data MGProcess = MGProc { mgp_definelines :: [String]
                         , mgp_processes   :: [String] }
                  deriving (Show,Typeable,Data)        
 
-
+{-
 data LHESanitizerType = NoLHESanitize 
                       | LHESanitize SanitizeType   
                       deriving (Show,Typeable,Data)
+-}
+
 
 -- | 
 newtype Polarization = RH { rhpol_percent  :: Double }
