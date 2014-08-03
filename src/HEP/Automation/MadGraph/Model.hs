@@ -3,7 +3,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE StandaloneDeriving #-}
--- {-# LANGUAGE ExistentialQuantification #-}
 
 -----------------------------------------------------------------------------
 -- |
@@ -69,15 +68,21 @@ instance Model DummyModel where
   briefParamShow _ = "" 
   interpreteParam _ = DummyParam
 
+
+{- 
 modelParamTc :: TyCon
-modelParamTc = mkTyCon "HEP.Automation.MadGraph.Model.ModelParam"
+modelParamTc = mkTyCon3 "HEP.Automation.MadGraph.Model.ModelParam"
 
 
 dummyModelTr :: TypeRep
-dummyModelTr = mkTyConApp (mkTyCon "HEP.Automation.MadGraph.Model.DummyModel") []
+dummyModelTr = mkTyConApp (mkTyCon3 "HEP.Automation.MadGraph.Model.DummyModel") []
 
 instance Typeable (ModelParam DummyModel) where
-  typeOf _ = mkTyConApp modelParamTc [dummyModelTr]
+  -- typeOf _ = mkTyConApp modelParamTc [dummyModelTr]
+  typeRep _ = mkTyConApp modelParamTc [dummyModelTr]
+-}
+
+deriving instance Typeable ModelParam
 
 deriving instance Data (ModelParam DummyModel)
 
