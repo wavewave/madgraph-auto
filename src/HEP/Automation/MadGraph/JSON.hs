@@ -81,6 +81,12 @@ instance ToJSON MachineType where
   toJSON TeVatron = object [ "Type" .= String "TeVatron" ]
   toJSON (LHC7 detector) = object [ "Type" .= String "LHC7"
                                   , "Detector" .= G.toJSON detector ]
+  toJSON (LHC8 detector)  = object [ "Type" .= String "LHC8" 
+                                    , "Detector" .= G.toJSON detector ]
+  toJSON (LHC10 detector)  = object [ "Type" .= String "LHC10" 
+                                    , "Detector" .= G.toJSON detector ]
+  toJSON (LHC13 detector)  = object [ "Type" .= String "LHC13" 
+                                    , "Detector" .= G.toJSON detector ]
   toJSON (LHC14 detector)  = object [ "Type" .= String "LHC14" 
                                     , "Detector" .= G.toJSON detector ]
   toJSON (Parton energy detector) = object [ "Type" .= String "Parton"
@@ -100,7 +106,10 @@ instance FromJSON MachineType where
     t <- elookup "Type" m
     case t of 
       String "TeVatron" -> return TeVatron 
-      String "LHC7"     -> LHC7 <$> lookupfunc "Detector" m 
+      String "LHC7"     -> LHC7  <$> lookupfunc "Detector" m 
+      String "LHC8"     -> LHC8  <$> lookupfunc "Detector" m
+      String "LHC10"    -> LHC10 <$> lookupfunc "Detector" m
+      String "LHC13"    -> LHC13 <$> lookupfunc "Detector" m
       String "LHC14"    -> LHC14 <$> lookupfunc "Detector" m
       String "Parton"   -> do 
         Parton <$> lookupfunc "Energy" m 

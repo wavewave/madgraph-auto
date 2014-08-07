@@ -54,6 +54,10 @@ pgsCardMachine (LHC10 LHC)   = "pgs_card_LHC.dat.st"
 pgsCardMachine (LHC10 ATLAS) = "pgs_card_ATLAS.dat.st"
 pgsCardMachine (LHC10 CMS)   = "pgs_card_CMS.dat.st"
 pgsCardMachine (LHC10 _)     = undefined
+pgsCardMachine (LHC13 LHC)   = "pgs_card_LHC.dat.st"
+pgsCardMachine (LHC13 ATLAS) = "pgs_card_ATLAS.dat.st"
+pgsCardMachine (LHC13 CMS)   = "pgs_card_CMS.dat.st"
+pgsCardMachine (LHC13 _)     = undefined
 pgsCardMachine (LHC14 LHC)   = "pgs_card_LHC.dat.st"
 pgsCardMachine (LHC14 ATLAS) = "pgs_card_ATLAS.dat.st"
 pgsCardMachine (LHC14 CMS)   = "pgs_card_CMS.dat.st"
@@ -81,10 +85,11 @@ runCardSetup :: FilePath
              -> IO String 
 runCardSetup tpath machine ctype mtype rgtype scale numevt hsalt setnum = do 
   let (beamtyp1,beamtyp2,beamenergy,beampol1,beampol2) = case machine of 
-        TeVatron -> ("1","-1","980","0","0")
+        TeVatron  -> ("1","-1","980","0","0")
         LHC7 _    -> ("1","1","3500","0","0")
         LHC8 _    -> ("1","1","4000","0","0")
         LHC10 _   -> ("1","1","5000","0","0")
+        LHC13 _   -> ("1","1","6500","0","0")
         LHC14 _   -> ("1","1","7000","0","0")
         Parton be _ -> ("0","0", show be,"0","0")
         PolParton be ipol _ -> ( "0","0", show be

@@ -57,6 +57,7 @@ data MachineType = TeVatron
                  | LHC7 Detector
                  | LHC8 Detector
                  | LHC10 Detector
+                 | LHC13 Detector
                  | LHC14 Detector 
                  | Parton Double Detector
                  | PolParton Double InitPolarization Detector

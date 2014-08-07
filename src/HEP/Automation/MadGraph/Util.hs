@@ -122,6 +122,7 @@ makeRunName psetup param rsetup =
         LHC7 detector -> "LHC7" ++ show detector
         LHC8 detector -> "LHC8" ++ show detector
         LHC10 detector -> "LHC10" ++ show detector
+        LHC10 detector -> "LHC13" ++ show detector
         LHC14 detector -> "LHC14" ++ show detector
         Parton be detector -> "Ptn" ++ (show be) ++ (show detector)
         PolParton be ipol detector -> 
