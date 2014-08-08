@@ -85,7 +85,7 @@ data PGSJetAlgorithm = Cone Double | KTJet Double | AntiKTJet Double
                        deriving (Show, Typeable, Data)
 
 -- | 
-data PGSTau = NoTau | WithTau
+data PGSTau = {- NoTau | -} WithTau
               deriving (Show,Typeable,Data)
 
 -- | 

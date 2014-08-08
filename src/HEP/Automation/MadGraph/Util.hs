@@ -142,7 +142,7 @@ makeRunName psetup param rsetup =
         RunPGS (jetalgo,tau) ->
           let taustr = case tau of 
                 WithTau -> "_WithTau"
-                NoTau   -> "_NoTau" 
+                -- NoTau   -> "_NoTau" 
               jetalgoName = case jetalgo of
                 Cone conesize -> "Cone" ++ show conesize
                 KTJet conesize -> "KT" ++ show conesize

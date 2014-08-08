@@ -180,11 +180,11 @@ instance FromJSON PGSType where
 
 
 instance ToJSON PGSTau where
-  toJSON NoTau   = "NoTau"
+  -- toJSON NoTau   = "NoTau"
   toJSON WithTau = "WithTau"
    
 instance FromJSON PGSTau where
-  parseJSON (String "NoTau")   = return NoTau
+  -- parseJSON (String "NoTau")   = return NoTau
   parseJSON (String "WithTau") = return WithTau
 
 instance ToJSON PGSJetAlgorithm where

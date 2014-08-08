@@ -140,8 +140,8 @@ pgsCardSetup tpath machine NoPGS = return Nothing
 pgsCardSetup tpath machine (RunPGS (jetalgo,tau)) = do 
     tmplstr <- (++ "\n\n\n") <$> readFile (tpath </> pgsCardMachine machine) 
     let addnotau = case tau of 
-                   NoTau -> "notau"
-                   WithTau -> ""  
+                     -- NoTau -> "notau"
+                     WithTau -> ""  
     let str = case jetalgo of 
           Cone conesize  -> render1 [ ("jetalgo", "cone"++addnotau)
                                     , ("conesize", show conesize) ] tmplstr
