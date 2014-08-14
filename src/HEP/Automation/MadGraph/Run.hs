@@ -88,12 +88,14 @@ getWorkDir = ask >>= \ws ->
 -- | get string for me5_configuration.txt
 me5confSetup :: (Model a) => WorkIO a String 
 me5confSetup = do 
-  tpath <- ask >>= return . runtmpldir . ws_ssetup 
-  wdir <- getWorkDir
+  ssetup <- ws_ssetup <$> ask 
+  let tpath = runtmpldir ssetup 
+      pydir = pythiapgsdir ssetup
+  -- wdir <- getWorkDir
   templates <- liftIO $ directoryGroup tpath 
   return $ renderTemplateGroup
              templates
-             [ ("pythiapgs", wdir </> "../pythia-pgs" ) ] 
+             [ ("pythiapgs", pydir </> "share" </> "pythia-pgs" ) ] 
              "me5_configuration.txt" 
 
 
@@ -146,7 +148,7 @@ cardPrepare = do
                            (runtmpldir ssetup)
                            (machine rsetup)
                            (pgs     rsetup) 
-  --                 
+  -- 
   liftIO $ writeFile (carddir </> "me5_configuration.txt") me5conf 
   liftIO $ writeFile (carddir </> "param_card.dat") paramcard
   liftIO $ writeFile (carddir </> "run_card.dat")   runcard
@@ -180,7 +182,8 @@ generateEvents = do
   checkFile (wdir </> "Cards/param_card.dat") 10
   -- 
   case (pythia rsetup,lhesanitizer rsetup) of 
-    (RunPYTHIA,[]) -> checkFile (wdir </> "Cards/pythia_card.dat") 10
+    (RunPYTHIA,[]) -> do 
+      checkFile (wdir </> "Cards/pythia_card.dat") 10
     (RunPYTHIA,_:_) -> checkFile (wdir </> "Cards/pythia_card.dat.sanitize") 10
     (_,_) -> return () 
   -- 
