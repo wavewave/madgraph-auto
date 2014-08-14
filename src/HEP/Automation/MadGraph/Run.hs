@@ -95,7 +95,7 @@ me5confSetup = do
   templates <- liftIO $ directoryGroup tpath 
   return $ renderTemplateGroup
              templates
-             [ ("pythiapgs", pydir </> "share" </> "pythia-pgs" ) ] 
+             [ ("pythiapgs", pydir ) ] 
              "me5_configuration.txt" 
 
 
