@@ -52,35 +52,6 @@ checkFile fp n = do
           debugMsgDef $ fp ++ " not exist : " ++ show (n-1) ++ " chances left" 
           liftIO $ threadDelay 5000000 
           checkFile fp (n-1)   
-{-      if b  
-        then do 
-          b2 <- liftIO $ getFileStatus fp >>= return.(> (0 :: Int)).fromIntegral.fileSize
-          if b2 
-            then do 
-              debugMsgDef $ "nontrivial " ++ fp ++ " exists" 
-              (ex,str,err) <- liftIO $ readProcessWithExitCode "/usr/sbin/lsof" [fp] "" 
-              case ex of 
-                ExitSuccess -> do 
-                  debugMsgDef $ "some program is using the file " ++ fp  
-                  debugMsgDef str
-                  liftIO $ threadDelay 5000000 
-                  checkFile fp (n-1)
-                ExitFailure 1 -> do 
-                  debugMsgDef $ "okay. it's safe to use this file"
-                  return () 
-                _ -> do 
-                  debugMsgDef "mmm? what's going on here?"
-                  debugMsgDef $ show ex
-                  debugMsgDef $ str 
-                  debugMsgDef $ err
-                  liftIO $ threadDelay 5000000
-                  checkFile fp (n-1)
-
-            else do { liftIO (threadDelay 5000000); checkFile fp (n-1) } 
-          else do  
-            debugMsgDef $ fp ++ " not exist : " ++ show (n-1) ++ " chances left" 
-            liftIO $ threadDelay 5000000 
-            checkFile fp (n-1)   -}
 
 -- | 
 checkVetoFile :: (Model a) => FilePath -> Int -> WorkIO a () 
