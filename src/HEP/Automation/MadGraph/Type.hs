@@ -3,7 +3,7 @@
 -----------------------------------------------------------------------------
 -- |
 -- Module      : HEP.Automation.MadGraph.Type 
--- Copyright   : (c) 2011-2013 Ian-Woo Kim
+-- Copyright   : (c) 2011-2013,2015 Ian-Woo Kim
 --
 -- License     : BSD3
 -- Maintainer  : Ian-Woo Kim <ianwookim@gmail.com>
@@ -28,12 +28,6 @@ newtype HashSalt = HashSalt { unHashSalt :: Maybe Int }
 data MGProcess = MGProc { mgp_definelines :: [String] 
                         , mgp_processes   :: [String] }
                  deriving (Show,Typeable,Data)        
-
-{-
-data LHESanitizerType = NoLHESanitize 
-                      | LHESanitize SanitizeType   
-                      deriving (Show,Typeable,Data)
--}
 
 
 -- | 
@@ -76,7 +70,11 @@ data MatchType = NoMatch | MLM
                deriving (Show,Typeable,Data)
 
 -- | 
-data PYTHIAType = NoPYTHIA | RunPYTHIA | RunPYTHIA8
+data PYTHIAType = NoPYTHIA 
+                | RunPYTHIA 
+                | RunPYTHIA8 
+                | RunPYTHIA6Detail { isISROn :: Bool 
+                                   , isFSROn :: Bool }
                 deriving (Show,Typeable,Data)
 
 
@@ -85,8 +83,7 @@ data PGSJetAlgorithm = Cone Double | KTJet Double | AntiKTJet Double
                        deriving (Show, Typeable, Data)
 
 -- | 
-data PGSTau = {- NoTau | -} WithTau
-              deriving (Show,Typeable,Data)
+data PGSTau = WithTau deriving (Show,Typeable,Data)
 
 -- | 
 type PGSJetAlgoNTau = (PGSJetAlgorithm,PGSTau) 

@@ -1,6 +1,6 @@
 !...Parton showering on or off  
-      MSTP(61)=1
-      MSTP(71)=1
+      MSTP(61)=$ISR$
+      MSTP(71)=$FSR$
  
 !...Fragmentation/hadronization on or off 
       MSTJ(1)=1

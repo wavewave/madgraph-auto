@@ -9,7 +9,7 @@
 -----------------------------------------------------------------------------
 -- |
 -- Module      : HEP.Automation.MadGraph.SetupType 
--- Copyright   : (c) 2011-2013 Ian-Woo Kim
+-- Copyright   : (c) 2011-2013,2015 Ian-Woo Kim
 --
 -- License     : BSD3
 -- Maintainer  : Ian-Woo Kim <ianwookim@gmail.com>
@@ -31,7 +31,6 @@ import Data.List
 import HEP.Parser.LHE.Sanitizer.Type
 import HEP.Storage.WebDAV.Type
 -- from this package
--- import HEP.Automation.MadGraph.Card
 import HEP.Automation.MadGraph.Model
 import HEP.Automation.MadGraph.Type
 

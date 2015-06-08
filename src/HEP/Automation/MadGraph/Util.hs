@@ -1,9 +1,10 @@
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
 -----------------------------------------------------------------------------
 -- |
 -- Module      : HEP.Automation.MadGraph.Util 
--- Copyright   : (c) 2011, 2012 Ian-Woo Kim
+-- Copyright   : (c) 2011,2012,2015 Ian-Woo Kim
 --
 -- License     : BSD3
 -- Maintainer  : Ian-Woo Kim <ianwookim@gmail.com>
@@ -119,12 +120,16 @@ makeRunName psetup param rsetup =
                 KTJet conesize -> "KT" ++ show conesize
                 AntiKTJet conesize -> "AntiKT" ++ show conesize
           in jetalgoName ++ taustr 
+      postfix = case (pythia rsetup) of
+        RunPYTHIA6Detail {..} -> (if not isISROn then "ISROff" else "") ++ (if not isFSROn then "FSROff" else "")
+        _ -> ""
   in  mprefix++masscoup
       ++"_"++processBrief psetup
       ++"_"++machineName
       ++"_"++matchName
       ++"_"++cutName
       ++"_"++pgsName
+      ++ if not (null postfix) then "_" ++ postfix else ""
       ++"_Set" ++ show (setnum rsetup)  
 
 -- | 

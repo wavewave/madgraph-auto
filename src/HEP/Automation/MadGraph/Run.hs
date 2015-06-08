@@ -1,9 +1,10 @@
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
 -----------------------------------------------------------------------------
 -- |
 -- Module      : HEP.Automation.MadGraph.Run 
--- Copyright   : (c) 2011-2013 Ian-Woo Kim
+-- Copyright   : (c) 2011-2013,2015 Ian-Woo Kim
 --
 -- License     : GPL-3
 -- Maintainer  : Ian-Woo Kim <ianwookim@gmail.com>
@@ -115,7 +116,6 @@ cardPrepare = do
   checkDirectory (wdir </> "SubProcesses") 10
   checkDirectory carddir 10   
   -- erase previous run 
-  -- existThenRemove (carddir </> "me5_configuration.txt")
   existThenRemove (carddir </> "param_card.dat") 
   existThenRemove (carddir </> "run_card.dat") 
   existThenRemove (carddir </> "pythia_card.dat") 
@@ -123,9 +123,7 @@ cardPrepare = do
   existThenRemove (carddir </> "pgs_card.dat")
   existThenRemove (carddir </> "pgs_card.dat.sanitize")
   -- 
-  -- liftIO $ copyFile (runtmpldir ssetup </> "me5_configuration.txt" ) (carddir </> "me5_configuration.txt" )
   --
-  -- me5conf <- me5confSetup 
   paramcard  <- liftIO $ paramCardSetup 
                            (modeltmpldir ssetup)
                            (model psetup)
@@ -149,7 +147,6 @@ cardPrepare = do
                            (machine rsetup)
                            (pgs     rsetup) 
   -- 
-  -- liftIO $ writeFile (carddir </> "me5_configuration.txt") me5conf 
   liftIO $ writeFile (carddir </> "param_card.dat") paramcard
   liftIO $ writeFile (carddir </> "run_card.dat")   runcard
   -- 
@@ -240,6 +237,7 @@ sanitizeLHE = do
 
       case pythia rsetup of 
         RunPYTHIA -> return ()
+        RunPYTHIA6Detail {..} -> return ()
         RunPYTHIA8 -> return ()
         NoPYTHIA -> do 
           liftIO $ system $ "gzip -f " ++ rawunweightedevtfilename

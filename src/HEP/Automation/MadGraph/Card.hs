@@ -3,7 +3,7 @@
 -----------------------------------------------------------------------------
 -- |
 -- Module      : HEP.Automation.MadGraph.Machine 
--- Copyright   : (c) 2011-2013 Ian-Woo Kim
+-- Copyright   : (c) 2011-2013,2015 Ian-Woo Kim
 --
 -- License     : GPL-3
 -- Maintainer  : Ian-Woo Kim <ianwookim@gmail.com>
@@ -35,8 +35,8 @@ runCard4CutMatch _ _ = error "cut mlm does not match"
 
 -- | 
 pythiaCardMatch :: MatchType -> String
-pythiaCardMatch NoMatch = "pythia_card_default.dat"
-pythiaCardMatch MLM     = "pythia_card_MLM.dat"
+pythiaCardMatch NoMatch = "pythia_card_default.dat.st"
+pythiaCardMatch MLM     = "pythia_card_MLM.dat.st"
 
 -- | 
 
@@ -118,20 +118,24 @@ runCardSetup tpath machine ctype mtype rgtype scale numevt hsalt setnum = do
               (runCard4CutMatch ctype mtype)  ) ++ "\n\n\n"
 
 -- | 
-
 pythiaCardSetup :: FilePath -> MatchType -> PYTHIAType -> IO (Maybe String)
 pythiaCardSetup tpath mtype ptype = do  
-  case mtype of 
-    MLM -> do str <- readFile (tpath </> pythiaCardMatch MLM)
-              return (Just str)
-    NoMatch -> case ptype of
-      NoPYTHIA -> return Nothing 
-      RunPYTHIA8 -> return Nothing 
-      RunPYTHIA -> do str <- readFile (tpath </> pythiaCardMatch NoMatch)
-                      return (Just (str++"\n\n\n"))
+  templates <- directoryGroup tpath
+  let tfile = pythiaCardMatch mtype
+  case ptype of
+    NoPYTHIA -> return Nothing
+    RunPYTHIA8 -> return Nothing
+    RunPYTHIA -> do
+      let str = renderTemplateGroup templates [ ("ISR","1"), ("FSR","1") ] tfile ++ "\n\n\n"
+      return (Just str)
+    RunPYTHIA6Detail isr fsr -> do 
+      let f True = "1"
+          f False = "0"
+          flagset = [ ("ISR", f isr), ("FSR", f fsr) ]
+          str = renderTemplateGroup templates flagset tfile ++ "\n\n\n"
+      return (Just str)
 
 -- | 
-                      
 pgsCardSetup :: FilePath          -- ^ template path
              -> MachineType       -- ^ machine type
              -> PGSType           -- ^ pgs work type
