@@ -137,6 +137,8 @@ instance FromJSON CutType where
 instance ToJSON PYTHIAType where
   toJSON NoPYTHIA =  "NoPYTHIA"
   toJSON RunPYTHIA = "RunPYTHIA"
+  toJSON RunPYTHIA8 = "RunPYTHIA8"
+  toJSON (RunPYTHIA6Detail isr fsr) = object [ "Type" .= String "RunPYTHIA6Detail", "ISR" .= toJSON isr, "FSR" .= toJSON fsr ]
 
 instance FromJSON PYTHIAType where
   parseJSON (String "NoPYTHIA") = return NoPYTHIA
