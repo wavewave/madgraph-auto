@@ -35,8 +35,8 @@ runCard4CutMatch _ _ = error "cut mlm does not match"
 
 -- | 
 pythiaCardMatch :: MatchType -> String
-pythiaCardMatch NoMatch = "pythia_card_default.dat.st"
-pythiaCardMatch MLM     = "pythia_card_MLM.dat.st"
+pythiaCardMatch NoMatch = "pythia_card_default.dat"
+pythiaCardMatch MLM     = "pythia_card_MLM.dat"
 
 -- | 
 
