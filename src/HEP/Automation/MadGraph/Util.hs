@@ -129,7 +129,7 @@ makeRunName psetup param rsetup =
       ++"_"++matchName
       ++"_"++cutName
       ++"_"++pgsName
-      ++ if not (null postfix) then "_" ++ postfix else ""
+      ++ (if not (null postfix) then "_" ++ postfix else "")
       ++"_Set" ++ show (setnum rsetup)  
 
 -- | 
