@@ -10,7 +10,6 @@ Build-Type: 	Simple
 Cabal-Version:  >= 1.2
 data-files: 
             template/*.dat.st
-            template/*.dat
             template/me5_configuration.txt.st
 
 Library
